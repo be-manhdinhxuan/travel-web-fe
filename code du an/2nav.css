@@ -13,7 +13,7 @@ nav {
 .nav-links { display: flex; gap: 32px; list-style: none; }
 .nav-links a { text-decoration: none; color: var(--text); font-size: 0.875rem; font-weight: 500; transition: color .2s; cursor: pointer; }
 .nav-links a:hover { color: var(--green); }
-.nav-cta { display: flex; align-items: center; gap: 12px; }
+.nav-cta { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .btn-primary { background: var(--green); color: white; border: none; padding: 9px 20px; border-radius: 8px; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: background .2s, transform .15s; }
 .btn-primary:hover { background: var(--green-light); transform: translateY(-1px); }
 .fav-btn-nav { position: relative; background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--muted); transition: color .2s; display: flex; align-items: center; gap: 4px; }
@@ -27,10 +27,11 @@ nav {
 .btn-register-nav:hover { background: var(--green-light); }
 
 /* Nav user */
+#navUser { position: relative; }
 .nav-user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 10px; transition: background .2s; }
 .nav-user-info:hover { background: #f0f7f2; }
 .nav-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--green-light)); color: white; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; }
-.nav-username { font-size: 0.85rem; font-weight: 600; color: var(--dark); }
+.nav-username { font-size: 0.85rem; font-weight: 600; color: var(--dark); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .user-dropdown { position: absolute; top: calc(100% + 12px); right: 0; background: white; border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.14); min-width: 220px; opacity: 0; pointer-events: none; transform: translateY(-8px) scale(0.97); transition: all .25s cubic-bezier(.4,0,.2,1); z-index: 999; overflow: hidden; }
 .user-dropdown.open { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
 .user-dropdown-header { padding: 16px 18px 12px; background: linear-gradient(135deg, #f0faf5, #e8f4ee); border-bottom: 1px solid #e0eee6; }

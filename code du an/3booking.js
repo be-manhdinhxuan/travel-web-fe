@@ -1,134 +1,135 @@
 // ============================================================
-let currentTourName = '', currentTourPrice = '';
+// 3booking.js – Booking Modal (kết nối API)
+// ============================================================
 
-function openBookingModal(tourName, price) {
-  currentTourName  = tourName  || 'Tour du lịch Việt Nam';
-  currentTourPrice = price     || '';
+var currentTour  = '';
+var currentPrice = 0;
+var currentTourId = '';
 
-  document.getElementById('modalTourName').textContent  = currentTourName;
-  document.getElementById('modalTourPrice').textContent = currentTourPrice;
+function openBookingModal(tourName, price, tourId) {
+  currentTour    = tourName || '';
+  currentPrice   = parseInt((price || '0').replace(/[^\d]/g,'')) || 0;
+  currentTourId  = tourId || '';
 
-  // Default date = today + 7
-  const d = new Date(); d.setDate(d.getDate() + 7);
-  document.getElementById('mDate').value = d.toISOString().split('T')[0];
+  document.getElementById('modalTourName').textContent  = currentTour;
+  document.getElementById('modalTourPrice').textContent = price || '—';
+  document.getElementById('sumTour').textContent        = currentTour;
+  document.getElementById('sumPrice').textContent       = price || '—';
 
-  // Auto-fill thông tin user nếu đã đăng nhập
-  try {
-    const u = JSON.parse(sessionStorage.getItem('vt_user'));
-    if (u) {
-      const n = document.getElementById('mName');  if (n) n.value = u.name  || '';
-      const p = document.getElementById('mPhone'); if (p) p.value = u.phone || '';
-      const e = document.getElementById('mEmail'); if (e) e.value = u.email || '';
-    } else {
-      ['mName','mPhone','mEmail'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    }
-  } catch(e) {
-    ['mName','mPhone','mEmail'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  // Auto-fill thông tin user
+  const u = loadUser();
+  if (u) {
+    if (document.getElementById('mName'))  document.getElementById('mName').value  = u.name  || '';
+    if (document.getElementById('mPhone')) document.getElementById('mPhone').value = u.phone || '';
+    if (document.getElementById('mEmail')) document.getElementById('mEmail').value = u.email || '';
   }
-  const note = document.getElementById('mNote'); if (note) note.value = '';
-  document.getElementById('mAdults').value = '2';
-  document.getElementById('mKids').value   = '0';
+
+  // Set ngày tối thiểu
+  const today = new Date().toISOString().split('T')[0];
+  if (document.getElementById('mDate')) document.getElementById('mDate').min = today;
 
   updateModalSummary();
   goStep(1);
-
-  document.getElementById('bookingOverlay').classList.add('open');
-  document.getElementById('bookingModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.getElementById('bookingOverlay').style.display = 'block';
+  document.getElementById('bookingModal').style.display   = 'block';
 }
 
 function closeBookingModal() {
-  document.getElementById('bookingOverlay').classList.remove('open');
-  document.getElementById('bookingModal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function goStep(n) {
-  // Validate step 1 before proceeding
-  if (n === 2) {
-    const name  = document.getElementById('mName').value.trim();
-    const phone = document.getElementById('mPhone').value.trim();
-    const email = document.getElementById('mEmail').value.trim();
-    const date  = document.getElementById('mDate').value;
-    if (!name)  { showToast('⚠️ Vui lòng nhập họ và tên'); return; }
-    if (!phone) { showToast('⚠️ Vui lòng nhập số điện thoại'); return; }
-    if (!email) { showToast('⚠️ Vui lòng nhập email'); return; }
-    if (!date)  { showToast('⚠️ Vui lòng chọn ngày khởi hành'); return; }
-  }
-
-  [1,2,3].forEach(i => {
-    document.getElementById(`modalStep${i}`).style.display = i === n ? 'block' : 'none';
-    const dot = document.getElementById(`step${i}-dot`);
-    dot.classList.toggle('active', i <= n);
-    dot.classList.toggle('done',   i < n);
-  });
-
-  if (n === 2) {
-    updateModalSummary();
-    document.getElementById('sumTotal2').textContent = document.getElementById('sumTotal').textContent;
-    document.getElementById('bankRef').textContent = 'VNT-' + Math.random().toString(36).substr(2,6).toUpperCase();
-  }
-
-  if (n === 3) {
-    const code = 'VNT-' + Math.floor(Math.random() * 90000 + 10000);
-    document.getElementById('bookingCode').textContent   = code;
-    document.getElementById('confirmEmail').textContent  = document.getElementById('mEmail').value || 'email của bạn';
-
-    // Lưu lịch sử
-    try {
-      const u = JSON.parse(sessionStorage.getItem('vt_user'));
-      if (u) {
-        const key = 'vt_bookings_' + u.email;
-        const bookings = JSON.parse(localStorage.getItem(key) || '[]');
-        const adults = parseInt(document.getElementById('mAdults')?.value || 2);
-        const kids   = parseInt(document.getElementById('mKids')?.value   || 0);
-        bookings.unshift({
-          code, tourName: currentTourName || '—',
-          date: document.getElementById('mDate')?.value || '—',
-          guests: `${adults} người lớn${kids>0?' + '+kids+' trẻ em':''}`,
-          total: document.getElementById('sumTotal')?.textContent || '—',
-          status: 'confirmed',
-          bg: 'linear-gradient(135deg,#2d8a4e,#3aaa62)'
-        });
-        localStorage.setItem(key, JSON.stringify(bookings));
-      }
-    } catch(e) {}
-
-    // Chuyển sang trang thành công sau 1.5s (để người dùng thấy bước 3)
-    setTimeout(() => {
-      const adults = parseInt(document.getElementById('mAdults')?.value || 2);
-      const kids   = parseInt(document.getElementById('mKids')?.value   || 0);
-      const guestsText = `${adults} người lớn${kids>0?' + '+kids+' trẻ em':''}`;
-      const params = new URLSearchParams({
-        code,
-        tour: currentTourName || '—',
-        date: document.getElementById('mDate')?.value || '—',
-        guests: guestsText,
-        total: document.getElementById('sumTotal')?.textContent || '—'
-      });
-      window.location.href = '1thanhcong.html?' + params.toString();
-    }, 1500);
-  }
+  document.getElementById('bookingOverlay').style.display = 'none';
+  document.getElementById('bookingModal').style.display   = 'none';
 }
 
 function updateModalSummary() {
-  const adults   = parseInt(document.getElementById('mAdults')?.value || 2);
-  const kids     = parseInt(document.getElementById('mKids')?.value   || 0);
-  const rawPrice = currentTourPrice.replace(/[^\d]/g, '');
-  const unitPrice = parseInt(rawPrice) || 0;
-  const total = unitPrice * adults + Math.floor(unitPrice * 0.5) * kids;
-  const fmt = n => n.toLocaleString('vi-VN') + 'đ';
+  const adults  = parseInt(document.getElementById('mAdults')?.value)  || 2;
+  const kids    = parseInt(document.getElementById('mKids')?.value)    || 0;
+  const total   = currentPrice * adults + Math.floor(currentPrice * 0.7) * kids;
+  const people  = adults + ' người lớn' + (kids > 0 ? ', ' + kids + ' trẻ em' : '');
 
-  document.getElementById('sumTour').textContent   = currentTourName;
-  document.getElementById('sumPrice').textContent  = currentTourPrice;
-  document.getElementById('sumPeople').textContent = `${adults} người lớn${kids > 0 ? ` + ${kids} trẻ em` : ''}`;
-  document.getElementById('sumTotal').textContent  = fmt(total);
+  if (document.getElementById('sumPeople')) document.getElementById('sumPeople').textContent = people;
+  if (document.getElementById('sumTotal'))  document.getElementById('sumTotal').textContent  = total.toLocaleString('vi-VN') + 'đ';
+  if (document.getElementById('sumTotal2')) document.getElementById('sumTotal2').textContent = total.toLocaleString('vi-VN') + 'đ';
 }
 
-function selectPayment(lbl, method) {
+function selectPayment(el, method) {
   document.querySelectorAll('.pay-method').forEach(l => l.classList.remove('active'));
-  lbl.classList.add('active');
-  document.getElementById('bankInfo').style.display = method === 'bank' ? 'block' : 'none';
+  el.classList.add('active');
+  const bankInfo = document.getElementById('bankInfo');
+  if (bankInfo) bankInfo.style.display = method === 'bank' ? 'block' : 'none';
 }
 
-// ============================================================
+function goStep(n) {
+  [1,2,3].forEach(i => {
+    const body = document.getElementById('modalStep' + i);
+    const dot  = document.getElementById('step' + i + '-dot');
+    if (body) body.style.display = (i === n) ? 'block' : 'none';
+    if (dot)  { dot.classList.toggle('active', i === n); dot.classList.toggle('done', i < n); }
+  });
+  if (n === 3) doConfirmBooking();
+}
+
+async function doConfirmBooking() {
+  const name    = document.getElementById('mName')?.value   || '';
+  const phone   = document.getElementById('mPhone')?.value  || '';
+  const email   = document.getElementById('mEmail')?.value  || '';
+  const date    = document.getElementById('mDate')?.value   || '';
+  const adults  = parseInt(document.getElementById('mAdults')?.value) || 2;
+  const kids    = parseInt(document.getElementById('mKids')?.value)   || 0;
+  const payment = document.querySelector('.pay-method.active input')?.value || 'bank';
+  const note    = document.getElementById('mNote')?.value   || '';
+
+  const totalAmt  = currentPrice * adults + Math.floor(currentPrice * 0.7) * kids;
+  const totalStr  = totalAmt.toLocaleString('vi-VN') + 'đ';
+  const guestStr  = adults + ' người lớn' + (kids > 0 ? ', ' + kids + ' trẻ em' : '');
+  const code      = 'VNT-' + Math.floor(10000 + Math.random() * 90000);
+  const methodMap = { bank:'Chuyển khoản', card:'Thẻ tín dụng', momo:'MoMo', vnpay:'VNPay', cod:'Tiền mặt' };
+
+  // Hiện mã booking
+  if (document.getElementById('bookingCode'))  document.getElementById('bookingCode').textContent  = code;
+  if (document.getElementById('confirmEmail')) document.getElementById('confirmEmail').textContent = email;
+
+  // Lưu booking vào localStorage (luôn làm để hiện lịch sử)
+  const u = loadUser();
+  if (u) {
+    const key      = 'vt_bookings_' + u.email;
+    const bookings = JSON.parse(localStorage.getItem(key) || '[]');
+    bookings.unshift({
+      code, tourName: currentTour, date, guests: guestStr,
+      total: totalStr, payment: methodMap[payment] || payment,
+      status: 'upcoming', bg: 'linear-gradient(135deg,#2d8a4e,#3aaa62)',
+      createdAt: new Date().toISOString()
+    });
+    localStorage.setItem(key, JSON.stringify(bookings));
+  }
+
+  // Gọi API tạo booking (nếu có backend)
+  try {
+    if (currentTourId) {
+      const payMethod = payment === 'momo' ? 1 : 2; // 1=momo, 2=vnpay
+      const res = await apiCreateBooking({
+        schedule_id: currentTourId,
+        passengers: { adults, children: kids, babies: 0 },
+        payment_method: payMethod,
+        contact_info: { full_name: name, phone, email },
+        note
+      });
+      if (res && res.ok && res.data.result) {
+        const { booking, payment_url } = res.data.result;
+        // Có payment_url → redirect thanh toán
+        if (payment_url) {
+          setTimeout(function(){ window.location.href = payment_url; }, 1500);
+          return;
+        }
+      }
+    }
+  } catch(e) { /* tiếp tục với local flow */ }
+
+  // Redirect trang thành công sau 1.5s
+  setTimeout(function() {
+    closeBookingModal();
+    window.location.href = '1thanhcong.html?code=' + code +
+      '&tour=' + encodeURIComponent(currentTour) +
+      '&date=' + encodeURIComponent(date) +
+      '&guests=' + encodeURIComponent(guestStr) +
+      '&total=' + encodeURIComponent(totalStr);
+  }, 1500);
+}

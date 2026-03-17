@@ -1,209 +1,276 @@
 // ============================================================
-// 3checkout.js – Logic trang Hoàn Tất Đặt Chỗ (1datour.html)
+// 3checkout.js – Trang Đặt Chỗ (kết nối API)
 // ============================================================
 
-let coSelectedDate = null;
-let coAdults = 2, coKids = 0;
-let coCurrentTour = null;
-let coCalYear, coCalMonth;
+var coCalendarDate = null;
+var coAdultsCount  = 2;
+var coKidsCount    = 0;
+var coPayMethod    = 'momo';
+var coTourData     = null;
+var coScheduleId   = null;
+var coCouponData   = null;
 
-function openCheckout(imgKey) {
-  const tour = getActiveTours().find(t => t.imgKey === imgKey) || getActiveTours()[0];
-  coCurrentTour = tour;
-  coAdults = 2; coKids = 0;
-  coSelectedDate = null;
+// ============================================================
+// KHỞI TẠO
+// ============================================================
+window.addEventListener('DOMContentLoaded', async function () {
+  initNav();
 
-  // Auto-fill thông tin user nếu đã đăng nhập
+  const params  = new URLSearchParams(window.location.search);
+  const tourKey = params.get('tour') || 't1';
+
+  // Thử lấy tour từ API
+  try {
+    const res = await apiGetTour(tourKey);
+    if (res && res.ok && res.data.result) {
+      coTourData = res.data.result.tour || res.data.result;
+    }
+  } catch(e) {}
+
+  // Fallback local
+  if (!coTourData) {
+    coTourData = getActiveTours().find(t => t.imgKey === tourKey) || getActiveTours()[0];
+  }
+
+  if (!coTourData) return;
+
+  // Hiển thị tour info
+  const bg = getImgBg(coTourData.imgKey || coTourData.images?.[0]);
+  const imgEl = document.getElementById('coTourImg');
+  if (imgEl) { imgEl.style.background = bg; imgEl.style.backgroundSize = 'cover'; imgEl.style.backgroundPosition = 'center'; }
+
+  const name     = coTourData.title || coTourData.name || '—';
+  const location = coTourData.location || coTourData.destination || '—';
+  const price    = coTourData.price || '—';
+  const badge    = coTourData.badge || coTourData.duration_days + ' ngày' || '';
+
+  if (document.getElementById('coTourName'))     document.getElementById('coTourName').textContent     = name;
+  if (document.getElementById('coTourLocation')) document.getElementById('coTourLocation').textContent = '📍 ' + location;
+  if (document.getElementById('coTourBadge'))    document.getElementById('coTourBadge').textContent    = badge;
+
+  const priceEl = document.getElementById('coBasePrice');
+  if (priceEl) priceEl.textContent = price;
+
+  // Load lịch khởi hành từ API
+  if (coTourData._id || coTourData.id) {
+    try {
+      const sid = coTourData._id || coTourData.id;
+      const sres = await apiGetSchedules(sid);
+      if (sres && sres.ok && sres.data.result) {
+        const schedules = sres.data.result.schedules || [];
+        if (schedules.length) coScheduleId = schedules[0]._id;
+      }
+    } catch(e) {}
+  }
+
+  // Tự điền thông tin user
   const u = loadUser();
   if (u) {
-    const n = document.getElementById('coName');  if (n) n.value = u.name  || '';
-    const e = document.getElementById('coEmail'); if (e) e.value = u.email || '';
-    const p = document.getElementById('coPhone'); if (p) p.value = u.phone || '';
+    if (document.getElementById('coName'))  document.getElementById('coName').value  = u.name  || '';
+    if (document.getElementById('coEmail')) document.getElementById('coEmail').value = u.email || '';
+    if (document.getElementById('coPhone')) document.getElementById('coPhone').value = u.phone || '';
   }
 
-  // Sidebar: ảnh + badge
-  const imgEl = document.getElementById('coTourImg');
-  if (imgEl) {
-    imgEl.style.background       = IMG_BG[tour.imgKey] || 'linear-gradient(135deg,#2d8a4e,#3aaa62)';
-    imgEl.style.backgroundSize   = 'cover';
-    imgEl.style.backgroundPosition = 'center';
-  }
-  const badgeEl = document.getElementById('coTourBadge');
-  if (badgeEl) badgeEl.textContent = tour.badge;
-
-  // Sidebar: tên + sao + địa điểm
-  const nameEl  = document.getElementById('coSummaryName');
-  const starEl  = document.getElementById('coSummaryStars');
-  const locEl   = document.getElementById('coMetaLoc');
-  const dateEl  = document.getElementById('coMetaDate');
-  const guestEl = document.getElementById('coMetaGuests');
-
-  if (nameEl)  nameEl.textContent  = tour.title;
-  if (starEl)  starEl.textContent  = tour.stars + ' (' + tour.reviews + ' đánh giá)';
-  if (locEl)   locEl.textContent   = tour.location;
-  if (dateEl)  dateEl.textContent  = 'Chưa chọn';
-  if (guestEl) guestEl.textContent = '2 người lớn';
-
-  // Số khách hiển thị
-  const adEl = document.getElementById('coAdults');
-  const kdEl = document.getElementById('coKids');
-  if (adEl) adEl.textContent = coAdults;
-  if (kdEl) kdEl.textContent = coKids;
-
+  buildCalendar();
   updateCoSummary();
+});
 
-  // Render lịch
-  const now = new Date();
-  coCalYear  = now.getFullYear();
-  coCalMonth = now.getMonth();
-  renderCalendar();
-}
+// ============================================================
+// CALENDAR
+// ============================================================
+var coCalMonth = new Date().getMonth();
+var coCalYear  = new Date().getFullYear();
 
-// ============ CALENDAR ============
-function renderCalendar() {
-  const calEl = document.getElementById('coCalendar');
-  if (!calEl) return;
-
+function buildCalendar() {
+  const cal = document.getElementById('coCalendar');
+  if (!cal) return;
   const days   = ['CN','T2','T3','T4','T5','T6','T7'];
-  const months = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5',
-                  'Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
-  const today    = new Date(); today.setHours(0,0,0,0);
-  const firstDay = new Date(coCalYear, coCalMonth, 1).getDay();
-  const daysInM  = new Date(coCalYear, coCalMonth + 1, 0).getDate();
+  const today  = new Date(); today.setHours(0,0,0,0);
+  const first  = new Date(coCalYear, coCalMonth, 1);
+  const total  = new Date(coCalYear, coCalMonth+1, 0).getDate();
+  const startDow = first.getDay();
 
-  let html = '<div class="co-cal-nav">'
-    + '<button onclick="changeCalMonth(-1)">‹</button>'
-    + '<span>' + months[coCalMonth] + ', ' + coCalYear + '</span>'
-    + '<button onclick="changeCalMonth(1)">›</button>'
-    + '</div>'
-    + '<div class="co-cal-grid">'
-    + days.map(d => '<div class="co-cal-day-name">' + d + '</div>').join('')
-    + Array(firstDay).fill('<div></div>').join('');
-
-  for (let d = 1; d <= daysInM; d++) {
-    const date       = new Date(coCalYear, coCalMonth, d);
-    const isPast     = date < today;
-    const isSelected = coSelectedDate && date.toDateString() === coSelectedDate.toDateString();
-    html += '<div class="co-cal-day'
-      + (isPast ? ' past' : '')
-      + (isSelected ? ' selected' : '') + '"'
-      + (!isPast ? ' onclick="selectCoDate(' + coCalYear + ',' + coCalMonth + ',' + d + ')"' : '')
-      + '>' + d + '</div>';
+  let html = '<div class="co-cal-nav"><button onclick="coNavCal(-1)">‹</button><span>Tháng ' + (coCalMonth+1) + ', ' + coCalYear + '</span><button onclick="coNavCal(1)">›</button></div>';
+  html += '<div class="co-cal-grid">';
+  days.forEach(d => html += '<div class="co-cal-day-name">' + d + '</div>');
+  for (let i = 0; i < startDow; i++) html += '<div></div>';
+  for (let d = 1; d <= total; d++) {
+    const date    = new Date(coCalYear, coCalMonth, d);
+    const dateStr = coCalYear + '-' + String(coCalMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const isPast  = date < today;
+    const isSel   = coCalendarDate === dateStr;
+    html += '<div class="co-cal-day' + (isPast?' past':'') + (isSel?' selected':'') + '" onclick="' + (isPast?'':'coSelectDate(\''+dateStr+'\')') + '">' + d + '</div>';
   }
   html += '</div>';
-  calEl.innerHTML = html;
+  cal.innerHTML = html;
 }
 
-function changeCalMonth(dir) {
+function coNavCal(dir) {
   coCalMonth += dir;
+  if (coCalMonth > 11) { coCalMonth = 0; coCalYear++; }
   if (coCalMonth < 0)  { coCalMonth = 11; coCalYear--; }
-  if (coCalMonth > 11) { coCalMonth = 0;  coCalYear++; }
-  renderCalendar();
+  buildCalendar();
 }
 
-function selectCoDate(y, m, d) {
-  coSelectedDate = new Date(y, m, d);
-  const fmt = coSelectedDate.toLocaleDateString('vi-VN', {
-    weekday:'long', day:'numeric', month:'long', year:'numeric'
-  });
-  const dateEl = document.getElementById('coMetaDate');
-  if (dateEl) dateEl.textContent = fmt;
+function coSelectDate(dateStr) {
+  coCalendarDate = dateStr;
+  buildCalendar();
+  const el = document.getElementById('coSelectedDate');
+  if (el) el.textContent = dateStr;
   updateCoSummary();
-  renderCalendar();
 }
 
-// ============ GUESTS ============
+// ============================================================
+// GUESTS
+// ============================================================
 function changeGuests(type, delta) {
-  if (type === 'adults') coAdults = Math.max(1, coAdults + delta);
-  if (type === 'kids')   coKids   = Math.max(0, coKids   + delta);
-
-  const adEl = document.getElementById('coAdults');
-  const kdEl = document.getElementById('coKids');
-  if (adEl) adEl.textContent = coAdults;
-  if (kdEl) kdEl.textContent = coKids;
-
-  const guestEl = document.getElementById('coMetaGuests');
-  if (guestEl) guestEl.textContent = coAdults + ' người lớn'
-    + (coKids > 0 ? ' + ' + coKids + ' trẻ em' : '');
-
+  if (type === 'adults') { coAdultsCount = Math.max(1, coAdultsCount + delta); if (document.getElementById('coAdults')) document.getElementById('coAdults').textContent = coAdultsCount; }
+  if (type === 'kids')   { coKidsCount   = Math.max(0, coKidsCount + delta);   if (document.getElementById('coKids'))   document.getElementById('coKids').textContent   = coKidsCount;   }
   updateCoSummary();
 }
 
-// ============ SUMMARY ============
-function updateCoSummary() {
-  if (!coCurrentTour) return;
-  const unit  = parseInt(coCurrentTour.price.replace(/\D/g, '')) || 0;
-  const base  = unit * coAdults + Math.floor(unit * 0.5) * coKids;
-  const fee   = 360000;
-  const tax   = 500000;
-  const total = base + fee + tax;
-
-  const baseEl  = document.getElementById('coPriceBase');
-  const totalEl = document.getElementById('coPriceTotal');
-  if (baseEl)  baseEl.textContent  = base.toLocaleString('vi-VN')  + 'đ';
-  if (totalEl) totalEl.textContent = total.toLocaleString('vi-VN') + 'đ';
-}
-
-// ============ PAYMENT ============
+// ============================================================
+// PAYMENT
+// ============================================================
 function selectCoPayment(el, method) {
-  document.querySelectorAll('.co-pay-opt').forEach(function(l) { l.classList.remove('active'); });
+  document.querySelectorAll('.co-pay-opt').forEach(l => l.classList.remove('active'));
   el.classList.add('active');
-  // Ẩn/hiện info tương ứng
-  var momo  = document.getElementById('coPayMomo');
-  var vnpay = document.getElementById('coPayVnpay');
-  if (momo)  momo.style.display  = method === 'momo'  ? 'block' : 'none';
-  if (vnpay) vnpay.style.display = method === 'vnpay' ? 'block' : 'none';
+  coPayMethod = method;
+  const momoEl  = document.getElementById('coPayMomo');
+  const vnpayEl = document.getElementById('coPayVnpay');
+  if (momoEl)  momoEl.style.display  = method === 'momo'  ? 'block' : 'none';
+  if (vnpayEl) vnpayEl.style.display = method === 'vnpay' ? 'block' : 'none';
 }
 
-function formatCardNum(inp) {
-  let v = inp.value.replace(/\D/g, '').substring(0, 16);
-  inp.value = v.replace(/(.{4})/g, '$1 ').trim();
-}
+// ============================================================
+// COUPON
+// ============================================================
+async function validateCoupon() {
+  const code  = (document.getElementById('coCouponCode')?.value || '').trim().toUpperCase();
+  const total = calcTotal();
+  if (!code) return;
 
-// ============ SUBMIT ============
-function doCheckout() {
-  if (!coSelectedDate) { showToast('⚠️ Vui lòng chọn ngày khởi hành'); return; }
-
-  const name  = (document.getElementById('coName')?.value  || '').trim();
-  const email = (document.getElementById('coEmail')?.value || '').trim();
-  const phone = (document.getElementById('coPhone')?.value || '').trim();
-
-  if (!name)  { showToast('⚠️ Vui lòng nhập họ và tên');      return; }
-  if (!email) { showToast('⚠️ Vui lòng nhập email');           return; }
-  if (!phone) { showToast('⚠️ Vui lòng nhập số điện thoại'); return; }
-
-  const code       = 'VNT-' + Math.floor(Math.random() * 90000 + 10000);
-  const dateText   = coSelectedDate.toLocaleDateString('vi-VN');
-  const guestsText = coAdults + ' người lớn' + (coKids > 0 ? ' + ' + coKids + ' trẻ em' : '');
-  const totalText  = document.getElementById('coPriceTotal')?.textContent || '—';
-
-  // Lưu lịch sử cá nhân
   try {
-    const u = loadUser();
-    if (u) {
-      const key      = 'vt_bookings_' + u.email;
-      const bookings = JSON.parse(localStorage.getItem(key) || '[]');
-      bookings.unshift({
-        code,
-        tourName : coCurrentTour?.title || '—',
-        date     : dateText,
-        guests   : guestsText,
-        total    : totalText,
-        payment  : document.querySelector('.co-pay-opt.active')?.dataset.method || 'Không rõ',
-        status   : 'confirmed',
-        bg       : IMG_BG[coCurrentTour?.imgKey] || 'linear-gradient(135deg,#2d8a4e,#3aaa62)'
-      });
-      localStorage.setItem(key, JSON.stringify(bookings));
+    const res = await apiValidateCoupon(code, total);
+    if (res && res.ok && res.data.result && res.data.result.is_valid) {
+      coCouponData = res.data.result;
+      showToast('✅ Mã giảm giá hợp lệ: -' + res.data.result.discount_amount.toLocaleString('vi-VN') + 'đ');
+      updateCoSummary();
+    } else {
+      coCouponData = null;
+      showToast('❌ ' + (res?.data?.message || 'Mã không hợp lệ'));
     }
-  } catch (e) {}
+  } catch(e) {
+    showToast('⚠️ Không thể kiểm tra mã, thử lại sau');
+  }
+}
 
-  // Redirect sang trang thành công
-  const params = new URLSearchParams({
-    code,
-    tour   : coCurrentTour?.title || '—',
-    date   : dateText,
-    guests : guestsText,
-    total  : totalText
-  });
-  window.location.href = '1thanhcong.html?' + params.toString();
+// ============================================================
+// SUMMARY
+// ============================================================
+function calcTotal() {
+  const priceStr  = coTourData ? (coTourData.price || coTourData.price_adult || '0') : '0';
+  const priceNum  = parseInt(String(priceStr).replace(/[^\d]/g,'')) || 0;
+  const adultAmt  = priceNum * coAdultsCount;
+  const kidAmt    = Math.floor(priceNum * 0.7) * coKidsCount;
+  const service   = Math.floor((adultAmt + kidAmt) * 0.025);
+  const tax       = Math.floor((adultAmt + kidAmt) * 0.035);
+  const base      = adultAmt + kidAmt + service + tax;
+  const discount  = coCouponData ? (coCouponData.discount_amount || 0) : 0;
+  return Math.max(0, base - discount);
+}
+
+function updateCoSummary() {
+  const priceStr  = coTourData ? (coTourData.price || '0') : '0';
+  const priceNum  = parseInt(String(priceStr).replace(/[^\d]/g,'')) || 0;
+  const adultAmt  = priceNum * coAdultsCount;
+  const kidAmt    = Math.floor(priceNum * 0.7) * coKidsCount;
+  const service   = Math.floor((adultAmt + kidAmt) * 0.025);
+  const tax       = Math.floor((adultAmt + kidAmt) * 0.035);
+  const discount  = coCouponData ? (coCouponData.discount_amount || 0) : 0;
+  const total     = Math.max(0, adultAmt + kidAmt + service + tax - discount);
+  const fmt       = n => n.toLocaleString('vi-VN') + 'đ';
+
+  if (document.getElementById('coBasePrice'))    document.getElementById('coBasePrice').textContent    = fmt(adultAmt + kidAmt);
+  if (document.getElementById('coServiceFee'))   document.getElementById('coServiceFee').textContent   = fmt(service);
+  if (document.getElementById('coTax'))          document.getElementById('coTax').textContent          = fmt(tax);
+  if (document.getElementById('coDiscount'))     document.getElementById('coDiscount').textContent     = discount ? '-' + fmt(discount) : 'Không có';
+  if (document.getElementById('coTotal'))        document.getElementById('coTotal').textContent        = fmt(total);
+  if (document.getElementById('coBtnTotal'))     document.getElementById('coBtnTotal').textContent     = fmt(total);
+  if (document.getElementById('coTourGuests'))   document.getElementById('coTourGuests').textContent   = coAdultsCount + ' người lớn' + (coKidsCount ? ', ' + coKidsCount + ' trẻ em' : '');
+  if (document.getElementById('coTourDate'))     document.getElementById('coTourDate').textContent     = coCalendarDate || 'Chưa chọn';
+}
+
+// ============================================================
+// CHECKOUT – SUBMIT
+// ============================================================
+async function doCheckout() {
+  const name    = (document.getElementById('coName')?.value  || '').trim();
+  const email   = (document.getElementById('coEmail')?.value || '').trim();
+  const phone   = (document.getElementById('coPhone')?.value || '').trim();
+
+  if (!coCalendarDate) { showToast('⚠️ Vui lòng chọn ngày khởi hành'); return; }
+  if (!name)   { showToast('⚠️ Vui lòng nhập họ và tên'); return; }
+  if (!email)  { showToast('⚠️ Vui lòng nhập email'); return; }
+  if (!phone)  { showToast('⚠️ Vui lòng nhập số điện thoại'); return; }
+
+  const btn = document.getElementById('coCheckoutBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Đang xử lý...'; }
+
+  const total      = calcTotal();
+  const totalStr   = total.toLocaleString('vi-VN') + 'đ';
+  const code       = 'VNT-' + Math.floor(10000 + Math.random() * 90000);
+  const tourName   = coTourData ? (coTourData.title || coTourData.name) : '—';
+  const guestStr   = coAdultsCount + ' người lớn' + (coKidsCount ? ', ' + coKidsCount + ' trẻ em' : '');
+  const payMethodMap = { momo:'MoMo', vnpay:'VNPay' };
+
+  try {
+    // Gọi API tạo booking
+    if (coScheduleId || (coTourData && (coTourData._id || coTourData.id))) {
+      const bookingBody = {
+        schedule_id: coScheduleId || coTourData._id || coTourData.id,
+        passengers: { adults: coAdultsCount, children: coKidsCount, babies: 0 },
+        payment_method: coPayMethod === 'momo' ? 1 : 2,
+        contact_info: { full_name: name, phone, email },
+        coupon_code: document.getElementById('coCouponCode')?.value || undefined,
+      };
+
+      const res = await apiCreateBooking(bookingBody);
+      if (res && res.ok && res.data.result) {
+        const { booking, payment_url } = res.data.result;
+        // Lưu local
+        saveBkLocal(booking?.booking_code || code, tourName, coCalendarDate, guestStr, totalStr, payMethodMap[coPayMethod]);
+        if (payment_url) { window.location.href = payment_url; return; }
+        redirectSuccess(booking?.booking_code || code, tourName, guestStr, totalStr);
+        return;
+      }
+    }
+  } catch(e) { /* fallback */ }
+
+  // Fallback local
+  saveBkLocal(code, tourName, coCalendarDate, guestStr, totalStr, payMethodMap[coPayMethod]);
+  if (btn) { btn.disabled = false; btn.textContent = 'Xác nhận & Thanh toán'; }
+  redirectSuccess(code, tourName, guestStr, totalStr);
+}
+
+function saveBkLocal(code, tourName, date, guests, total, payment) {
+  const u = loadUser();
+  if (!u) return;
+  const key = 'vt_bookings_' + u.email;
+  const bks = JSON.parse(localStorage.getItem(key) || '[]');
+  bks.unshift({ code, tourName, date, guests, total, payment, status:'upcoming', bg:'linear-gradient(135deg,#2d8a4e,#3aaa62)', createdAt: new Date().toISOString() });
+  localStorage.setItem(key, JSON.stringify(bks));
+}
+
+function redirectSuccess(code, tour, guests, total) {
+  window.location.href = '1thanhcong.html?code=' + code +
+    '&tour=' + encodeURIComponent(tour) +
+    '&date=' + encodeURIComponent(coCalendarDate||'') +
+    '&guests=' + encodeURIComponent(guests) +
+    '&total=' + encodeURIComponent(total);
+}
+
+// Format card number
+function formatCardNum(inp) {
+  inp.value = inp.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim().slice(0,19);
 }

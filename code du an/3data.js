@@ -21,8 +21,41 @@ const FAV_EMOJI  = { t1:'🚢', t2:'🏮', t3:'⛰️', th:'🏛️', td:'🌉',
 const FAV_COLOR  = { t1:'linear-gradient(135deg,#1a6e8a,#2d9ebf)', t2:'linear-gradient(135deg,#8a7a1a,#bfaf2d)', t3:'linear-gradient(135deg,#3a6a1a,#5a9a2d)', th:'linear-gradient(135deg,#4a1a8a,#7a4abf)', td:'linear-gradient(135deg,#1a4e8a,#2d7ebf)', tn:'linear-gradient(135deg,#8a3a1a,#bf6a2d)', tm:'linear-gradient(135deg,#1a7a4a,#2dbf7a)' };
 
 // ============================================================
-// MERGE TOUR TỪ ADMIN
+// MERGE TOUR TỪ ADMIN + API
 // ============================================================
+
+// Async version - dùng khi load trang tour
+async function loadToursFromAPI() {
+  try {
+    if (typeof apiGetTours === 'function') {
+      const res = await apiGetTours({ limit: 50 });
+      if (res && res.ok && res.data.result) {
+        const apiTours = res.data.result.tours || res.data.result || [];
+        if (apiTours.length) {
+          // Convert API format sang local format
+          return apiTours.map(function(t) {
+            return {
+              title:     t.name,
+              location:  t.destination || t.departure_city || '—',
+              price:     t.schedules && t.schedules[0] ? t.schedules[0].price_adult.toLocaleString('vi-VN') + 'đ' : (t.price || '—'),
+              stars:     '★★★★★',
+              reviews:   t.rating_count || '0',
+              badge:     t.duration_days ? t.duration_days + ' ngày' : '—',
+              badgeClass: '',
+              imgKey:    'api_' + t._id,
+              tags:      [t.destination || ''],
+              page:      '',
+              _id:       t._id,
+              isApiTour: true,
+            };
+          });
+        }
+      }
+    }
+  } catch(e) {}
+  return null;
+}
+
 function getActiveTours() {
   // Lấy tour từ admin localStorage
   var adminTours = [];

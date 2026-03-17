@@ -3,34 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vịnh Hạ Long – VietnamTravel</title>
+<title>Tài Khoản Cá Nhân – VietnamTravel</title>
 <link rel="stylesheet" href="2bass.css">
 <link rel="stylesheet" href="2nav.css">
-<link rel="stylesheet" href="2detail.css">
-<link rel="stylesheet" href="2components.css">
+<link rel="stylesheet" href="2canhan.css">
 </head>
 <body>
+
+<!-- NAV -->
 <nav id="mainNav">
   <a class="logo" href="1trangchu.html">
     <img src="logo.png" alt="VietnamTravel" class="logo-img">
   </a>
   <ul class="nav-links">
+    <li><a href="1trangchu.html">Trang chủ</a></li>
     <li><a href="1trangchu.html">Điểm đến</a></li>
-    <li><a href="1tourdulich.html">Tour du lịch</a></li>
-    <li><a href="#">Giảm giá</a></li>
-    <li><a href="1vechungtoi.html">Về chúng tôi</a></li>
+    <li><a href="1tourdulich.html">Tour</a></li>
+    <li><a href="#">Cẩm nang</a></li>
+    <li><a href="1vechungtoi.html">Liên hệ</a></li>
   </ul>
   <div class="nav-cta">
-    <button class="fav-btn-nav" onclick="toggleFavPanel()">♥ Yêu thích <span class="fav-count" id="favCount" style="display:none">0</span></button>
-    <button class="btn-primary" onclick="openBookingModal()">Đặt ngay</button>
-    <div id="navGuest" style="display:flex;gap:8px;align-items:center;">
+    <div id="navGuest" style="display:none;gap:8px;align-items:center;">
       <button class="btn-login-nav" onclick="window.location.href='1dangnhap.html'">Đăng nhập</button>
       <button class="btn-register-nav" onclick="window.location.href='1dangky.html'">Đăng ký</button>
     </div>
     <div id="navUser" style="display:none;align-items:center;gap:10px;position:relative;">
       <div class="nav-user-info" onclick="toggleUserMenu()">
         <div class="nav-avatar" id="navAvatarEl">U</div>
-        <span class="nav-username" id="navUsernameEl">User</span>
+        <div style="display:flex;flex-direction:column;line-height:1.2;">
+          <span class="nav-username" id="navUsernameEl">User</span>
+          <span style="font-size:0.68rem;color:#f5c518;font-weight:600;">Hạng Vàng</span>
+        </div>
         <span style="font-size:0.7rem;color:var(--muted);">▾</span>
       </div>
       <div class="user-dropdown" id="userDropdown">
@@ -47,253 +50,225 @@
   </div>
 </nav>
 
-<div id="page-detail-halong">
-  <button class="back-btn" onclick="window.location.href='1trangchu.html'">← Quay lại</button>
-  <div class="detail-hero">
-    <div class="detail-hero-bg" style="background-image:url('halong.jpg')"></div>
-    <div class="detail-hero-overlay"></div>
-    <div class="detail-hero-content">
-      <div class="detail-breadcrumb">Trang chủ › Tour du lịch › Vịnh Hạ Long</div>
-      <h1>Du thuyền Hạ Long 2 Ngày 1 Đêm</h1>
-      <div class="detail-hero-badges">
-        <div class="detail-badge">⏱ 2 ngày 1 đêm</div>
-        <div class="detail-badge">👥 Tối đa 15 khách</div>
-        <div class="detail-badge">🚗 Limousine & Cruiser</div>
-        <div class="detail-badge">★★★★★ 4.9 · 134 đánh giá</div>
+<!-- BREADCRUMB -->
+<div class="cp-breadcrumb">
+  <a href="1trangchu.html">Trang chủ</a>
+  <span>›</span>
+  <span>Tài khoản cá nhân</span>
+</div>
+
+<!-- LAYOUT -->
+<div class="cp-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="cp-sidebar">
+    <div class="cp-profile-card">
+      <div class="cp-avatar-wrap">
+        <div class="cp-avatar" id="cpAvatar">
+          <span id="cpAvatarInitial">U</span>
+        </div>
+        <div class="cp-avatar-online"></div>
+        <label class="cp-avatar-edit" for="avatarInput" title="Đổi ảnh">📷</label>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="changeAvatar(this)">
       </div>
+      <div class="cp-profile-name" id="cpSidebarName">—</div>
+      <div class="cp-profile-since" id="cpSidebarSince">Thành viên từ 2026</div>
+      <div class="cp-member-badge" id="cpMemberBadge">👑 Hạng Vàng</div>
     </div>
-  </div>
-  <div class="detail-body">
-    <div class="detail-main">
-      <div class="detail-section"><h2>🌿 Tổng quan</h2><p>Hãy để Vịnh Hạ Long – Di sản Thiên nhiên Thế giới được UNESCO công nhận 2 lần – trở thành trải nghiệm không thể quên trong cuộc đời bạn. Hành trình đặc biệt này đưa bạn khám phá những hang động huyền bí, chèo kayak giữa vùng nước ngọc lam và thưởng thức hải sản tươi ngon trên du thuyền sang trọng.</p></div>
-      <div class="detail-section">
-        <h2>📋 Lịch trình chi tiết</h2>
-        <div class="itinerary-day">
-          <div class="day-header">Ngày 1: Hà Nội – Vịnh Hạ Long – Hang Luồn <span>~7h di chuyển</span></div>
-          <div class="day-items">
-            <div class="day-item"><div class="day-time">06:00</div><div class="day-desc">Đón quý khách tại khách sạn ở Hà Nội, khởi hành bằng xe Limousine cao cấp.</div></div>
-            <div class="day-item"><div class="day-time">11:30</div><div class="day-desc">Đến Cảng Tuần Châu, làm thủ tục lên tàu, ăn trưa buffet hải sản ngay khi rời bến.</div></div>
-            <div class="day-item"><div class="day-time">13:30</div><div class="day-desc">Tham quan hang Sáng – Tối, chèo kayak qua hang Luồn, bơi lội tại vùng nước trong xanh.</div></div>
-            <div class="day-item"><div class="day-time">19:30</div><div class="day-desc">Tiệc BBQ tại Bãi Tử Long, giao lưu cùng du khách quốc tế.</div></div>
+
+    <nav class="cp-sidenav">
+      <button class="cp-sidenav-item active" onclick="switchTab('info',this)">
+        <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Thông tin cá nhân
+      </button>
+      <button class="cp-sidenav-item" onclick="switchTab('history',this)">
+        <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        Lịch sử đặt chỗ
+      </button>
+      <button class="cp-sidenav-item" onclick="switchTab('favorites',this)">
+        <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Ưu đãi của tôi
+      </button>
+      <button class="cp-sidenav-item" onclick="switchTab('password',this)">
+        <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Đổi mật khẩu
+      </button>
+      <button class="cp-sidenav-item cp-sidenav-logout" onclick="doLogout()">
+        <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Đăng xuất
+      </button>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="cp-main">
+
+    <!-- TAB: THÔNG TIN -->
+    <div class="cp-tab active" id="tab-info">
+      <div class="cp-section">
+        <div class="cp-section-header">
+          <h2>Thông tin cá nhân</h2>
+          <p>Cập nhật thông tin để chúng tôi phục vụ bạn tốt hơn</p>
+        </div>
+        <div class="cp-form-grid">
+          <div class="cp-field">
+            <label>Họ và tên</label>
+            <input type="text" id="infoName" placeholder="Nguyễn Văn A">
+          </div>
+          <div class="cp-field">
+            <label>Địa chỉ Email</label>
+            <input type="email" id="infoEmail" readonly>
+          </div>
+          <div class="cp-field">
+            <label>Số điện thoại</label>
+            <input type="tel" id="infoPhone" placeholder="090 123 4567">
+          </div>
+          <div class="cp-field">
+            <label>Ngày sinh</label>
+            <input type="date" id="infoDob">
+          </div>
+          <div class="cp-field cp-field-full">
+            <label>Địa chỉ</label>
+            <input type="text" id="infoAddress" placeholder="123 Đường Lê Lợi, Quận 1, TP. Hồ Chí Minh">
           </div>
         </div>
-        <div class="itinerary-day">
-          <div class="day-header">Ngày 2: Hang Sửng Sốt – Hà Nội <span>~5h di chuyển</span></div>
-          <div class="day-items">
-            <div class="day-item"><div class="day-time">06:30</div><div class="day-desc">Tập Thái Cực Quyền trên boong ngắm bình minh trên Vịnh.</div></div>
-            <div class="day-item"><div class="day-time">08:00</div><div class="day-desc">Tham quan hang Sửng Sốt – một trong những hang động đẹp nhất Vịnh Hạ Long.</div></div>
-            <div class="day-item"><div class="day-time">19:00</div><div class="day-desc">Kết thúc hành trình, chia tay tại Hà Nội.</div></div>
+        <div class="cp-form-actions">
+          <button class="cp-btn-save" onclick="saveInfo()">💾 Lưu thay đổi</button>
+          <div class="cp-success-msg" id="infoSuccess">✅ Thông tin đã được cập nhật!</div>
+        </div>
+      </div>
+
+      <!-- Lịch sử gần đây — ẩn nếu chưa có booking -->
+      <div class="cp-section" id="recentSection" style="display:none">
+        <div class="cp-section-header cp-section-header-row">
+          <div>
+            <h2>Lịch sử đặt tour gần đây</h2>
+            <p>Danh sách các chuyến đi bạn đã tham gia</p>
+          </div>
+          <button class="cp-link-btn" onclick="switchTabById('history')">Xem tất cả</button>
+        </div>
+        <div id="recentHistoryList"></div>
+      </div>
+    </div>
+
+    <!-- TAB: LỊCH SỬ -->
+    <div class="cp-tab" id="tab-history">
+      <div class="cp-section">
+        <div class="cp-section-header">
+          <h2>Lịch sử đặt chỗ</h2>
+          <p>Tất cả các tour bạn đã đặt</p>
+        </div>
+        <div id="historyList"></div>
+      </div>
+    </div>
+
+    <!-- TAB: YÊU THÍCH -->
+    <div class="cp-tab" id="tab-favorites">
+      <div class="cp-section">
+        <div class="cp-section-header">
+          <h2>Ưu đãi của tôi</h2>
+          <p>Các tour bạn đã lưu lại</p>
+        </div>
+        <div id="favList" class="cp-fav-grid"></div>
+      </div>
+    </div>
+
+    <!-- TAB: MẬT KHẨU -->
+    <div class="cp-tab" id="tab-password">
+      <div class="cp-section">
+        <div class="cp-section-header">
+          <h2>Đổi mật khẩu</h2>
+          <p>Bảo mật tài khoản của bạn</p>
+        </div>
+        <div class="cp-form-grid" style="max-width:480px">
+          <div class="cp-field cp-field-full">
+            <label>Mật khẩu hiện tại</label>
+            <div class="cp-input-wrap">
+              <input type="password" id="pwdCurrent" placeholder="Nhập mật khẩu hiện tại">
+              <button class="cp-eye" type="button" onclick="togglePwd('pwdCurrent',this)">👁</button>
+            </div>
+          </div>
+          <div class="cp-field cp-field-full">
+            <label>Mật khẩu mới</label>
+            <div class="cp-input-wrap">
+              <input type="password" id="pwdNew" placeholder="Tối thiểu 6 ký tự" oninput="checkPwdStrength(this.value)">
+              <button class="cp-eye" type="button" onclick="togglePwd('pwdNew',this)">👁</button>
+            </div>
+            <div class="cp-pwd-strength">
+              <div class="cp-pwd-bar"><div class="cp-pwd-fill" id="pwdBarFill"></div></div>
+              <span id="pwdStrengthText"></span>
+            </div>
+          </div>
+          <div class="cp-field cp-field-full">
+            <label>Xác nhận mật khẩu mới</label>
+            <div class="cp-input-wrap">
+              <input type="password" id="pwdConfirm" placeholder="Nhập lại mật khẩu mới">
+              <button class="cp-eye" type="button" onclick="togglePwd('pwdConfirm',this)">👁</button>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="detail-section"><h2>✅ Bao gồm / Không bao gồm</h2><div class="includes-grid"><div class="include-col yes"><h4>✅ Bao gồm</h4><ul><li>Xe Limousine đưa đón 2 chiều từ Hà Nội</li><li>Phòng ngủ sang trọng trên du thuyền</li><li>Toàn bộ bữa ăn theo chương trình</li><li>Vé tham quan các điểm trên lịch trình</li></ul></div><div class="include-col no"><h4>❌ Không bao gồm</h4><ul><li>Đồ uống ngoài danh sách</li><li>Thuế VAT 10%</li><li>Tiêu dùng cá nhân</li></ul></div></div></div>
-      <div class="detail-section"><h2>⭐ Đánh giá từ du khách</h2><div class="review-item"><div class="review-header"><div class="review-avatar">HN</div><div class="review-info"><div class="review-name">Hoàng Nam</div><div class="review-date">12/01/2024</div></div><div class="review-stars">★★★★★</div></div><div class="review-text">Chuyến đi rất tuyệt vời! Du thuyền cao cấp, đội ngũ nhân viên chu đáo nhiệt tình. Đồ ăn ngon, view đẹp không tả được.</div></div></div>
-    </div>
-    <div class="detail-sidebar">
-      <div class="booking-card">
-        <div class="booking-price"><div class="price-label">Giá chỉ từ / người</div><div><span class="price-main">2.450.000đ</span><span class="price-old">3.200.000đ</span></div><div class="price-sub">Tiết kiệm tới 23%</div></div>
-        <div class="booking-form">
-          <div class="booking-field"><label>Ngày khởi hành</label><input type="date"></div>
-          <div class="booking-field"><label>Số lượng người</label><select><option>02 người</option><option>04 người</option><option>06 người</option></select></div>
+        <div class="cp-error-msg" id="pwdError"></div>
+        <div class="cp-form-actions" style="margin-top:20px">
+          <button class="cp-btn-save" onclick="changePassword()">Cập nhật mật khẩu</button>
+          <div class="cp-success-msg" id="pwdSuccess">✅ Đổi mật khẩu thành công!</div>
         </div>
-        <div class="booking-total"><div class="booking-total-row"><span>2.450.000đ × 2 người</span><span>4.900.000đ</span></div><div class="booking-total-row total"><span>Tổng tiền</span><span>4.900.000đ</span></div></div>
-        <button class="btn-book-full" onclick="openBookingModal('Du Thuyền Hạ Long 2N1Đ','2.450.000đ')">Đặt ngay</button>
-        <div class="booking-support"><div class="booking-support-icon">📞</div><div class="booking-support-text"><strong>Hỗ trợ 24/7</strong>1900 x709</div></div>
       </div>
     </div>
-  </div>
+
+  </main>
 </div>
 
-
-<div class="modal-overlay" id="bookingOverlay" onclick="closeBookingModal()"></div>
-<div class="modal" id="bookingModal">
-  <div class="modal-header">
-    <div>
-      <div class="modal-pretitle">Xác nhận đặt tour</div>
-      <h3 class="modal-title" id="modalTourName">Tour du lịch</h3>
-    </div>
-    <button class="modal-close" onclick="closeBookingModal()">✕</button>
-  </div>
-
-  <!-- STEP INDICATORS -->
-  <div class="modal-steps">
-    <div class="modal-step active" id="step1-dot"><span>1</span>Thông tin</div>
-    <div class="modal-step-line"></div>
-    <div class="modal-step" id="step2-dot"><span>2</span>Thanh toán</div>
-    <div class="modal-step-line"></div>
-    <div class="modal-step" id="step3-dot"><span>3</span>Xác nhận</div>
-  </div>
-
-  <!-- STEP 1: Info -->
-  <div class="modal-body" id="modalStep1">
-    <div class="modal-price-row">
-      <span class="modal-price-label">Giá từ</span>
-      <span class="modal-price-val" id="modalTourPrice">—</span>
-      <span class="modal-price-label">/ người</span>
-    </div>
-    <div class="modal-form-grid">
-      <div class="modal-field">
-        <label>Họ và tên *</label>
-        <input type="text" id="mName" placeholder="Nguyễn Văn A">
+<!-- FOOTER -->
+<footer class="cp-footer">
+  <div class="cp-footer-inner">
+    <div class="cp-footer-brand">
+      <div class="cp-footer-logo">
+        <img src="logo.png" alt="VietnamTravel" style="height:26px">
+        <span>VIETNAM <strong>TRAVEL</strong></span>
       </div>
-      <div class="modal-field">
-        <label>Số điện thoại *</label>
-        <input type="tel" id="mPhone" placeholder="0901 234 567">
-      </div>
-      <div class="modal-field">
-        <label>Email *</label>
-        <input type="email" id="mEmail" placeholder="email@gmail.com">
-      </div>
-      <div class="modal-field">
-        <label>Ngày khởi hành *</label>
-        <input type="date" id="mDate">
-      </div>
-      <div class="modal-field">
-        <label>Số người lớn</label>
-        <select id="mAdults" onchange="updateModalSummary()">
-          <option value="1">1 người</option>
-          <option value="2" selected>2 người</option>
-          <option value="3">3 người</option>
-          <option value="4">4 người</option>
-          <option value="6">6 người</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <label>Số trẻ em</label>
-        <select id="mKids" onchange="updateModalSummary()">
-          <option value="0" selected>Không có</option>
-          <option value="1">1 trẻ</option>
-          <option value="2">2 trẻ</option>
-          <option value="3">3 trẻ</option>
-        </select>
+      <p>Chúng tôi cung cấp những trải nghiệm du lịch tuyệt vời nhất tại Việt Nam với dịch vụ chuyên nghiệp và tận tâm.</p>
+      <div class="cp-footer-socials">
+        <a href="#">🌐</a><a href="#">📤</a><a href="#">✉️</a>
       </div>
     </div>
-    <div class="modal-field" style="margin-top:12px;">
-      <label>Ghi chú thêm</label>
-      <textarea id="mNote" placeholder="Yêu cầu đặc biệt, ăn kiêng, phòng đặc biệt..." class="modal-textarea"></textarea>
+    <div class="cp-footer-col">
+      <h4>Điểm đến phổ biến</h4>
+      <ul>
+        <li><a href="1halong.html">Vịnh Hạ Long</a></li>
+        <li><a href="1hoian.html">Phố Cổ Hội An</a></li>
+        <li><a href="#">Đảo Ngọc Phú Quốc</a></li>
+        <li><a href="#">Cố Đô Huế</a></li>
+        <li><a href="1sapa.html">Sapa Mù Sương</a></li>
+      </ul>
     </div>
-    <div class="modal-summary">
-      <div class="modal-summary-row"><span>Tour</span><span id="sumTour">—</span></div>
-      <div class="modal-summary-row"><span>Giá / người</span><span id="sumPrice">—</span></div>
-      <div class="modal-summary-row"><span>Số người</span><span id="sumPeople">2 người lớn</span></div>
-      <div class="modal-summary-row total"><span>Tổng cộng</span><span id="sumTotal">—</span></div>
+    <div class="cp-footer-col">
+      <h4>Liên kết hữu ích</h4>
+      <ul>
+        <li><a href="1vechungtoi.html">Về chúng tôi</a></li>
+        <li><a href="#">Chính sách bảo mật</a></li>
+        <li><a href="#">Điều khoản dịch vụ</a></li>
+        <li><a href="#">Câu hỏi thường gặp</a></li>
+        <li><a href="#">Hỗ trợ khách hàng</a></li>
+      </ul>
     </div>
-    <button class="modal-btn-next" onclick="goStep(2)">Tiếp theo →</button>
+    <div class="cp-footer-col">
+      <h4>Bản tin du lịch</h4>
+      <p class="cp-footer-sub">Đăng ký để nhận các ưu đãi hấp dẫn sớm nhất.</p>
+      <div class="cp-footer-subscribe">
+        <input type="email" placeholder="Email của bạn">
+        <button>ĐĂNG KÝ NGAY</button>
+      </div>
+    </div>
   </div>
+  <div class="cp-footer-bottom">
+    © 2024 Vietnam Travel. All rights reserved. Designed with passion for Vietnam.
+  </div>
+</footer>
 
-  <!-- STEP 2: Payment -->
-  <div class="modal-body" id="modalStep2" style="display:none">
-    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:20px;">Chọn phương thức thanh toán</p>
-    <div class="pay-methods">
-      <label class="pay-method active" onclick="selectPayment(this,'bank')">
-        <input type="radio" name="payment" value="bank" checked hidden>
-        <span class="pay-icon">🏦</span>
-        <span class="pay-label">Chuyển khoản ngân hàng</span>
-        <span class="pay-check">✓</span>
-      </label>
-      <label class="pay-method" onclick="selectPayment(this,'card')">
-        <input type="radio" name="payment" value="card" hidden>
-        <span class="pay-icon">💳</span>
-        <span class="pay-label">Thẻ tín dụng / Visa</span>
-        <span class="pay-check">✓</span>
-      </label>
-      <label class="pay-method" onclick="selectPayment(this,'momo')">
-        <input type="radio" name="payment" value="momo" hidden>
-        <span class="pay-icon">📱</span>
-        <span class="pay-label">Ví MoMo</span>
-        <span class="pay-check">✓</span>
-      </label>
-      <label class="pay-method" onclick="selectPayment(this,'cod')">
-        <input type="radio" name="payment" value="cod" hidden>
-        <span class="pay-icon">💵</span>
-        <span class="pay-label">Thanh toán trực tiếp</span>
-        <span class="pay-check">✓</span>
-      </label>
-    </div>
-    <div id="bankInfo" class="bank-info">
-      <div class="bank-info-row"><span>Ngân hàng</span><strong>Vietcombank</strong></div>
-      <div class="bank-info-row"><span>Số tài khoản</span><strong>1234 5678 9012</strong></div>
-      <div class="bank-info-row"><span>Chủ tài khoản</span><strong>CONG TY VIETNAMTRAVEL</strong></div>
-      <div class="bank-info-row"><span>Nội dung CK</span><strong id="bankRef">VNT-BOOKING</strong></div>
-    </div>
-    <div class="modal-summary" style="margin-top:16px;">
-      <div class="modal-summary-row total"><span>Tổng thanh toán</span><span id="sumTotal2">—</span></div>
-    </div>
-    <div style="display:flex; gap:12px; margin-top:20px;">
-      <button class="modal-btn-back" onclick="goStep(1)">← Quay lại</button>
-      <button class="modal-btn-next" onclick="goStep(3)" style="flex:1">Xác nhận đặt →</button>
-    </div>
-  </div>
-
-  <!-- STEP 3: Success -->
-  <div class="modal-body" id="modalStep3" style="display:none; text-align:center; padding:32px 24px;">
-    <div class="success-anim">✅</div>
-    <h3 style="font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--dark); margin:16px 0 8px;">Đặt tour thành công!</h3>
-    <p style="color:var(--muted); font-size:0.875rem; line-height:1.6; margin-bottom:20px;">Cảm ơn bạn đã tin tưởng VietnamTravel 🌿<br>Chúng tôi sẽ liên hệ xác nhận trong vòng <strong>2 giờ</strong>.</p>
-    <div class="booking-code-box">
-      <div style="font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">Mã đặt chỗ của bạn</div>
-      <div id="bookingCode" style="font-size:1.8rem; font-weight:700; font-family:'Playfair Display',serif; color:var(--green); letter-spacing:4px;">VNT-XXXX</div>
-    </div>
-    <p style="font-size:0.8rem; color:var(--muted); margin-top:12px;">Email xác nhận đã được gửi đến <strong id="confirmEmail">—</strong></p>
-    <button class="modal-btn-next" onclick="closeBookingModal()" style="margin-top:20px;">Đóng</button>
-  </div>
-</div>
-
-<!-- FAVORITES PANEL -->
-<div class="fav-overlay" id="favOverlay" onclick="toggleFavPanel()"></div>
-<div class="fav-panel" id="favPanel">
-  <div class="fav-panel-header">
-    <h3>❤️ Yêu thích của tôi</h3>
-    <button class="fav-close" onclick="toggleFavPanel()">✕</button>
-  </div>
-  <div class="fav-list" id="favList">
-    <div class="fav-empty"><div class="fav-empty-icon">🤍</div><p>Chưa có tour yêu thích nào.<br>Nhấn ♡ để thêm vào danh sách!</p></div>
-  </div>
-</div>
-
-<!-- CHAT FAB -->
-<button class="chat-fab" id="chatFab" onclick="toggleChat()">
-  💬
-  <span class="chat-notif" id="chatNotif">1</span>
-</button>
-
-<!-- CHAT WINDOW -->
-<div class="chat-window" id="chatWindow">
-  <div class="chat-header">
-    <div class="chat-header-avatar">👩‍💼</div>
-    <div class="chat-header-info">
-      <div class="chat-header-name">Linh – Tư vấn du lịch</div>
-      <div class="chat-header-status"><span class="online-dot"></span>Đang trực tuyến</div>
-    </div>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
-  </div>
-  <div class="chat-messages" id="chatMessages">
-    <div class="msg bot">
-      <div class="msg-bubble">Xin chào! Tôi là Linh, chuyên viên tư vấn du lịch của VietnamTravel 🌿 Tôi có thể giúp gì cho bạn hôm nay?</div>
-      <div class="msg-time">Vừa xong</div>
-    </div>
-  </div>
-  <div class="chat-quick-replies" id="quickReplies">
-    <button class="quick-reply" onclick="sendQuick('Tôi muốn đặt tour Hạ Long')">🚢 Tour Hạ Long</button>
-    <button class="quick-reply" onclick="sendQuick('Giá tour Sapa bao nhiêu?')">⛰️ Tour Sapa</button>
-    <button class="quick-reply" onclick="sendQuick('Tour nào đang giảm giá?')">🏷️ Ưu đãi</button>
-    <button class="quick-reply" onclick="sendQuick('Tôi cần tư vấn lịch trình')">📅 Tư vấn</button>
-  </div>
-  <div class="chat-input-area">
-    <textarea class="chat-input" id="chatInput" placeholder="Nhập tin nhắn..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
-    <button class="chat-send" onclick="sendMessage()">➤</button>
-  </div>
-</div>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
-
-
+<script src="3api.js"></script>
 <script src="3data.js"></script>
 <script src="3toast.js"></script>
-<script src="3booking.js"></script>
-<script src="3favouites.js"></script>
-<script src="3chat.js"></script>
-<script>window.addEventListener('DOMContentLoaded', initNav);</script>
+<script src="3canhan.js"></script>
 </body>
 </html>
