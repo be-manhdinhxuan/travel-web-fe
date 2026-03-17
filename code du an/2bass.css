@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green: #2d8a4e; --green-light: #3aaa62; --gold: #c9963a;
+  --dark: #0d1f17; --text: #2a2a2a; --muted: #666; --white: #ffffff;
+}
+body { font-family: 'Be Vietnam Pro', sans-serif; color: var(--text); background: var(--white); overflow-x: hidden; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shakeX { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+@keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes pulse { 0%,100% { box-shadow: 0 4px 20px rgba(45,138,78,0.5); } 50% { box-shadow: 0 4px 32px rgba(45,138,78,0.8), 0 0 0 8px rgba(45,138,78,0.1); } }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes typingAnim { 0%,80%,100%{transform:scale(0.7);opacity:.5} 40%{transform:scale(1);opacity:1} }
