@@ -1,0 +1,181 @@
+<div class="modal" id="bookingModal">
+  <div class="modal-header">
+    <div>
+      <div class="modal-pretitle">Xác nhận đặt tour</div>
+      <h3 class="modal-title" id="modalTourName">Tour du lịch</h3>
+    </div>
+    <button class="modal-close" onclick="closeBookingModal()">✕</button>
+  </div>
+
+  <!-- STEP INDICATORS -->
+  <div class="modal-steps">
+    <div class="modal-step active" id="step1-dot"><span>1</span>Thông tin</div>
+    <div class="modal-step-line"></div>
+    <div class="modal-step" id="step2-dot"><span>2</span>Thanh toán</div>
+    <div class="modal-step-line"></div>
+    <div class="modal-step" id="step3-dot"><span>3</span>Xác nhận</div>
+  </div>
+
+  <!-- STEP 1: Info -->
+  <div class="modal-body" id="modalStep1">
+    <div class="modal-price-row">
+      <span class="modal-price-label">Giá từ</span>
+      <span class="modal-price-val" id="modalTourPrice">—</span>
+      <span class="modal-price-label">/ người</span>
+    </div>
+    <div class="modal-form-grid">
+      <div class="modal-field">
+        <label>Họ và tên *</label>
+        <input type="text" id="mName" placeholder="Nguyễn Văn A">
+      </div>
+      <div class="modal-field">
+        <label>Số điện thoại *</label>
+        <input type="tel" id="mPhone" placeholder="0901 234 567">
+      </div>
+      <div class="modal-field">
+        <label>Email *</label>
+        <input type="email" id="mEmail" placeholder="email@gmail.com">
+      </div>
+      <div class="modal-field">
+        <label>Ngày khởi hành *</label>
+        <input type="date" id="mDate">
+      </div>
+      <div class="modal-field">
+        <label>Số người lớn</label>
+        <select id="mAdults" onchange="updateModalSummary()">
+          <option value="1">1 người</option>
+          <option value="2" selected>2 người</option>
+          <option value="3">3 người</option>
+          <option value="4">4 người</option>
+          <option value="6">6 người</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Số trẻ em</label>
+        <select id="mKids" onchange="updateModalSummary()">
+          <option value="0" selected>Không có</option>
+          <option value="1">1 trẻ</option>
+          <option value="2">2 trẻ</option>
+          <option value="3">3 trẻ</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-field" style="margin-top:12px;">
+      <label>Ghi chú thêm</label>
+      <textarea id="mNote" placeholder="Yêu cầu đặc biệt, ăn kiêng, phòng đặc biệt..." class="modal-textarea"></textarea>
+    </div>
+    <div class="modal-summary">
+      <div class="modal-summary-row"><span>Tour</span><span id="sumTour">—</span></div>
+      <div class="modal-summary-row"><span>Giá / người</span><span id="sumPrice">—</span></div>
+      <div class="modal-summary-row"><span>Số người</span><span id="sumPeople">2 người lớn</span></div>
+      <div class="modal-summary-row total"><span>Tổng cộng</span><span id="sumTotal">—</span></div>
+    </div>
+    <button class="modal-btn-next" onclick="goStep(2)">Tiếp theo →</button>
+  </div>
+
+  <!-- STEP 2: Payment -->
+  <div class="modal-body" id="modalStep2" style="display:none">
+    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:20px;">Chọn phương thức thanh toán</p>
+    <div class="pay-methods">
+      <label class="pay-method active" onclick="selectPayment(this,'bank')">
+        <input type="radio" name="payment" value="bank" checked hidden>
+        <span class="pay-icon">🏦</span>
+        <span class="pay-label">Chuyển khoản ngân hàng</span>
+        <span class="pay-check">✓</span>
+      </label>
+      <label class="pay-method" onclick="selectPayment(this,'card')">
+        <input type="radio" name="payment" value="card" hidden>
+        <span class="pay-icon">💳</span>
+        <span class="pay-label">Thẻ tín dụng / Visa</span>
+        <span class="pay-check">✓</span>
+      </label>
+      <label class="pay-method" onclick="selectPayment(this,'momo')">
+        <input type="radio" name="payment" value="momo" hidden>
+        <span class="pay-icon">📱</span>
+        <span class="pay-label">Ví MoMo</span>
+        <span class="pay-check">✓</span>
+      </label>
+      <label class="pay-method" onclick="selectPayment(this,'cod')">
+        <input type="radio" name="payment" value="cod" hidden>
+        <span class="pay-icon">💵</span>
+        <span class="pay-label">Thanh toán trực tiếp</span>
+        <span class="pay-check">✓</span>
+      </label>
+    </div>
+    <div id="bankInfo" class="bank-info">
+      <div class="bank-info-row"><span>Ngân hàng</span><strong>Vietcombank</strong></div>
+      <div class="bank-info-row"><span>Số tài khoản</span><strong>1234 5678 9012</strong></div>
+      <div class="bank-info-row"><span>Chủ tài khoản</span><strong>CONG TY VIETNAMTRAVEL</strong></div>
+      <div class="bank-info-row"><span>Nội dung CK</span><strong id="bankRef">VNT-BOOKING</strong></div>
+    </div>
+    <div class="modal-summary" style="margin-top:16px;">
+      <div class="modal-summary-row total"><span>Tổng thanh toán</span><span id="sumTotal2">—</span></div>
+    </div>
+    <div style="display:flex; gap:12px; margin-top:20px;">
+      <button class="modal-btn-back" onclick="goStep(1)">← Quay lại</button>
+      <button class="modal-btn-next" onclick="goStep(3)" style="flex:1">Xác nhận đặt →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Success -->
+  <div class="modal-body" id="modalStep3" style="display:none; text-align:center; padding:32px 24px;">
+    <div class="success-anim">✅</div>
+    <h3 style="font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--dark); margin:16px 0 8px;">Đặt tour thành công!</h3>
+    <p style="color:var(--muted); font-size:0.875rem; line-height:1.6; margin-bottom:20px;">Cảm ơn bạn đã tin tưởng VietnamTravel 🌿<br>Chúng tôi sẽ liên hệ xác nhận trong vòng <strong>2 giờ</strong>.</p>
+    <div class="booking-code-box">
+      <div style="font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">Mã đặt chỗ của bạn</div>
+      <div id="bookingCode" style="font-size:1.8rem; font-weight:700; font-family:'Playfair Display',serif; color:var(--green); letter-spacing:4px;">VNT-XXXX</div>
+    </div>
+    <p style="font-size:0.8rem; color:var(--muted); margin-top:12px;">Email xác nhận đã được gửi đến <strong id="confirmEmail">—</strong></p>
+    <button class="modal-btn-next" onclick="closeBookingModal()" style="margin-top:20px;">Đóng</button>
+  </div>
+</div>
+
+<!-- FAVORITES PANEL -->
+<div class="fav-overlay" id="favOverlay" onclick="toggleFavPanel()"></div>
+<div class="fav-panel" id="favPanel">
+  <div class="fav-panel-header">
+    <h3>❤️ Yêu thích của tôi</h3>
+    <button class="fav-close" onclick="toggleFavPanel()">✕</button>
+  </div>
+  <div class="fav-list" id="favList">
+    <div class="fav-empty"><div class="fav-empty-icon">🤍</div><p>Chưa có tour yêu thích nào.<br>Nhấn ♡ để thêm vào danh sách!</p></div>
+  </div>
+</div>
+
+<!-- CHAT FAB -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()">
+  💬
+  <span class="chat-notif" id="chatNotif">1</span>
+</button>
+
+<!-- CHAT WINDOW -->
+<div class="chat-window" id="chatWindow">
+  <div class="chat-header">
+    <div class="chat-header-avatar">👩‍💼</div>
+    <div class="chat-header-info">
+      <div class="chat-header-name">Linh – Tư vấn du lịch</div>
+      <div class="chat-header-status"><span class="online-dot"></span>Đang trực tuyến</div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="msg bot">
+      <div class="msg-bubble">Xin chào! Tôi là Linh, chuyên viên tư vấn du lịch của VietnamTravel 🌿 Tôi có thể giúp gì cho bạn hôm nay?</div>
+      <div class="msg-time">Vừa xong</div>
+    </div>
+  </div>
+  <div class="chat-quick-replies" id="quickReplies">
+    <button class="quick-reply" onclick="sendQuick('Tôi muốn đặt tour Hạ Long')">🚢 Tour Hạ Long</button>
+    <button class="quick-reply" onclick="sendQuick('Giá tour Sapa bao nhiêu?')">⛰️ Tour Sapa</button>
+    <button class="quick-reply" onclick="sendQuick('Tour nào đang giảm giá?')">🏷️ Ưu đãi</button>
+    <button class="quick-reply" onclick="sendQuick('Tôi cần tư vấn lịch trình')">📅 Tư vấn</button>
+  </div>
+  <div class="chat-input-area">
+    <textarea class="chat-input" id="chatInput" placeholder="Nhập tin nhắn..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="chat-send" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>

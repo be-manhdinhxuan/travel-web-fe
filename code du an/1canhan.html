@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tài Khoản Cá Nhân – VietnamTravel</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="2canhan.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a class="logo" href="1trangchu.html">
+    <img src="logo.png" alt="VietnamTravel" class="logo-img">
+  </a>
+  <ul class="nav-links">
+    <li><a href="1trangchu.html">Trang chủ</a></li>
+    <li><a href="1trangchu.html">Điểm đến</a></li>
+    <li><a href="1tourdulich.html">Tour</a></li>
+    <li><a href="#">Cẩm nang</a></li>
+    <li><a href="1vechungtoi.html">Liên hệ</a></li>
+  </ul>
+  <div class="nav-cta">
+    <div id="navGuest" style="display:none;gap:8px;align-items:center;">
+      <button class="btn-login-nav" onclick="window.location.href='1dangnhap.html'">Đăng nhập</button>
+      <button class="btn-register-nav" onclick="window.location.href='1dangky.html'">Đăng ký</button>
+    </div>
+    <div id="navUser" style="display:none;align-items:center;gap:10px;position:relative;">
+      <div class="nav-user-info" onclick="toggleUserMenu()">
+        <div class="nav-avatar" id="navAvatarEl">U</div>
+        <div style="display:flex;flex-direction:column;line-height:1.2;">
+          <span class="nav-username" id="navUsernameEl">User</span>
+          <span style="font-size:0.68rem;color:#f5c518;font-weight:600;">Hạng Vàng</span>
+        </div>
+        <span style="font-size:0.7rem;color:#888;">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-dropdown-header">
+          <div class="user-dropdown-name" id="dropName">—</div>
+          <div class="user-dropdown-email" id="dropEmail">—</div>
+        </div>
+        <a class="user-dropdown-item" href="1canhan.html">👤 Hồ sơ cá nhân</a>
+        <a class="user-dropdown-item" href="1trangchu.html">🏠 Trang chủ</a>
+        <a class="user-dropdown-item" id="adminMenuBtn" href="1admin.html" style="display:none">⚙️ Quản trị Admin</a>
+        <a class="user-dropdown-item logout-item" onclick="doLogout()">🚪 Đăng xuất</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="cp-page">
+
+  <div class="cp-breadcrumb">
+    <a href="1trangchu.html">Trang chủ</a>
+    <span>›</span>
+    <span>Tài khoản cá nhân</span>
+  </div>
+
+  <div class="cp-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="cp-sidebar">
+      <div class="cp-profile-top">
+        <div class="cp-avatar-wrap">
+          <div class="cp-avatar" id="cpAvatar">
+            <span id="cpAvatarInitial">U</span>
+          </div>
+          <div class="cp-avatar-online"></div>
+          <label class="cp-avatar-edit" for="avatarInput">📷</label>
+          <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="changeAvatar(this)">
+        </div>
+        <div class="cp-profile-name" id="cpSidebarName">—</div>
+        <div class="cp-member-badge" id="cpMemberBadge">THÀNH VIÊN</div>
+      </div>
+
+      <nav class="cp-sidenav">
+        <button class="cp-sidenav-item active" onclick="switchTab('info',this)">
+          <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          Hồ sơ cá nhân
+        </button>
+        <button class="cp-sidenav-item" onclick="switchTab('offers',this)">
+          <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Ưu đãi của tôi
+        </button>
+        <button class="cp-sidenav-item" onclick="switchTab('history',this)">
+          <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          Lịch sử
+        </button>
+        <button class="cp-sidenav-item" onclick="switchTab('wallet',this)">
+          <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Ví điện tử
+        </button>
+        <button class="cp-sidenav-item" onclick="switchTab('password',this)">
+          <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+          Cài đặt
+        </button>
+        <button class="cp-sidenav-item cp-sidenav-logout" onclick="doLogout()">
+          <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Đăng xuất
+        </button>
+      </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="cp-main">
+
+      <!-- TAB: HỒ SƠ -->
+      <div class="cp-tab active" id="tab-info">
+        <div class="cp-section">
+          <div class="cp-section-header">
+            <h2>Thông tin cá nhân</h2>
+            <p>Cập nhật thông tin để chúng tôi phục vụ bạn tốt hơn</p>
+          </div>
+          <div class="cp-form-grid">
+            <div class="cp-field">
+              <label>Họ và tên</label>
+              <input type="text" id="infoName" placeholder="Nguyễn Văn A">
+            </div>
+            <div class="cp-field">
+              <label>Địa chỉ Email</label>
+              <input type="email" id="infoEmail" readonly>
+            </div>
+            <div class="cp-field">
+              <label>Số điện thoại</label>
+              <input type="tel" id="infoPhone" placeholder="090 123 4567">
+            </div>
+            <div class="cp-field">
+              <label>Ngày sinh</label>
+              <input type="date" id="infoDob">
+            </div>
+            <div class="cp-field cp-field-full">
+              <label>Địa chỉ</label>
+              <input type="text" id="infoAddress" placeholder="123 Đường Lê Lợi, Quận 1, TP. Hồ Chí Minh">
+            </div>
+          </div>
+          <div class="cp-form-actions">
+            <button class="cp-btn-save" onclick="saveInfo()">💾 Lưu thay đổi</button>
+            <div class="cp-success-msg" id="infoSuccess">✅ Thông tin đã được cập nhật!</div>
+          </div>
+        </div>
+
+        <div class="cp-section" id="recentSection" style="display:none">
+          <div class="cp-section-header cp-section-header-row">
+            <div>
+              <h2>Lịch sử đặt tour gần đây</h2>
+              <p>Danh sách các chuyến đi bạn đã tham gia</p>
+            </div>
+            <button class="cp-link-btn" onclick="switchTabById('history')">Xem tất cả</button>
+          </div>
+          <div id="recentHistoryList"></div>
+        </div>
+      </div>
+
+      <!-- TAB: ƯU ĐÃI -->
+      <div class="cp-tab" id="tab-offers">
+        <div class="cp-section">
+          <div class="cp-section-header">
+            <h2>Ưu đãi của tôi</h2>
+            <p>Các ưu đãi và voucher dành riêng cho bạn</p>
+          </div>
+          <div class="cp-empty">
+            <div class="cp-empty-icon">🎁</div>
+            <p>Bạn chưa có ưu đãi nào.</p>
+            <a href="1tourdulich.html" class="cp-explore-btn">Khám phá tour ngay</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: LỊCH SỬ -->
+      <div class="cp-tab" id="tab-history">
+        <div class="cp-section">
+          <div class="cp-section-header">
+            <h2>Lịch sử đặt chỗ</h2>
+            <p>Tất cả các tour bạn đã đặt</p>
+          </div>
+          <div id="historyList"></div>
+        </div>
+      </div>
+
+      <!-- TAB: VÍ -->
+      <div class="cp-tab" id="tab-wallet">
+        <div class="cp-section">
+          <div class="cp-section-header">
+            <h2>Ví điện tử</h2>
+            <p>Quản lý số dư và giao dịch</p>
+          </div>
+          <div class="cp-empty">
+            <div class="cp-empty-icon">💳</div>
+            <p>Chưa có giao dịch nào.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: CÀI ĐẶT -->
+      <div class="cp-tab" id="tab-password">
+        <div class="cp-section">
+          <div class="cp-section-header">
+            <h2>Đổi mật khẩu</h2>
+            <p>Bảo mật tài khoản của bạn</p>
+          </div>
+          <div class="cp-form-grid" style="max-width:480px">
+            <div class="cp-field cp-field-full">
+              <label>Mật khẩu hiện tại</label>
+              <div class="cp-input-wrap">
+                <input type="password" id="pwdCurrent" placeholder="Nhập mật khẩu hiện tại">
+                <button class="cp-eye" type="button" onclick="togglePwd('pwdCurrent',this)">👁</button>
+              </div>
+            </div>
+            <div class="cp-field cp-field-full">
+              <label>Mật khẩu mới</label>
+              <div class="cp-input-wrap">
+                <input type="password" id="pwdNew" placeholder="Tối thiểu 6 ký tự" oninput="checkPwdStrength(this.value)">
+                <button class="cp-eye" type="button" onclick="togglePwd('pwdNew',this)">👁</button>
+              </div>
+              <div class="cp-pwd-strength">
+                <div class="cp-pwd-bar"><div class="cp-pwd-fill" id="pwdBarFill"></div></div>
+                <span id="pwdStrengthText"></span>
+              </div>
+            </div>
+            <div class="cp-field cp-field-full">
+              <label>Xác nhận mật khẩu mới</label>
+              <div class="cp-input-wrap">
+                <input type="password" id="pwdConfirm" placeholder="Nhập lại mật khẩu mới">
+                <button class="cp-eye" type="button" onclick="togglePwd('pwdConfirm',this)">👁</button>
+              </div>
+            </div>
+          </div>
+          <div class="cp-error-msg" id="pwdError"></div>
+          <div class="cp-form-actions" style="margin-top:20px">
+            <button class="cp-btn-save" onclick="changePassword()">Cập nhật mật khẩu</button>
+            <div class="cp-success-msg" id="pwdSuccess">✅ Đổi mật khẩu thành công!</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="cp-footer">
+  <div class="cp-footer-inner">
+    <div class="cp-footer-brand">
+      <div class="cp-footer-logo">
+        <img src="logo.png" alt="VietnamTravel" style="height:26px">
+        <span>Vietnam<strong>Travel</strong></span>
+      </div>
+      <p>Trải nghiệm du lịch cao cấp tại Đông Nam Á. Chúng tôi cung cấp những hành trình đích thực kết nối du khách với di sản phong phú, văn hóa sôi động và cảnh quan tuyệt đẹp của Việt Nam.</p>
+      <div class="cp-footer-socials">
+        <a href="#">🌐</a><a href="#">📤</a><a href="#">✉️</a>
+      </div>
+    </div>
+    <div class="cp-footer-col">
+      <h4>Khám phá</h4>
+      <ul>
+        <li><a href="#">Miền Bắc</a></li>
+        <li><a href="#">Miền Trung</a></li>
+        <li><a href="#">Miền Nam</a></li>
+        <li><a href="#">Du lịch Biển</a></li>
+      </ul>
+    </div>
+    <div class="cp-footer-col">
+      <h4>Hỗ trợ</h4>
+      <ul>
+        <li><a href="#">Mẹo du lịch</a></li>
+        <li><a href="#">Visa</a></li>
+        <li><a href="#">Liên hệ</a></li>
+        <li><a href="#">FAQs</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="cp-footer-bottom">
+    © 2024 VIETNAMTRAVEL. BẢN QUYỀN ĐÃ ĐƯỢC BẢO LƯU.
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+<script src="3data.js"></script>
+<script src="3toast.js"></script>
+<script src="3canhan.js"></script>
+</body>
+</html>

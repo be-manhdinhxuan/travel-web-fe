@@ -1,0 +1,54 @@
+/* ===== TOUR LIST PAGE ===== */
+.tl-breadcrumb { padding: 14px 5%; font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 6px; background: white; border-bottom: 1px solid #f0f0f0; }
+.tl-breadcrumb a { color: var(--green); cursor: pointer; text-decoration: none; }
+.tl-breadcrumb a:hover { text-decoration: underline; }
+.tl-breadcrumb span { color: #ccc; }
+.tl-layout { display: grid; grid-template-columns: 260px 1fr; gap: 28px; padding: 28px 5%; background: #f4f6f9; min-height: 80vh; }
+.tl-sidebar { display: flex; flex-direction: column; gap: 12px; }
+.tl-filter-box { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 1px 8px rgba(0,0,0,0.05); }
+.tl-filter-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--dark); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+.tl-search-box { display: flex; align-items: center; gap: 8px; background: #f5f5f5; border-radius: 8px; padding: 9px 12px; border: 1.5px solid transparent; transition: border-color .2s; }
+.tl-search-box:focus-within { border-color: var(--green); background: white; }
+.tl-search-box input { background: none; border: none; outline: none; font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.85rem; flex: 1; }
+.tl-price-range { display: flex; flex-direction: column; gap: 8px; }
+.tl-price-range input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; background: #e0e0e0; border-radius: 2px; outline: none; cursor: pointer; }
+.tl-price-range input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--green); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 6px rgba(45,138,78,0.4); }
+.tl-price-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); }
+.tl-check { display: flex; align-items: center; gap: 8px; padding: 7px 0; font-size: 0.82rem; color: var(--text); cursor: pointer; border-bottom: 1px solid #f5f5f5; }
+.tl-check:last-of-type { border-bottom: none; }
+.tl-check input[type=checkbox] { accent-color: var(--green); width: 15px; height: 15px; }
+.tl-stars-check { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 8px; transition: background .15s; border-bottom: none !important; }
+.tl-stars-check:hover, .tl-stars-check.active { background: #f0faf5; }
+.tl-reset-btn { background: none; border: 1.5px solid #ddd; color: var(--muted); padding: 9px; border-radius: 10px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.8rem; cursor: pointer; transition: all .2s; font-weight: 600; }
+.tl-reset-btn:hover { border-color: var(--green); color: var(--green); background: #f5fff8; }
+.tl-main { display: flex; flex-direction: column; gap: 20px; }
+.tl-top-bar { display: flex; align-items: flex-start; justify-content: space-between; }
+.tl-page-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--dark); margin-bottom: 4px; }
+.tl-page-sub { font-size: 0.85rem; color: var(--muted); }
+.tl-sort-wrap { display: flex; align-items: center; gap: 8px; }
+.tl-sort-select { padding: 8px 12px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.82rem; color: var(--dark); outline: none; cursor: pointer; background: white; }
+.tl-sort-select:focus { border-color: var(--green); }
+.tl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.tl-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); cursor: pointer; transition: transform .3s, box-shadow .3s; }
+.tl-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+.tl-card-img { position: relative; height: 160px; overflow: hidden; }
+.tl-card-img-inner { position: absolute; inset: 0; background-size: cover !important; background-position: center !important; transition: transform .4s; }
+.tl-card:hover .tl-card-img-inner { transform: scale(1.06); }
+.tl-card-img .tour-badge { position: absolute; top: 10px; left: 10px; }
+.tl-card-img .tour-wishlist { position: absolute; top: 10px; right: 10px; }
+.tl-card-body { padding: 14px 16px; }
+.tl-card-location { font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; }
+.tl-card-title { font-weight: 700; font-size: 0.92rem; color: var(--dark); margin-bottom: 6px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tl-card-stars { font-size: 0.78rem; color: var(--gold); margin-bottom: 10px; }
+.tl-card-stars span { color: var(--muted); }
+.tl-card-footer { display: flex; align-items: center; justify-content: space-between; }
+.tl-card-price span { font-size: 0.7rem; color: var(--muted); display: block; }
+.tl-card-price strong { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--green); }
+.tl-pagination { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 0 20px; }
+.tl-page-btn { width: 36px; height: 36px; border: 1.5px solid #e0e0e0; background: white; border-radius: 8px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; color: var(--text); }
+.tl-page-btn:hover:not([disabled]) { border-color: var(--green); color: var(--green); }
+.tl-page-btn.active { background: var(--green); color: white; border-color: var(--green); font-weight: 700; }
+.tl-page-btn[disabled] { opacity: 0.35; cursor: default; }
+
+@media (max-width: 1024px) { .tl-layout { grid-template-columns: 1fr; } .tl-sidebar { display: none; } .tl-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .tl-grid { grid-template-columns: 1fr; } }
