@@ -1,0 +1,115 @@
+/* ===== BOOKING MODAL ===== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 900; opacity: 0; pointer-events: none; transition: opacity .3s ease; backdrop-filter: blur(4px); }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { position: fixed; top: 50%; left: 50%; z-index: 1000; transform: translate(-50%, -46%) scale(0.96); width: min(620px, 95vw); max-height: 90vh; overflow-y: auto; background: white; border-radius: 24px; box-shadow: 0 24px 80px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .35s ease; }
+.modal.open { transform: translate(-50%,-50%) scale(1); opacity: 1; pointer-events: all; }
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 28px 28px 0; }
+.modal-pretitle { font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 4px; }
+.modal-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--dark); font-weight: 700; line-height: 1.3; }
+.modal-close { background: #f5f5f5; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; color: var(--muted); transition: all .2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 16px; margin-top: 2px; }
+.modal-close:hover { background: #ffe0e0; color: #e55; }
+.modal-steps { display: flex; align-items: center; padding: 20px 28px 0; gap: 0; }
+.modal-step { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; font-weight: 600; color: #bbb; transition: color .3s; white-space: nowrap; }
+.modal-step span { width: 24px; height: 24px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; transition: all .3s; flex-shrink: 0; }
+.modal-step.active { color: var(--green); }
+.modal-step.active span { background: var(--green); color: white; }
+.modal-step.done span { background: var(--green-light); color: white; }
+.modal-step-line { flex: 1; height: 2px; background: #eee; margin: 0 8px; min-width: 20px; transition: background .3s; }
+.modal-step.done + .modal-step-line { background: var(--green-light); }
+.modal-body { padding: 20px 28px 28px; }
+.modal-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 18px; padding: 12px 16px; background: #f5faf7; border-radius: 10px; }
+.modal-price-label { font-size: 0.8rem; color: var(--muted); }
+.modal-price-val { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--green); }
+.modal-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-field { display: flex; flex-direction: column; gap: 5px; }
+.modal-field label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+.modal-field input, .modal-field select { border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 10px 14px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.875rem; color: var(--text); outline: none; transition: border-color .2s; background: white; }
+.modal-field input:focus, .modal-field select:focus { border-color: var(--green); }
+.modal-textarea { border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 10px 14px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.85rem; resize: vertical; min-height: 72px; outline: none; width: 100%; transition: border-color .2s; }
+.modal-textarea:focus { border-color: var(--green); }
+.modal-summary { background: #f5faf7; border-radius: 12px; padding: 14px 16px; margin-top: 16px; }
+.modal-summary-row { display: flex; justify-content: space-between; font-size: 0.82rem; color: #555; padding: 4px 0; }
+.modal-summary-row.total { font-weight: 700; color: var(--dark); font-size: 0.95rem; border-top: 1px solid #d0e8d8; margin-top: 6px; padding-top: 10px; }
+.modal-btn-next { width: 100%; background: var(--green); color: white; border: none; padding: 14px; border-radius: 12px; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: background .2s, transform .15s; margin-top: 16px; }
+.modal-btn-next:hover { background: var(--green-light); transform: translateY(-1px); }
+.modal-btn-back { background: #f0f0f0; color: var(--text); border: none; padding: 14px 20px; border-radius: 12px; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: background .2s; margin-top: 16px; }
+.modal-btn-back:hover { background: #e0e0e0; }
+.pay-methods { display: flex; flex-direction: column; gap: 10px; }
+.pay-method { display: flex; align-items: center; gap: 14px; border: 2px solid #e8e8e8; border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: all .2s; }
+.pay-method.active { border-color: var(--green); background: #f0faf5; }
+.pay-icon { font-size: 1.4rem; }
+.pay-label { flex: 1; font-size: 0.875rem; font-weight: 600; color: var(--dark); }
+.pay-check { width: 20px; height: 20px; border-radius: 50%; background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: transparent; transition: all .2s; }
+.pay-method.active .pay-check { background: var(--green); color: white; }
+.bank-info { background: #e8f4ee; border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
+.bank-info-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 0.82rem; border-bottom: 1px solid rgba(45,138,78,0.1); }
+.bank-info-row:last-child { border-bottom: none; }
+.bank-info-row span { color: var(--muted); }
+.bank-info-row strong { color: var(--dark); }
+.success-anim { font-size: 4rem; animation: popIn .5s cubic-bezier(.4,0,.2,1) both; }
+.booking-code-box { background: #f0faf5; border: 2px dashed #a8d8b8; border-radius: 14px; padding: 18px 24px; display: inline-block; margin: 0 auto; }
+
+/* ===== FAVORITES PANEL ===== */
+.fav-panel { position: fixed; top: 0; right: -380px; width: 360px; height: 100vh; background: white; box-shadow: -8px 0 40px rgba(0,0,0,0.15); z-index: 500; transition: right .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
+.fav-panel.open { right: 0; }
+.fav-panel-header { padding: 20px 20px 16px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; margin-top: 82px; }
+.fav-panel-header h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--dark); }
+.fav-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--muted); }
+.fav-close:hover { color: var(--dark); }
+.fav-list { flex: 1; overflow-y: auto; padding: 16px 20px; }
+.fav-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f5f5f5; align-items: center; }
+.fav-item-icon { width: 52px; height: 52px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+.fav-item-info { flex: 1; }
+.fav-item-title { font-weight: 600; font-size: 0.85rem; color: var(--dark); margin-bottom: 2px; }
+.fav-item-price { font-size: 0.82rem; font-weight: 700; color: var(--green); }
+.fav-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; transition: color .2s; }
+.fav-remove:hover { color: #e55; }
+.fav-empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+.fav-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.fav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 499; display: none; }
+.fav-overlay.open { display: block; }
+
+/* ===== CHAT ===== */
+.chat-fab { position: fixed; bottom: 28px; right: 28px; z-index: 700; width: 56px; height: 56px; border-radius: 50%; background: var(--green); color: white; border: none; cursor: pointer; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; transition: transform .2s, box-shadow .2s; animation: pulse 2.5s ease infinite; }
+.chat-fab:hover { transform: scale(1.1); }
+.chat-fab .chat-notif { position: absolute; top: -3px; right: -3px; width: 16px; height: 16px; background: #e55; border-radius: 50%; border: 2px solid white; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; }
+.chat-window { position: fixed; bottom: 96px; right: 28px; z-index: 699; width: 340px; height: 480px; background: white; border-radius: 20px; box-shadow: 0 8px 48px rgba(0,0,0,0.18); display: flex; flex-direction: column; transform: scale(0.9) translateY(20px); opacity: 0; pointer-events: none; transition: all .3s cubic-bezier(.4,0,.2,1); transform-origin: bottom right; }
+.chat-window.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+.chat-header { background: linear-gradient(135deg, var(--green), var(--green-light)); padding: 16px 20px; border-radius: 20px 20px 0 0; display: flex; align-items: center; gap: 12px; color: white; }
+.chat-header-avatar { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.chat-header-info { flex: 1; }
+.chat-header-name { font-weight: 700; font-size: 0.9rem; }
+.chat-header-status { font-size: 0.72rem; opacity: .85; display: flex; align-items: center; gap: 4px; }
+.online-dot { width: 6px; height: 6px; background: #7fff9a; border-radius: 50%; animation: blink 1.5s ease infinite; }
+.chat-close { background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer; font-size: 1.1rem; }
+.chat-close:hover { color: white; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+.msg { max-width: 78%; }
+.msg.bot { align-self: flex-start; }
+.msg.user { align-self: flex-end; }
+.msg-bubble { padding: 10px 14px; border-radius: 18px; font-size: 0.83rem; line-height: 1.5; }
+.msg.bot .msg-bubble { background: #f0f7f2; color: var(--text); border-bottom-left-radius: 4px; }
+.msg.user .msg-bubble { background: var(--green); color: white; border-bottom-right-radius: 4px; }
+.msg-time { font-size: 0.65rem; color: var(--muted); margin-top: 3px; padding: 0 4px; }
+.msg.user .msg-time { text-align: right; }
+.chat-quick-replies { padding: 0 16px 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.quick-reply { background: #f0f7f2; color: var(--green); border: 1.5px solid #c8e8d4; border-radius: 20px; padding: 5px 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'Be Vietnam Pro', sans-serif; }
+.quick-reply:hover { background: var(--green); color: white; border-color: var(--green); }
+.chat-input-area { padding: 12px 16px; border-top: 1px solid #eee; display: flex; gap: 8px; align-items: flex-end; }
+.chat-input { flex: 1; border: 1.5px solid #e0e0e0; border-radius: 12px; padding: 10px 14px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.83rem; resize: none; outline: none; transition: border-color .2s; max-height: 80px; }
+.chat-input:focus { border-color: var(--green); }
+.chat-send { width: 38px; height: 38px; background: var(--green); border: none; border-radius: 10px; color: white; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background .2s; flex-shrink: 0; }
+.chat-send:hover { background: var(--green-light); }
+.typing-indicator { display: flex; align-items: center; gap: 4px; padding: 10px 14px; background: #f0f7f2; border-radius: 18px; border-bottom-left-radius: 4px; width: fit-content; }
+.typing-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: typingAnim 1.2s ease infinite; }
+.typing-dot:nth-child(2) { animation-delay: .2s; }
+.typing-dot:nth-child(3) { animation-delay: .4s; }
+
+/* ===== TOAST ===== */
+.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--dark); color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.85rem; font-weight: 500; opacity: 0; pointer-events: none; transition: all .35s ease; z-index: 2000; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Responsive */
+@media (max-width: 600px) { .chat-window { width: calc(100vw - 32px); right: 16px; } .fav-panel { width: 100%; } .modal-form-grid { grid-template-columns: 1fr; } }

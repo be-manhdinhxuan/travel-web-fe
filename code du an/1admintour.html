@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tạo Tour Mới – VietnamTravel Admin</title>
+<link rel="stylesheet" href="2bass.css">
+<link rel="stylesheet" href="2admin.css">
+<link rel="stylesheet" href="2admintour.css">
+</head>
+<body class="admin-body">
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="admin-brand">
+      <div class="admin-brand-logo">
+        <img src="logo.png" alt="Logo" style="height:28px;filter:brightness(0) invert(1)">
+        <div>
+          <div class="admin-brand-name"><span style="color:#3aaa62">Vietnam</span>Travel</div>
+          <div class="admin-brand-role">Trang Quản Trị</div>
+        </div>
+      </div>
+    </div>
+    <nav class="admin-nav">
+      <a class="admin-nav-item" href="1admin.html" onclick="window.location.href='1admin.html'">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="admin-nav-item active" href="1admin.html">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10z"/></svg>
+        Quản lý Tour
+      </a>
+      <a class="admin-nav-item" href="1admin.html">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Quản lý Ưu đãi
+      </a>
+      <a class="admin-nav-item" href="1admin.html">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Quản lý Nhân viên
+      </a>
+      <a class="admin-nav-item" href="1admin.html">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Thống kê
+      </a>
+      <a class="admin-nav-item" href="1admin.html">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Cài đặt
+      </a>
+    </nav>
+    <div class="admin-sidebar-user">
+      <div class="admin-user-avatar" id="sideUserAvatar">A</div>
+      <div class="admin-user-info">
+        <div class="admin-user-name" id="sideUserName">Admin</div>
+        <div class="admin-user-role">Quản trị viên cao cấp</div>
+      </div>
+      <button class="admin-user-logout" onclick="doLogout()" title="Đăng xuất">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+    <div class="at-topbar">
+      <div>
+        <h1 class="at-title" id="atPageTitle">Tạo Tour Mới</h1>
+        <p class="at-sub">Thêm một địa điểm đến mới vào nền tảng</p>
+      </div>
+      <div class="at-topbar-actions">
+        <button class="admin-btn-ghost" onclick="atSave('draft')">Lưu bản nháp</button>
+        <button class="admin-btn-primary" onclick="atSave('publish')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Xuất bản Tour
+        </button>
+      </div>
+    </div>
+
+    <div class="at-body">
+      <div class="at-left">
+
+        <!-- THÔNG TIN CƠ BẢN -->
+        <div class="at-card">
+          <div class="at-card-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Thông tin cơ bản
+          </div>
+          <div class="at-row2">
+            <div class="at-field">
+              <label>Tên Tour <span class="at-req">*</span></label>
+              <input type="text" id="atName" placeholder="Ví dụ: Du thuyền Hạng sang Vịnh Hạ Long">
+            </div>
+            <div class="at-field">
+              <label>Điểm đến <span class="at-req">*</span></label>
+              <select id="atLocation">
+                <option value="">Chọn địa điểm</option>
+                <option value="Vịnh Hạ Long, Quảng Ninh">Vịnh Hạ Long, Quảng Ninh</option>
+                <option value="Phố Cổ Hội An, Quảng Nam">Phố Cổ Hội An, Quảng Nam</option>
+                <option value="Sapa, Lào Cai">Sapa, Lào Cai</option>
+                <option value="Hà Nội">Hà Nội</option>
+                <option value="Đà Nẵng">Đà Nẵng</option>
+                <option value="Ninh Bình">Ninh Bình</option>
+                <option value="Cần Thơ">Cần Thơ</option>
+                <option value="Phú Quốc">Phú Quốc</option>
+                <option value="Huế">Huế</option>
+                <option value="Nha Trang">Nha Trang</option>
+              </select>
+            </div>
+          </div>
+          <div class="at-row2">
+            <div class="at-field">
+              <label>Giá / người <span class="at-req">*</span></label>
+              <div class="at-prefix-wrap">
+                <span>₫</span>
+                <input type="text" id="atPrice" placeholder="0" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+              </div>
+            </div>
+            <div class="at-field">
+              <label>Thời lượng (ngày) <span class="at-req">*</span></label>
+              <input type="number" id="atDuration" placeholder="Ví dụ: 3" min="1">
+            </div>
+          </div>
+          <div class="at-row2">
+            <div class="at-field">
+              <label>Danh mục</label>
+              <select id="atCategory">
+                <option value="">Chọn danh mục</option>
+              </select>
+            </div>
+            <div class="at-field">
+              <label>Thành phố khởi hành</label>
+              <input type="text" id="atDepartureCity" placeholder="Ví dụ: Hà Nội">
+            </div>
+          </div>
+        </div>
+
+        <!-- MÔ TẢ -->
+        <div class="at-card">
+          <div class="at-card-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Mô tả
+          </div>
+          <div class="at-toolbar">
+            <button class="at-tb" onclick="document.execCommand('bold')" title="Bold"><b>B</b></button>
+            <button class="at-tb" onclick="document.execCommand('italic')" title="Italic"><i>I</i></button>
+            <button class="at-tb" onclick="document.execCommand('underline')" title="Underline"><u>U</u></button>
+            <button class="at-tb" onclick="document.execCommand('strikeThrough')" title="Gạch ngang">—</button>
+          </div>
+          <div class="at-editor" id="atDesc" contenteditable="true">Mô tả các điểm nổi bật của tour...</div>
+        </div>
+
+        <!-- HÌNH ẢNH -->
+        <div class="at-card">
+          <div class="at-card-head">
+            <div class="at-card-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Bộ sưu tập hình ảnh
+            </div>
+            <span style="font-size:0.72rem;color:#aaa">Tối đa 10 ảnh JPG/PNG</span>
+          </div>
+          <div class="at-img-grid" id="atImgGrid">
+            <label class="at-img-add" for="atImgInput">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Thêm ảnh</span>
+              <input type="file" id="atImgInput" accept="image/*" multiple style="display:none" onchange="atAddImages(this)">
+            </label>
+          </div>
+        </div>
+
+        <!-- LỊCH TRÌNH -->
+        <div class="at-card">
+          <div class="at-card-head">
+            <div class="at-card-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Lịch trình chi tiết
+            </div>
+            <button class="at-btn-add" onclick="atAddDay()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Thêm ngày
+            </button>
+          </div>
+          <div id="atDaysList"></div>
+        </div>
+
+
+        <!-- CÀI ĐẶT XUẤT BẢN -->
+        <div class="at-card">
+          <div class="at-card-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Cài đặt xuất bản
+          </div>
+          <div class="at-publish-grid">
+            <div>
+              <div class="at-toggle-row">
+                <div><div class="at-toggle-label">Hiển thị công khai</div><div class="at-toggle-desc">Cho phép khách hàng nhìn thấy tour này</div></div>
+                <label class="at-toggle"><input type="checkbox" id="atPublic" checked><span class="at-slider"></span></label>
+              </div>
+              <div class="at-toggle-row" style="border-bottom:none">
+                <div><div class="at-toggle-label">Huy hiệu xác minh</div><div class="at-toggle-desc">Hiển thị dấu tích đã xác minh chất lượng</div></div>
+                <label class="at-toggle"><input type="checkbox" id="atVerified"><span class="at-slider"></span></label>
+              </div>
+            </div>
+            <div>
+              <div class="at-field">
+                <label>Vị trí nổi bật</label>
+                <select id="atFeatured">
+                  <option value="hero">Trang chủ · Hero Top</option>
+                  <option value="featured">Trang chủ · Featured</option>
+                  <option value="tours_top">Trang tour · Đầu trang</option>
+                  <option value="none">Không hiển thị nổi bật</option>
+                </select>
+              </div>
+              <div class="at-field" style="margin-top:12px">
+                <label>Tỉ lệ hoa hồng (%)</label>
+                <input type="number" id="atCommission" value="15" min="0" max="50">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LỊCH KHỞI HÀNH + ĐIỂM NỔI BẬT -->
+        <div class="at-row2-cards">
+          <div class="at-card">
+            <div class="at-card-head">
+              <div class="at-card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Lịch khởi hành
+              </div>
+              <button class="at-btn-add" onclick="atAddSchedule()">＋</button>
+            </div>
+            <div id="atScheduleList"><p style="font-size:0.78rem;color:#bbb;text-align:center;padding:10px 0">Chưa có lịch</p></div>
+          </div>
+          <div class="at-card">
+            <div class="at-card-head">
+              <div class="at-card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Điểm nổi bật
+              </div>
+              <button class="at-btn-add" onclick="atAddHighlight()">＋</button>
+            </div>
+            <div id="atHighlightList"><p style="font-size:0.78rem;color:#bbb;text-align:center;padding:10px 0">Chưa có điểm nổi bật</p></div>
+          </div>
+        </div>
+
+        <!-- BOTTOM ACTIONS -->
+        <div class="at-final-actions">
+          <button class="admin-btn-ghost" onclick="window.location.href='1admin.html'">Hủy thay đổi</button>
+          <div style="display:flex;gap:10px">
+            <button class="admin-btn-ghost" onclick="atSave('draft')">Lưu bản nháp</button>
+            <button class="admin-btn-primary" onclick="atSave('publish')" style="min-width:120px">Gửi duyệt</button>
+          </div>
+        </div>
+
+      </div><!-- /at-left -->
+
+    </div><!-- /at-body -->
+
+    <div class="admin-footer">© 2024 VIETNAMTRAVEL. HỆ THỐNG QUẢN TRỊ NỘI BỘ.</div>
+  </div><!-- /admin-main -->
+</div>
+
+<div class="toast" id="toast"></div>
+<script>window.NO_NAV = true;</script>
+<script src="3api.js"></script>
+<script src="3data.js"></script>
+<script src="3toast.js"></script>
+<script src="3admin.js"></script>
+<script>
+// Init
+document.addEventListener('DOMContentLoaded', async function() {
+  var u = loadUser();
+  if (!u || u.role !== 'admin') { window.location.href = '1dangnhap.html'; return; }
+  document.getElementById('sideUserName').textContent   = u.name || 'Admin';
+  document.getElementById('sideUserAvatar').textContent = (u.name||'A')[0].toUpperCase();
+
+  // Load categories vào dropdown
+  atLoadCategories();
+
+  // Nếu có ?id= thì edit mode
+  var params = new URLSearchParams(window.location.search);
+  var editId = params.get('id');
+  if (editId) atLoadEdit(editId);
+});
+
+async function atLoadCategories() {
+  var sel = document.getElementById('atCategory');
+  var cats = [];
+  try {
+    var res = await apiGetCategories();
+    if (res && res.ok && res.data.result) cats = res.data.result.categories || res.data.result || [];
+  } catch(e) {}
+  if (!cats.length) {
+    try { cats = JSON.parse(localStorage.getItem('vt_admin_categories') || '[]'); } catch(e) {}
+  }
+  cats.forEach(function(c) {
+    var opt = document.createElement('option');
+    opt.value = c._id || c.id;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+}
+
+function atLoadEdit(id) {
+  var tours = adminGetTours ? adminGetTours() : [];
+  var t = tours.find(function(x){ return String(x.id) === id || x._id === id; });
+  if (!t) return;
+  document.getElementById('atPageTitle').textContent = 'Chỉnh sửa Tour';
+  document.querySelector('.at-sub').textContent = 'Cập nhật thông tin tour';
+  document.getElementById('atName').value     = t.name     || '';
+  document.getElementById('atLocation').value = t.location || '';
+  document.getElementById('atPrice').value    = String(t.price||'').replace(/[^\d]/g,'');
+  document.getElementById('atDuration').value = t.duration || '';
+  document.getElementById('atDesc').textContent = t.desc   || '';
+  if (t.days) t.days.forEach(function(d) { atAddDayData(d); });
+  if (t.schedules) t.schedules.forEach(function(s) { atAddScheduleData(s); });
+  document.getElementById('atPublic').checked = t.active !== false;
+}
+
+// ===== IMAGES =====
+function atAddImages(input) {
+  var grid = document.getElementById('atImgGrid');
+  var files = Array.from(input.files);
+  files.forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var div = document.createElement('div');
+      div.className = 'at-img-preview';
+      div.style.backgroundImage = 'url(' + e.target.result + ')';
+      var btn = document.createElement('button');
+      btn.textContent = '✕';
+      btn.onclick = function() { div.remove(); };
+      div.appendChild(btn);
+      grid.insertBefore(div, grid.querySelector('.at-img-add'));
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+// ===== DAYS =====
+var atDayCount = 0;
+function atAddDay(data) {
+  atDayCount++;
+  var list = document.getElementById('atDaysList');
+  var div  = document.createElement('div');
+  div.className = 'at-day-item';
+  div.innerHTML =
+    '<div class="at-day-header">' +
+      '<span class="at-day-badge">Ngày ' + atDayCount + '</span>' +
+      '<button class="at-day-del" onclick="this.closest(\'.at-day-item\').remove()">✕</button>' +
+    '</div>' +
+    '<div class="at-day-body">' +
+      '<input type="text" placeholder="Tiêu đề ngày " value="' + (data&&data.title?data.title:'') + '">' +
+      '<textarea placeholder="Mô tả hoạt động trong ngày...">' + (data&&data.desc?data.desc:'') + '</textarea>' +
+    '</div>';
+  list.appendChild(div);
+}
+function atAddDayData(d) { atAddDay(d); }
+
+// ===== SCHEDULES =====
+function atAddSchedule(data) {
+  var list = document.getElementById('atScheduleList');
+  var empty = list.querySelector('p');
+  if (empty) empty.remove();
+  var row = document.createElement('div');
+  row.className = 'at-sched-row';
+  row.innerHTML =
+    '<input type="date" class="at-sched-date" value="' + (data&&data.date?data.date:'') + '" min="' + new Date().toISOString().slice(0,10) + '">' +
+    '<input type="number" class="at-sched-slots" placeholder="Số chỗ" min="1" value="' + (data&&data.slots?data.slots:'') + '">' +
+    '<button class="at-sched-del" onclick="this.closest(\'.at-sched-row\').remove()">✕</button>';
+  list.appendChild(row);
+}
+function atAddScheduleData(s) { atAddSchedule(s); }
+
+// ===== HIGHLIGHTS =====
+function atAddHighlight() {
+  var list = document.getElementById('atHighlightList');
+  var empty = list.querySelector('p');
+  if (empty) empty.remove();
+  var row = document.createElement('div');
+  row.className = 'at-highlight-row';
+  row.innerHTML =
+    '<input type="text" placeholder="Ví dụ: Ngắm hoàng hôn trên vịnh">' +
+    '<button onclick="this.closest(\'.at-highlight-row\').remove()">✕</button>';
+  list.appendChild(row);
+}
+
+// ===== SAVE =====
+async function atSave(mode) {
+  var name     = (document.getElementById('atName').value || '').trim();
+  var location = document.getElementById('atLocation').value || '';
+  var price    = document.getElementById('atPrice').value || '0';
+  var duration = document.getElementById('atDuration').value || '';
+  var desc     = document.getElementById('atDesc').innerText || '';
+  var catId    = document.getElementById('atCategory').value || '';
+  var depCity  = document.getElementById('atDepartureCity').value || '';
+  var commission = parseInt(document.getElementById('atCommission').value) || 15;
+  var isPublic = document.getElementById('atPublic').checked;
+  var isVerified = document.getElementById('atVerified').checked;
+  var featured = document.getElementById('atFeatured').value || 'none';
+
+  if (!name)     { showToast('⚠️ Vui lòng nhập tên tour'); return; }
+  if (!location) { showToast('⚠️ Vui lòng chọn điểm đến'); return; }
+  if (!price || price === '0') { showToast('⚠️ Vui lòng nhập giá tour'); return; }
+  if (!duration) { showToast('⚠️ Vui lòng nhập thời lượng'); return; }
+
+  // Lấy lịch trình
+  var days = [];
+  document.querySelectorAll('.at-day-item').forEach(function(el, i) {
+    days.push({
+      day:   i + 1,
+      title: el.querySelector('input')?.value || '',
+      desc:  el.querySelector('textarea')?.value || ''
+    });
+  });
+
+  // Lấy lịch khởi hành
+  var schedules = [];
+  document.querySelectorAll('.at-sched-row').forEach(function(row) {
+    var date  = row.querySelector('.at-sched-date')?.value;
+    var slots = row.querySelector('.at-sched-slots')?.value;
+    if (date) schedules.push({ date, slots: parseInt(slots)||20 });
+  });
+
+  // Lấy highlights
+  var highlights = [];
+  document.querySelectorAll('.at-highlight-row input').forEach(function(inp) {
+    if (inp.value.trim()) highlights.push(inp.value.trim());
+  });
+
+  var priceNum = parseInt(price) || 0;
+  var priceStr = priceNum.toLocaleString('vi-VN') + 'đ';
+  var active   = (mode === 'publish') && isPublic;
+
+  var tourData = {
+    name, location, price: priceStr, duration,
+    desc, days, schedules, highlights,
+    category_id: catId, departure_city: depCity,
+    commission, verified: isVerified, featured,
+    active, updatedAt: 'Vừa xong'
+  };
+
+  var btn = document.querySelector('.at-topbar-actions .admin-btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Đang lưu...'; }
+
+  // Gọi API
+  try {
+    var editId = new URLSearchParams(window.location.search).get('id');
+    var res;
+    if (editId) {
+      res = await apiUpdateTour(editId, {
+        name, description: desc, destination: location,
+        departure_city: depCity, duration_days: parseInt(duration),
+        category_id: catId, highlights, itinerary: days
+      });
+    } else {
+      res = await apiCreateTour({
+        name, description: desc, destination: location,
+        departure_city: depCity, duration_days: parseInt(duration),
+        category_id: catId, highlights, itinerary: days
+      });
+    }
+    if (res && res.ok) {
+      showToast('✅ Đã ' + (mode==='publish'?'xuất bản':'lưu nháp') + ' tour: ' + name);
+      setTimeout(function(){ window.location.href = '1admin.html'; }, 1200);
+      return;
+    }
+  } catch(e) {}
+
+  // Fallback local
+  var tours = adminGetTours ? adminGetTours() : [];
+  var editId2 = new URLSearchParams(window.location.search).get('id');
+  if (editId2) {
+    var idx = tours.findIndex(function(t){ return String(t.id) === editId2; });
+    if (idx >= 0) { tourData.id = tours[idx].id; tours[idx] = tourData; }
+  } else {
+    tourData.id = tours.reduce(function(m,t){ return Math.max(m,t.id||0); }, 0) + 1;
+    tours.push(tourData);
+  }
+  if (typeof adminSaveTours === 'function') adminSaveTours(tours);
+  else localStorage.setItem('vt_admin_tours', JSON.stringify(tours));
+
+  showToast('✅ Đã ' + (mode==='publish'?'xuất bản':'lưu nháp') + ' tour: ' + name);
+  setTimeout(function(){ window.location.href = '1admin.html'; }, 1200);
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Xuất bản Tour'; }
+}
+</script>
+</body>
+</html>
