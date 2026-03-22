@@ -8,7 +8,6 @@ const STAFF_ACCOUNT = { email:'2', password:'2', name:'Nhân viên Vận hành',
 
 function getUserDB() {
   try {
-    // Đọc từ localStorage trước, fallback sessionStorage (tương thích cũ)
     var raw = localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb');
     return JSON.parse(raw) || [ADMIN_ACCOUNT, STAFF_ACCOUNT];
   }
@@ -103,10 +102,7 @@ async function doLogin() {
 
   try {
     const res = await apiLogin(emailVal, pwd);
-    if (res === null) {
-      // API không chạy → dùng localStorage
-      throw new Error('no_api');
-    }
+    if (res === null) throw new Error('no_api');
     if (res.ok) {
       const { user, access_token, refresh_token } = res.data.result;
       apiSaveTokens(access_token, refresh_token);
@@ -137,9 +133,9 @@ async function doLogin() {
 }
 
 function redirectByRole(role) {
-  if (role === 'admin')  window.location.href = '1admin.html';
+  if (role === 'admin')      window.location.href = '1admin.html';
   else if (role === 'staff') window.location.href = '1nhanvien.html';
-  else window.location.href = '1trangchu.html';
+  else                       window.location.href = '1trangchu.html';
 }
 
 // ============================================================
@@ -149,7 +145,7 @@ async function doRegister() {
   const fullName = (document.getElementById('regFullName')?.value || '').trim();
   const email    = (document.getElementById('regEmail')?.value    || '').trim().toLowerCase();
   const phone    = (document.getElementById('regPhone')?.value    || '').trim();
-  const dob      =  document.getElementById('regDob')?.value      || '';
+  const dob      =  document.getElementById('regDob')?.value      || ''; // optional
   const pwd      = (document.getElementById('regPassword')?.value || '');
   const confirm  = (document.getElementById('regConfirm')?.value  || '');
   const agreed   =  document.getElementById('agreeTerms')?.checked;
@@ -157,7 +153,7 @@ async function doRegister() {
   if (!fullName) { showAuthError('regError','⚠️ Vui lòng nhập họ và tên'); return; }
   if (!email)    { showAuthError('regError','⚠️ Vui lòng nhập email'); return; }
   if (!/\S+@\S+\.\S+/.test(email)) { showAuthError('regError','⚠️ Email không hợp lệ'); return; }
-  if (!dob)      { showAuthError('regError','⚠️ Vui lòng nhập ngày sinh'); return; }
+  // dob là optional – chỉ validate nếu người dùng có nhập
   if (pwd.length < 6)  { showAuthError('regError','⚠️ Mật khẩu phải có ít nhất 6 ký tự'); return; }
   if (pwd.length > 50) { showAuthError('regError','⚠️ Mật khẩu không được quá 50 ký tự'); return; }
   if (pwd !== confirm) { showAuthError('regError','❌ Mật khẩu xác nhận không khớp'); return; }
@@ -167,21 +163,16 @@ async function doRegister() {
   if (btn) { btn.disabled = true; btn.textContent = 'Đang đăng ký...'; }
 
   try {
-    const res = await apiRegister(fullName, email, pwd, confirm, dob ? new Date(dob).toISOString() : null);
-    if (res === null) {
-      // API không chạy → dùng localStorage
-      throw new Error('no_api');
-    }
+    const dobISO = dob ? new Date(dob).toISOString() : null;
+    const res = await apiRegister(fullName, email, pwd, confirm, dobISO);
+    if (res === null) throw new Error('no_api');
     if (res.ok) {
-      // Đăng ký thành công qua API
       const { access_token, refresh_token } = res.data.result;
       apiSaveTokens(access_token, refresh_token);
       const newUser = { name: fullName, email, phone, role: 'customer', active: true };
       saveUser(newUser);
-      // Redirect trang kiểm tra email xác thực
       window.location.href = '1trangchu.html'; // TODO: đổi thành 1xacthuc.html khi có backend
     } else {
-      // API trả lỗi có ý nghĩa (409 email trùng, 422 sai field...)
       const msg = res.data?.message || 'Đăng ký thất bại';
       showAuthError('regError','❌ ' + msg);
     }
@@ -197,7 +188,7 @@ async function doRegister() {
     db.push(newUser);
     saveUserDB(db);
     saveUser(newUser);
-    window.location.href = '1trangchu.html'; // fallback: bỏ qua xác thực khi chưa có backend
+    window.location.href = '1trangchu.html';
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Đăng ký ngay'; }
   }
