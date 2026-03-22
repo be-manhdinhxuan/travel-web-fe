@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản Trị – VietnamTravel</title>
+<link rel="stylesheet" href="2bass.css">
+<link rel="stylesheet" href="2admin.css">
+</head>
+<body class="admin-body">
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="admin-brand">
+      <div class="admin-brand-logo">
+        <div style="width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3aaa62" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div>
+          <div class="admin-brand-name"><span style="color:#3aaa62">Vietnam</span>Travel</div>
+          <div class="admin-brand-role">Trang Quản Trị</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="admin-nav">
+      <a class="admin-nav-item" onclick="switchTab('dashboard')" id="aNav-dashboard">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="admin-nav-item active" onclick="switchTab('tours')" id="aNav-tours">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Quản lý Tour
+      </a>
+      <a class="admin-nav-item" onclick="switchTab('categories')" id="aNav-categories">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Danh mục
+      </a>
+      <a class="admin-nav-item" onclick="switchTab('promotions')" id="aNav-promotions">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Quản lý Ưu đãi
+      </a>
+      <a class="admin-nav-item" onclick="switchTab('users')" id="aNav-users">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Quản lý Nhân viên
+      </a>
+      <a class="admin-nav-item" onclick="switchTab('bookings')" id="aNav-bookings">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Đơn hàng
+      </a>
+      <a class="admin-nav-item" onclick="switchTab('stats')" id="aNav-stats">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Thống kê
+      </a>
+      <a class="admin-nav-item" onclick="switchTab('settings')" id="aNav-settings">
+        <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Cài đặt
+      </a>
+    </nav>
+
+    <div class="admin-sidebar-user">
+      <div class="admin-user-avatar" id="sideUserAvatar">A</div>
+      <div class="admin-user-info">
+        <div class="admin-user-name" id="sideUserName">Admin</div>
+        <div class="admin-user-role">Quản trị viên cao cấp</div>
+      </div>
+      <button class="admin-user-logout" onclick="doLogout()" title="Đăng xuất">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+
+    <!-- ===== TOURS TAB (default) ===== -->
+    <div class="admin-tab active" id="tab-tours">
+      <!-- TOPBAR -->
+      <div class="admin-topbar">
+        <h1 class="admin-page-title" style="flex-shrink:0">Hệ thống Quản lý Tour & Nội dung</h1>
+        <div class="admin-topbar-actions">
+          <div class="admin-search-bar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Tìm kiếm tour..." id="adminTourSearch" oninput="adminRenderTours()">
+          </div>
+          <button class="admin-btn-primary" onclick="window.location.href='1admintour.html'">＋ Tạo Tour Mới</button>
+        </div>
+      </div>
+
+      <div class="admin-content">
+        <!-- KPI CARDS -->
+        <div class="admin-kpi-grid">
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-icon" style="background:#e8f4ff;color:#3a7abf">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10z"/></svg>
+            </div>
+            <div><div class="admin-kpi-label">Tổng số Tour</div><div class="admin-kpi-val" id="kpiTotal">0</div></div>
+          </div>
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-icon" style="background:#e8f5ee;color:#2d8a4e">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div><div class="admin-kpi-label">Đã Xuất bản</div><div class="admin-kpi-val" id="kpiActive">0</div></div>
+          </div>
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-icon" style="background:#fff8e8;color:#c9963a">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div><div class="admin-kpi-label">Bản nháp/Chờ</div><div class="admin-kpi-val" id="kpiDraft">0</div></div>
+          </div>
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-icon" style="background:#ffeef8;color:#c0397a">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+            <div><div class="admin-kpi-label">Ưu đãi Đang chạy</div><div class="admin-kpi-val" id="kpiPromo">0</div></div>
+          </div>
+        </div>
+
+        <!-- TOUR TABLE SECTION -->
+        <div class="admin-section">
+          <div class="admin-section-head">
+            <div>
+              <div class="admin-section-title" style="white-space:nowrap">Quản lý Nội dung & Trạng thái Xuất bản</div>
+              <div class="admin-section-sub">Quản lý thông tin chi tiết, hình ảnh và lịch trình tour trước khi hiển thị cho khách hàng.</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="admin-btn-ghost" onclick="adminFilterTours()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Lọc trạng thái
+              </button>
+              <button class="admin-btn-ghost">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <table class="admin-tour-table">
+            <thead>
+              <tr>
+                <th>TOUR & NỘI DUNG</th>
+                <th>HOÀN THIỆN NỘI DUNG</th>
+                <th>GIÁ & ƯU ĐÃI</th>
+                <th>TRẠNG THÁI</th>
+                <th>HÀNH ĐỘNG</th>
+              </tr>
+            </thead>
+            <tbody id="adminToursBody"></tbody>
+          </table>
+
+          <div class="admin-table-footer" id="adminToursFooter"></div>
+        </div>
+
+        <!-- PROMO SECTION -->
+        <div class="admin-section" style="margin-top:20px">
+          <div class="admin-section-head">
+            <div>
+              <div class="admin-section-title">🎉 Chương trình Ưu đãi & Khuyến mãi</div>
+            </div>
+            <a class="admin-view-all" onclick="switchTab('promotions')">Xem tất cả ›</a>
+          </div>
+          <div class="admin-promo-preview-grid" id="adminPromoPreview"></div>
+        </div>
+
+      </div><!-- /admin-content -->
+
+      <!-- CREATE/EDIT FORM PANEL -->
+      <div class="admin-form-panel" id="adminFormPanel" style="display:none">
+        <div class="admin-form-panel-inner">
+          <div class="afp-header">
+            <div>
+              <h2 class="afp-title" id="afpTitle">Tạo Tour Mới</h2>
+              <p class="afp-sub" id="afpSub">Thêm một địa điểm mới vào nền tảng</p>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="admin-btn-ghost" onclick="adminSaveDraft()">Lưu bản nháp</button>
+              <button class="admin-btn-primary" onclick="adminPublish()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Xuất bản Tour
+              </button>
+            </div>
+          </div>
+
+          <div class="afp-grid">
+            <div class="afp-left">
+              <!-- Thông tin cơ bản -->
+              <div class="afp-card">
+                <div class="afp-card-title">ℹ️ Thông tin cơ bản</div>
+                <div class="afp-row2">
+                  <div class="afp-field"><label>Tên Tour</label><input type="text" id="atfName" placeholder="Ví dụ: Du thuyền Hạng sang Vịnh Hạ Long"></div>
+                  <div class="afp-field">
+                    <label>Điểm đến</label>
+                    <select id="atfLocation">
+                      <option value="">Chọn địa điểm</option>
+                      <option>Vịnh Hạ Long, Quảng Ninh</option>
+                      <option>Phố Cổ Hội An, Quảng Nam</option>
+                      <option>Sapa, Lào Cai</option>
+                      <option>Hà Nội</option>
+                      <option>Đà Nẵng</option>
+                      <option>Ninh Bình</option>
+                      <option>Cần Thơ</option>
+                      <option>Phú Quốc</option>
+                      <option>Huế</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="afp-row2">
+                  <div class="afp-field">
+                    <label>Giá (VNĐ)</label>
+                    <div class="afp-prefix-wrap"><span>₫</span><input type="text" id="atfPrice" placeholder="0"></div>
+                  </div>
+                  <div class="afp-field"><label>Thời lượng (ngày)</label><input type="text" id="atfDuration" placeholder="Ví dụ: 3"></div>
+                </div>
+              </div>
+
+              <!-- Mô tả -->
+              <div class="afp-card">
+                <div class="afp-card-title">📝 Mô tả</div>
+                <div class="afp-toolbar">
+                  <button class="afp-tb" onclick="document.execCommand('bold')" title="Bold"><b>B</b></button>
+                  <button class="afp-tb" onclick="document.execCommand('italic')" title="Italic"><i>I</i></button>
+                  <button class="afp-tb" onclick="document.execCommand('underline')" title="Underline"><u>U</u></button>
+                  <button class="afp-tb" onclick="document.execCommand('strikeThrough')">—</button>
+                </div>
+                <div class="afp-editor" id="atfDesc" contenteditable="true">Mô tả các điểm nổi bật của tour...</div>
+              </div>
+
+              <!-- Hình ảnh -->
+              <div class="afp-card">
+                <div class="afp-card-title-row">
+                  <div class="afp-card-title">🖼️ Bộ sưu tập hình ảnh</div>
+                  <span style="font-size:0.72rem;color:#aaa">Tối đa 6 ảnh JPG/PNG</span>
+                </div>
+                <div class="afp-img-grid" id="atfImgGrid">
+                  <label class="afp-img-add" for="atfImgInput">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <span>Thêm ảnh</span>
+                    <input type="file" id="atfImgInput" accept="image/*" multiple style="display:none" onchange="atfAddImages(this)">
+                  </label>
+                </div>
+              </div>
+
+              <!-- Lịch trình -->
+              <div class="afp-card">
+                <div class="afp-card-title-row">
+                  <div class="afp-card-title">📅 Lịch trình chi tiết</div>
+                  <button class="afp-btn-add" onclick="atfAddDay()">⊕ Thêm ngày</button>
+                </div>
+                <div id="atfDaysList"></div>
+              </div>
+            </div>
+
+            <div class="afp-right">
+              <!-- Cài đặt xuất bản -->
+              <div class="afp-card">
+                <div class="afp-card-title">⚙️ Cài đặt xuất bản</div>
+                <div class="afp-toggle-row">
+                  <div><div class="afp-toggle-label">Hiển thị công khai</div><div class="afp-toggle-desc">Khách hàng có thể thấy tour này</div></div>
+                  <label class="afp-toggle"><input type="checkbox" id="atfPublic" checked><span class="afp-toggle-slider"></span></label>
+                </div>
+                <div class="afp-toggle-row" style="border-bottom:none">
+                  <div><div class="afp-toggle-label">Huy hiệu xác minh</div><div class="afp-toggle-desc">Hiển thị badge đã xác minh</div></div>
+                  <label class="afp-toggle"><input type="checkbox" id="atfVerified"><span class="afp-toggle-slider"></span></label>
+                </div>
+                <div class="afp-field" style="margin-top:14px">
+                  <label>Vị trí nổi bật</label>
+                  <select id="atfFeatured">
+                    <option>Trang chủ - Hero Top</option>
+                    <option>Trang chủ - Featured</option>
+                    <option>Trang tour - Đầu trang</option>
+                    <option>Không hiển thị nổi bật</option>
+                  </select>
+                </div>
+                <div class="afp-field">
+                  <label>Hoa hồng %</label>
+                  <input type="number" id="atfCommission" value="15" min="0" max="50">
+                </div>
+              </div>
+
+              <!-- Lịch khởi hành -->
+              <div class="afp-card">
+                <div class="afp-card-title-row">
+                  <div class="afp-card-title">🗓️ Lịch khởi hành</div>
+                  <button class="afp-btn-add" onclick="atfAddSchedule()">＋</button>
+                </div>
+                <div id="atfScheduleList"><p style="font-size:0.78rem;color:#bbb;text-align:center;padding:10px 0">Chưa có lịch</p></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="afp-bottom">
+            <button class="admin-btn-ghost" onclick="adminHideForm()">Hủy thay đổi</button>
+            <button class="admin-btn-primary" onclick="adminPublish()">Gửi duyệt</button>
+          </div>
+          <input type="hidden" id="atfIndex" value="-1">
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="admin-tab" id="tab-dashboard" style="display:none">
+      <div class="admin-topbar"><h1 class="admin-page-title">Dashboard</h1></div>
+      <div class="admin-content">
+        <div class="admin-stats-grid">
+          <div class="admin-stat-card"><div class="admin-stat-icon" style="background:linear-gradient(135deg,#2d8a4e,#3aaa62)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="admin-stat-val" id="statUsers">0</div><div class="admin-stat-label">Người dùng</div></div></div>
+          <div class="admin-stat-card"><div class="admin-stat-icon" style="background:linear-gradient(135deg,#c9963a,#e8b86d)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10z"/></svg></div><div><div class="admin-stat-val" id="statTours">0</div><div class="admin-stat-label">Tour hoạt động</div></div></div>
+          <div class="admin-stat-card"><div class="admin-stat-icon" style="background:linear-gradient(135deg,#2d5a8a,#3a7abf)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="admin-stat-val" id="statBookings">0</div><div class="admin-stat-label">Đơn đặt tour</div></div></div>
+          <div class="admin-stat-card"><div class="admin-stat-icon" style="background:linear-gradient(135deg,#8a2d5a,#bf3a7a)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div><div class="admin-stat-val">4.9★</div><div class="admin-stat-label">Điểm đánh giá</div></div></div>
+        </div>
+        <div class="admin-section"><h3 class="admin-section-title">🕐 Hoạt động gần đây</h3><div id="adminActivity"><div class="activity-item"><div class="activity-dot" style="background:#2d8a4e"></div><div class="activity-text">Hệ thống khởi động – Chào mừng Admin!</div><div class="activity-time">Vừa xong</div></div></div></div>
+      </div>
+    </div>
+
+
+    <!-- ===== DANH MỤC ===== -->
+    <div class="admin-tab" id="tab-categories" style="display:none">
+      <div class="admin-topbar">
+        <h1 class="admin-page-title">Quản lý Danh mục Tour</h1>
+        <div class="admin-topbar-actions">
+          <button class="admin-btn-primary" onclick="catShowForm()">＋ Thêm danh mục</button>
+        </div>
+      </div>
+      <div class="admin-content">
+
+        <!-- FORM THÊM/SỬA -->
+        <div class="admin-section" id="catFormCard" style="display:none;margin-bottom:16px">
+          <div class="admin-section-head">
+            <div class="admin-section-title" id="catFormTitle">Thêm danh mục mới</div>
+            <button class="admin-btn-ghost" onclick="catHideForm()">✕ Đóng</button>
+          </div>
+          <input type="hidden" id="catEditId" value="">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+            <div class="afp-field">
+              <label>Tên danh mục <span style="color:#e55">*</span></label>
+              <input type="text" id="catName" placeholder="Ví dụ: Du lịch biển">
+            </div>
+            <div class="afp-field">
+              <label>Ảnh thumbnail</label>
+              <input type="file" id="catThumbnail" accept="image/*" style="border:1.5px solid #e8e8e8;border-radius:8px;padding:8px;width:100%">
+            </div>
+            <div class="afp-field" style="grid-column:1/-1">
+              <label>Mô tả</label>
+              <textarea id="catDesc" rows="3" style="border:1.5px solid #e8e8e8;border-radius:8px;padding:10px;font-family:inherit;font-size:0.83rem;width:100%;resize:vertical;outline:none" placeholder="Mô tả ngắn về danh mục..."></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="admin-btn-ghost" onclick="catHideForm()">Hủy</button>
+            <button class="admin-btn-primary" onclick="catSave()">💾 Lưu danh mục</button>
+          </div>
+        </div>
+
+        <!-- DANH SÁCH -->
+        <div class="admin-section">
+          <div class="admin-section-head">
+            <div class="admin-section-title">Danh sách danh mục</div>
+            <div class="admin-search-bar" style="width:240px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="catSearch" placeholder="Tìm danh mục..." oninput="catRender()">
+            </div>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>#</th><th>Tên danh mục</th><th>Mô tả</th><th>Trạng thái</th><th>Hành động</th></tr></thead>
+              <tbody id="catTableBody"></tbody>
+            </table>
+            <div class="admin-table-footer" id="catTableFooter"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== ƯU ĐÃI ===== -->
+    <div class="admin-tab" id="tab-promotions" style="display:none">
+      <div class="admin-topbar">
+        <div><h1 class="admin-page-title">Quản lý Chương trình Ưu đãi</h1><p class="admin-page-sub">Quản lý và theo dõi các chiến dịch marketing bán tour</p></div>
+        <button class="admin-btn-primary" onclick="promoShowCreate()">＋ Tạo Ưu đãi Mới</button>
+      </div>
+      <div class="admin-content">
+        <div class="promo-tabs"><button class="promo-tab active" onclick="promoSwitchTab('active',this)">Đang hoạt động <span class="promo-count" id="promoCountActive">0</span></button><button class="promo-tab" onclick="promoSwitchTab('paused',this)">Ngừng hoạt động <span class="promo-count">0</span></button><button class="promo-tab" onclick="promoSwitchTab('draft',this)">Đã lưu trữ <span class="promo-count">0</span></button></div>
+        <div class="promo-main-grid">
+          <div class="promo-left">
+            <div class="promo-search-bar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="promoSearchInput" placeholder="Tìm kiếm ưu đãi..." oninput="promoRenderList()"><select id="promoFilterType" onchange="promoRenderList()" class="promo-filter-select"><option value="">Loại giảm giá</option><option value="percent">Phần trăm</option><option value="fixed">Số tiền cố định</option></select></div>
+            <div class="promo-form-card" id="promoFormCard" style="display:none">
+              <div class="promo-form-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span id="promoFormTitleText">Chi tiết Ưu đãi</span></div>
+              <input type="hidden" id="promoEditIdx" value="-1">
+              <div class="promo-form-field"><label>Tên chương trình</label><input type="text" id="promoName" placeholder="Summer Flash Sale 2024"></div>
+              <div class="promo-form-row2"><div class="promo-form-field"><label>Loại giảm giá</label><select id="promoType"><option value="fixed">Số tiền cố định (đ)</option><option value="percent">Phần trăm (%)</option></select></div><div class="promo-form-field"><label>Giá trị</label><div class="promo-input-prefix"><span id="promoValPrefix">₫</span><input type="number" id="promoValue" placeholder="50" min="0"></div></div></div>
+              <div class="promo-form-row2"><div class="promo-form-field"><label>Ngày bắt đầu</label><input type="date" id="promoStart"></div><div class="promo-form-field"><label>Ngày kết thúc</label><input type="date" id="promoEnd"></div></div>
+              <div class="promo-form-row2"><div class="promo-form-field"><label>Tổng lượt tối đa</label><input type="number" id="promoMaxUse" placeholder="1000" min="1"></div><div class="promo-form-field"><label>Giới hạn mỗi KH</label><input type="number" id="promoPerUser" value="1" min="1"></div></div>
+              <div class="promo-form-actions"><button class="admin-btn-ghost" onclick="promoHideCreate()">Hủy bỏ</button><button class="admin-btn-primary" onclick="promoSave()">💾 Lưu</button></div>
+            </div>
+            <div class="promo-list-section"><div class="promo-list-header"><span class="promo-list-title">Chiến dịch Đang hoạt động</span><a class="promo-view-all" href="#">Xem tất cả</a></div><div class="promo-list-table"><div class="promo-list-head"><span>Ưu đãi</span><span>Giảm giá</span><span>Kết thúc sau</span><span>Sử dụng</span><span>Trạng thái</span><span></span></div><div id="promoListBody"></div></div></div>
+          </div>
+          <div class="promo-right">
+            <div class="promo-preview-card"><div class="promo-preview-header"><span class="promo-preview-title">Xem trước hiển thị</span><span class="promo-preview-badge">Trang chủ</span></div><div class="promo-preview-visual"><div class="promo-preview-img"></div><div class="promo-preview-tag">THAY ĐỔI CÓ ÍCH</div><div class="promo-preview-body"><div class="promo-preview-name" id="promoPreviewName">Summer Flash Sale 2024</div><div class="promo-preview-desc">Ưu đãi đặc biệt cho khách hàng thân thiết</div><div class="promo-preview-price"><span id="promoPreviewVal">—</span><button>→</button></div></div></div><div class="promo-stats-mini"><div class="promo-stats-title">THỐNG KÊ THỜI GIAN THỰC</div><div class="promo-stats-row"><div class="promo-stat-mini"><div class="promo-stat-val" id="promoStatUse">0</div><div class="promo-stat-lbl">Tiếp cận ước tính</div></div><div class="promo-stat-mini"><div class="promo-stat-val">4.8%</div><div class="promo-stat-lbl">CTR tự vọng</div></div></div><div class="promo-warning"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e67e00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Độ trễ dữ liệu 14 phút</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== NHÂN VIÊN ===== -->
+    <div class="admin-tab" id="tab-users" style="display:none">
+      <div class="admin-topbar">
+        <h1 class="admin-page-title">Quản lý Người dùng</h1>
+        <div class="admin-topbar-actions">
+          <div class="admin-search-bar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="adminUserSearch" placeholder="Tìm tên, email..." oninput="adminSearchUsers()">
+          </div>
+        </div>
+      </div>
+      <div class="admin-content">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>SĐT</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+          <div class="admin-table-footer" id="usersTableFooter"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===== ĐƠN HÀNG ===== -->
+    <div class="admin-tab" id="tab-bookings" style="display:none">
+      <div class="admin-topbar">
+        <h1 class="admin-page-title">Quản lý Đơn hàng</h1>
+        <div class="admin-topbar-actions">
+          <div class="admin-search-bar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="adminBkSearch" placeholder="Mã booking, tên khách..." oninput="adminBkRender()">
+          </div>
+          <select id="adminBkStatus" onchange="adminBkRender()" class="promo-filter-select">
+            <option value="">Tất cả trạng thái</option>
+            <option value="0">Chờ thanh toán</option>
+            <option value="1">Đã xác nhận</option>
+            <option value="2">Hoàn thành</option>
+            <option value="3">Đã hủy</option>
+          </select>
+        </div>
+      </div>
+      <div class="admin-content">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>MÃ ĐẶT</th>
+                <th>KHÁCH HÀNG</th>
+                <th>TOUR</th>
+                <th>NGÀY ĐI</th>
+                <th>TỔNG TIỀN</th>
+                <th>TRẠNG THÁI</th>
+                <th>HÀNH ĐỘNG</th>
+              </tr>
+            </thead>
+            <tbody id="adminBkBody"></tbody>
+          </table>
+          <div class="admin-table-footer" id="adminBkFooter"></div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== THỐNG KÊ ===== -->
+    <div class="admin-tab" id="tab-stats" style="display:none">
+      <div class="admin-topbar">
+        <div><div class="stats-breadcrumb">ADMIN › BÁO CÁO</div><h1 class="admin-page-title">Tổng quan Phân tích</h1><p class="admin-page-sub">Theo dõi hiệu quả hoạt động thực tế của VietnamTravel.</p></div>
+        <div class="stats-period-btns"><button class="stats-period active" onclick="statsPeriod(this,'30')">30 Ngày</button><button class="stats-period" onclick="statsPeriod(this,'90')">90 Ngày</button><button class="stats-period" onclick="statsPeriod(this,'365')">12 Tháng</button></div>
+      </div>
+      <div class="admin-content">
+        <div class="stats-kpi-grid">
+          <div class="stats-kpi-card"><div class="stats-kpi-top"><div class="stats-kpi-icon" style="background:#fff0e8;color:#e67e00"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><span class="stats-kpi-change neutral">—</span></div><div class="stats-kpi-label">Tổng doanh thu</div><div class="stats-kpi-val" id="statRevenue">0đ</div></div>
+          <div class="stats-kpi-card"><div class="stats-kpi-top"><div class="stats-kpi-icon" style="background:#e8f0ff;color:#3a7abf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span class="stats-kpi-change neutral">—</span></div><div class="stats-kpi-label">Tổng lượt đặt tour</div><div class="stats-kpi-val" id="statTotalBookings">0</div></div>
+          <div class="stats-kpi-card"><div class="stats-kpi-top"><div class="stats-kpi-icon" style="background:#fffbe8;color:#c9963a"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><span class="stats-kpi-change neutral">Ổn định</span></div><div class="stats-kpi-label">Đánh giá trung bình</div><div class="stats-kpi-val" id="statRating">— / 5.0</div></div>
+          <div class="stats-kpi-card"><div class="stats-kpi-top"><div class="stats-kpi-icon" style="background:#f0e8ff;color:#7b1fa2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><span class="stats-kpi-change neutral">—</span></div><div class="stats-kpi-label">Khách truy cập</div><div class="stats-kpi-val" id="statVisitors">0</div></div>
+        </div>
+        <div class="stats-row2">
+          <div class="stats-chart-card"><div class="stats-chart-header"><span class="stats-card-title">Tăng trưởng doanh thu</span></div><div class="stats-chart-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><p>Chưa có dữ liệu doanh thu</p><span>Dữ liệu sẽ hiển thị sau khi có đơn đặt tour đầu tiên</span></div></div>
+          <div class="stats-source-card"><div class="stats-card-title" style="margin-bottom:20px">Nguồn đặt tour</div><div class="stats-donut-wrap"><svg class="stats-donut" viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="none" stroke="#f0f0f0" stroke-width="14"/></svg><div class="stats-donut-center"><div class="stats-donut-val" id="statsDonutVal">0</div><div class="stats-donut-lbl">TỔNG ĐẶT TOUR</div></div></div><div class="stats-source-list"><div class="stats-source-row"><span class="stats-source-dot" style="background:#3a7abf"></span><span class="stats-source-name">Ứng dụng di động</span><span class="stats-source-pct">—</span></div><div class="stats-source-row"><span class="stats-source-dot" style="background:#2d8a4e"></span><span class="stats-source-name">Trang web</span><span class="stats-source-pct">—</span></div></div></div>
+        </div>
+        <div class="stats-row3">
+          <div class="stats-tours-card"><div class="stats-chart-header"><span class="stats-card-title">Tour hiệu quả nhất</span><a href="#" class="promo-view-all" onclick="switchTab('tours');return false">Xem tất cả</a></div><div class="stats-tours-head"><span>TÊN TOUR</span><span>LƯỢT ĐẶT</span><span>DOANH THU</span><span>CHUYỂN ĐỔI</span></div><div id="statsToursList"><div class="stats-tours-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10z"/></svg><p>Chưa có dữ liệu</p></div></div></div>
+          <div class="stats-rating-card"><div class="stats-card-title" style="margin-bottom:16px">Sự hài lòng của khách hàng</div><div class="stats-rating-big">—</div><div class="stats-rating-stars">☆☆☆☆☆</div><div class="stats-rating-sub">DỰA TRÊN <span id="statsRatingCount">0</span> ĐÁNH GIÁ</div><div class="stats-rating-bars"><div class="stats-rb-row"><span>5</span><div class="stats-rb-track"><div class="stats-rb-fill" style="width:0%;background:#2d8a4e"></div></div><span>0%</span></div><div class="stats-rb-row"><span>4</span><div class="stats-rb-track"><div class="stats-rb-fill" style="width:0%;background:#e67e00"></div></div><span>0%</span></div><div class="stats-rb-row"><span>3</span><div class="stats-rb-track"><div class="stats-rb-fill" style="width:0%;background:#e0e0e0"></div></div><span>0%</span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CÀI ĐẶT ===== -->
+    <div class="admin-tab" id="tab-settings" style="display:none">
+      <div class="admin-topbar"><h1 class="admin-page-title">Cài đặt</h1></div>
+      <div class="admin-content"><div class="admin-section" style="text-align:center;padding:60px"><div style="font-size:3rem;margin-bottom:12px">⚙️</div><p style="color:#aaa;font-size:0.9rem">Chức năng đang phát triển</p></div></div>
+    </div>
+
+    <div class="admin-footer">© 2024 VIETNAMTRAVEL. HỆ THỐNG QUẢN TRỊ NỘI BỘ. BẢN QUYỀN ĐÃ ĐƯỢC BẢO LƯU.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="3api.js"></script>
+<script src="3data.js"></script>
+<script src="3toast.js"></script>
+<script src="3admin.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var u = loadUser();
+  if (!u || u.role !== 'admin') { window.location.href = '1dangnhap-admin.html'; return; }
+  var n = u.name || 'Admin';
+  document.getElementById('sideUserName').textContent   = n;
+  document.getElementById('sideUserAvatar').textContent = n[0].toUpperCase();
+  renderUsersTable();
+  adminRenderTours();
+  adminUpdateDashStats();
+  adminRenderPromoPreview();
+  switchTab('tours');
+});
+</script>
+</body>
+</html>

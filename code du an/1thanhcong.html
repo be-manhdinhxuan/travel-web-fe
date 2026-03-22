@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đặt Chỗ Thành Công – VietnamTravel</title>
+<link rel="stylesheet" href="2bass.css">
+<link rel="stylesheet" href="2nav.css">
+<link rel="stylesheet" href="2thanhcong.css">
+</head>
+<body>
+
+<!-- NAV -->
+
+<!-- MAIN -->
+<div class="tc-wrap">
+  <div class="tc-card">
+
+    <!-- TOP -->
+    <div class="tc-top">
+      <div class="tc-check-wrap">
+        <svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,7"/></svg>
+      </div>
+      <h1 class="tc-title">Đặt chỗ thành công!</h1>
+      <p class="tc-sub" id="tcSubText">
+        Cảm ơn bạn đã lựa chọn VietnamTravel.<br>
+        Chuyến phiêu lưu của bạn sẽ bắt đầu sớm thôi!
+      </p>
+    </div>
+
+    <!-- BOOKING CARD -->
+    <div class="tc-booking">
+      <div class="tc-booking-img" id="tcBgImg"></div>
+      <div class="tc-booking-info">
+        <div class="tc-booking-header">
+          <div>
+            <div class="tc-booking-name" id="tcTour">—</div>
+            <div class="tc-booking-code" id="tcCode">—</div>
+          </div>
+          <div class="tc-booking-price-wrap">
+            <div class="tc-booking-price-label">Tổng thanh toán</div>
+            <div class="tc-booking-price" id="tcTotal">—</div>
+          </div>
+        </div>
+        <div class="tc-booking-meta-row">
+          <div class="tc-meta-item">
+            <div class="tc-meta-label">Ngày khởi hành</div>
+            <div class="tc-meta-val"><span class="tc-meta-icon">📅</span><span id="tcDate">—</span></div>
+          </div>
+          <div class="tc-meta-item">
+            <div class="tc-meta-label">Số lượng khách</div>
+            <div class="tc-meta-val"><span class="tc-meta-icon">👥</span><span id="tcGuests">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL NOTICE -->
+    <div class="tc-email-notice">
+      <div class="tc-email-icon">✉️</div>
+      <div>
+        Một email xác nhận đã được gửi đến <strong id="tcEmail">email của bạn</strong>.
+        Vui lòng kiểm tra hộp thư để xem chi tiết lịch trình.
+      </div>
+    </div>
+
+
+    <!-- ĐÁNH GIÁ TOUR -->
+    <div class="tc-review-box" id="tcReviewBox">
+      <div class="tc-review-title">⭐ Bạn cảm thấy thế nào về tour này?</div>
+      <div class="tc-review-sub">Đánh giá của bạn giúp các khách hàng khác lựa chọn tốt hơn</div>
+      <div class="tc-stars" id="tcStarWrap">
+        <span class="tc-star" data-val="1" onclick="tcSetStar(1)">★</span>
+        <span class="tc-star" data-val="2" onclick="tcSetStar(2)">★</span>
+        <span class="tc-star" data-val="3" onclick="tcSetStar(3)">★</span>
+        <span class="tc-star" data-val="4" onclick="tcSetStar(4)">★</span>
+        <span class="tc-star" data-val="5" onclick="tcSetStar(5)">★</span>
+      </div>
+      <textarea id="tcReviewText" placeholder="Chia sẻ trải nghiệm của bạn (tùy chọn)..." rows="3"></textarea>
+      <button class="tc-btn-primary" onclick="tcSubmitReview()" id="tcReviewBtn">Gửi đánh giá</button>
+      <div id="tcReviewDone" style="display:none;color:#2d8a4e;font-weight:600;font-size:0.85rem;margin-top:8px">✅ Cảm ơn bạn đã đánh giá!</div>
+    </div>
+    <!-- BUTTONS -->
+    <div class="tc-btns">
+      <a href="1canhan.html" class="tc-btn-primary">⬇ Tải hóa đơn</a>
+      <a href="1trangchu.html" class="tc-btn-outline">🏠 Quay lại trang chủ</a>
+    </div>
+
+    <div class="tc-countdown">
+      Tự động về trang chủ sau <span id="tcTimer">10</span> giây
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="tc-footer-grid">
+    <div class="tc-footer-brand">
+      <div class="tc-footer-logo">
+        <div class="tc-footer-logo-dot">VT</div>
+        <span class="tc-footer-logo-text">Vietnam Travel</span>
+      </div>
+      <p class="tc-footer-desc">
+        Trải nghiệm những hành trình khám phá vẻ đẹp bất tận của Việt Nam cùng chúng tôi.
+      </p>
+    </div>
+    <div class="tc-footer-col">
+      <h4>Về chúng tôi</h4>
+      <ul>
+        <li><a href="1vechungtoi.html">Giới thiệu</a></li>
+        <li><a href="#">Điều khoản dịch vụ</a></li>
+        <li><a href="#">Chính sách bảo mật</a></li>
+      </ul>
+    </div>
+    <div class="tc-footer-col">
+      <h4>Dịch vụ</h4>
+      <ul>
+        <li><a href="1tourdulich.html">Tour du lịch</a></li>
+        <li><a href="1datour.html">Đặt khách sạn</a></li>
+        <li><a href="#">Vé máy bay</a></li>
+      </ul>
+    </div>
+    <div class="tc-footer-col">
+      <h4>Liên hệ</h4>
+      <div class="tc-footer-contact">
+        <p>✉️ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="71181f171e31071814051f101c05031007141d5f121e1c">[email&#160;protected]</a></p>
+        <p>📞 1900 x709</p>
+      </div>
+    </div>
+  </div>
+  <div class="tc-footer-bottom">
+    © 2026 Vietnam Travel. All rights reserved.
+  </div>
+</footer>
+
+<script>window.NO_NAV = true;</script>
+<script>
+// Đọc params từ URL — chạy TRƯỚC mọi script khác
+var _p = new URLSearchParams(window.location.search);
+var _tourName = _p.get('tour')   || '';
+var _code     = _p.get('code')   || 'VNT-00000';
+var _date     = _p.get('date')   || '';
+var _guests   = _p.get('guests') || '';
+var _total    = _p.get('total')  || '';
+
+function _set(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+function _setHtml(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.innerHTML = val;
+}
+
+_set('tcTour',   _tourName || '—');
+_set('tcCode',   'Mã giao dịch: #' + _code);
+_set('tcDate',   _date    || '—');
+_set('tcGuests', _guests  || '—');
+_set('tcTotal',  _total   || '—');
+
+if (_date) {
+  _setHtml('tcSubText',
+    'Cảm ơn bạn đã lựa chọn VietnamTravel.<br>Chuyến phiêu lưu của bạn sẽ bắt đầu vào ngày <strong>' + _date + '</strong>!');
+}
+
+// Email user
+try {
+  var _u = JSON.parse(localStorage.getItem('vt_user') || 'null');
+  if (_u && _u.email) _set('tcEmail', _u.email);
+} catch(e) {}
+
+</script>
+<script src="3api.js"></script>
+<script src="3data.js"></script>
+<script src="3toast.js"></script>
+<script>
+// Ảnh tour + nav sau khi 3data load xong
+window.addEventListener('load', function() {
+  try {
+    if (typeof initNav === 'function') initNav();
+    var _tours = typeof getActiveTours === 'function' ? getActiveTours() : [];
+    var _found = _tours.find(function(t){ return t.title === _tourName || t.name === _tourName; });
+    if (_found) {
+      var _bg = document.getElementById('tcBgImg');
+      var _bgVal = typeof getImgBg === 'function' ? getImgBg(_found.imgKey) : null;
+      if (_bg && _bgVal) { _bg.style.background = _bgVal; _bg.style.backgroundSize = 'cover'; _bg.style.backgroundPosition = 'center'; }
+    }
+  } catch(e) {}
+});
+
+function toggleUserMenu() {
+  document.getElementById('userDropdown')?.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nav-user-info') && !e.target.closest('.user-dropdown'))
+    document.getElementById('userDropdown')?.classList.remove('open');
+});
+
+// Countdown
+let t = 10

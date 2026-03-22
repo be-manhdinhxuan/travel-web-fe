@@ -1,0 +1,168 @@
+/* ===== PAGE HEADER ===== */
+.co-page-header {
+  margin-top: 82px;
+  background: linear-gradient(135deg, #1e4d2e 0%, #2d8a4e 100%);
+  padding: 36px 5% 32px;
+}
+.co-page-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.tl-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 14px;
+}
+.tl-breadcrumb a {
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s;
+}
+.tl-breadcrumb a:hover { color: #fff; }
+.tl-breadcrumb span { color: rgba(255,255,255,0.4); }
+.tl-breadcrumb .bc-current { color: #fff; font-weight: 600; }
+.co-page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.co-page-sub {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.72);
+}
+
+/* ===== BODY WRAP ===== */
+.co-body-wrap {
+  background: #f4f6f9;
+  padding: 32px 0 60px;
+  min-height: calc(100vh - 82px - 120px);
+}
+/* ===== CHECKOUT PAGE ===== */
+.co-layout { display: grid; grid-template-columns: 1fr 360px; gap: 28px; padding: 0 5%; max-width: 1200px; margin: 0 auto; }
+.co-left { display: flex; flex-direction: column; gap: 16px; }
+.co-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--dark); margin-bottom: 4px; }
+.co-subtitle { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+.co-step-card { background: white; border-radius: 16px; padding: 22px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+.co-step-head { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 0.95rem; color: var(--dark); margin-bottom: 18px; }
+.co-step-num { width: 28px; height: 28px; background: var(--green); color: white; border-radius: 50%; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.co-cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.co-cal-nav span { font-weight: 700; font-size: 0.9rem; color: var(--dark); }
+.co-cal-nav button { background: none; border: 1.5px solid #e0e0e0; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 1rem; line-height: 1; transition: border-color .2s; display: flex; align-items: center; justify-content: center; }
+.co-cal-nav button:hover { border-color: var(--green); color: var(--green); }
+.co-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.co-cal-day-name { text-align: center; font-size: 0.72rem; font-weight: 700; color: var(--muted); padding: 6px 0; }
+.co-cal-day { text-align: center; padding: 8px 4px; border-radius: 8px; font-size: 0.82rem; cursor: pointer; transition: background .15s, color .15s; color: var(--dark); }
+.co-cal-day:hover:not(.past) { background: #e8f4ee; color: var(--green); }
+.co-cal-day.selected { background: var(--green); color: white; font-weight: 700; }
+.co-cal-day.past { color: #ccc; cursor: default; }
+.co-guest-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f5f5f5; }
+.co-guest-label { font-weight: 600; font-size: 0.88rem; color: var(--dark); }
+.co-guest-sub { font-size: 0.74rem; color: var(--muted); margin-top: 2px; }
+.co-counter { display: flex; align-items: center; gap: 12px; }
+.co-counter button { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid #e0e0e0; background: white; font-size: 1.1rem; cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center; transition: border-color .2s, background .2s; font-weight: 600; color: var(--dark); }
+.co-counter button:hover { border-color: var(--green); background: #f0faf5; color: var(--green); }
+.co-counter span { font-weight: 700; font-size: 1rem; min-width: 20px; text-align: center; }
+.co-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.co-field label { display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #888; margin-bottom: 6px; }
+.co-field input { width: 100%; padding: 10px 14px; border: 1.5px solid #e4e4e4; border-radius: 9px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.875rem; outline: none; transition: border-color .2s; background: #fafafa; }
+.co-field input:focus { border-color: var(--green); background: white; }
+.co-pay-methods { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.co-pay-opt { flex: 1; min-width: 90px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; padding: 14px 10px; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all .2s; font-size: 0.78rem; font-weight: 600; color: var(--muted); text-align: center; }
+.co-pay-opt:hover { border-color: var(--green); color: var(--green); }
+.co-pay-opt.active { border-color: var(--green); color: var(--green); background: #f0faf5; }
+.co-card-fields { animation: fadeUp .25s ease; }
+.co-right { position: sticky; top: 100px; align-self: start; }
+.co-summary-card { background: white; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+.co-tour-img { height: 180px; background-size: cover !important; background-position: center !important; position: relative; }
+.co-tour-badge-wrap { padding: 12px 16px 0; }
+.co-summary-body { padding: 12px 20px 20px; }
+.co-summary-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--dark); margin-bottom: 4px; line-height: 1.3; }
+.co-summary-stars { font-size: 0.8rem; color: var(--gold); margin-bottom: 14px; }
+.co-summary-meta { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0; }
+.co-meta-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text); }
+.co-price-breakdown { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.co-price-row { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--muted); }
+.co-price-total { padding-top: 10px; border-top: 1px solid #eee; font-weight: 700; font-size: 1rem !important; color: var(--green) !important; }
+.co-price-total span:last-child { font-family: 'Playfair Display', serif; font-size: 1.2rem; }
+.co-confirm-btn { width: 100%; background: var(--green); color: white; border: none; padding: 14px; border-radius: 12px; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: background .2s, transform .15s; box-shadow: 0 4px 16px rgba(45,138,78,0.3); margin-bottom: 10px; }
+.co-confirm-btn:hover { background: #24703f; transform: translateY(-1px); }
+.co-trust { display: flex; justify-content: center; gap: 20px; font-size: 1.2rem; opacity: 0.5; }
+
+@media (max-width: 1024px) { .co-layout { grid-template-columns: 1fr; } .co-right { position: static; } }
+@media (max-width: 640px) { .co-form-grid { grid-template-columns: 1fr; } }
+
+/* ===== PAYMENT MoMo & VNPay ===== */
+.co-pay-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #444;
+  transition: all .2s;
+  flex: 1;
+}
+.co-pay-opt:hover { border-color: #2d8a4e; color: #2d8a4e; }
+.co-pay-opt.active { border-color: #2d8a4e; background: #f0faf5; color: #2d8a4e; font-weight: 700; }
+
+.co-pay-methods {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.co-pay-info {
+  background: #f8fdf9;
+  border: 1.5px solid #d4eadb;
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+
+.co-pay-qr-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.co-pay-qr-box {
+  width: 90px; height: 90px;
+  background: #fff;
+  border: 1.5px solid #d4eadb;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #e2217e;
+  flex-shrink: 0;
+  gap: 4px;
+}
+.co-pay-qr-box span {
+  font-size: 0.65rem;
+  color: #888;
+  font-weight: 600;
+}
+
+.co-pay-info-detail { flex: 1; }
+.co-pay-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid #eaf4ec;
+  font-size: 0.83rem;
+}
+.co-pay-info-row:last-child { border-bottom: none; }
+.co-pay-info-row span { color: #888; }
+.co-pay-info-row strong { color: #1a1a1a; font-weight: 700; }

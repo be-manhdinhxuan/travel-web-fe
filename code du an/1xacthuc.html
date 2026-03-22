@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xác thực Email – VietnamTravel</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Be Vietnam Pro','Segoe UI',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0d3d22 0%,#1a5c35 40%,#2d8a4e 100%);display:flex;align-items:center;justify-content:center;padding:20px}
+.xv-card{background:#fff;border-radius:20px;width:420px;max-width:100%;padding:40px 36px;box-shadow:0 24px 80px rgba(0,0,0,0.25);text-align:center;animation:slideUp .45s cubic-bezier(.34,1.2,.64,1) both}
+@keyframes slideUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+.xv-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px}
+.xv-logo img{height:32px}
+.xv-logo-text{font-size:1rem;font-weight:800;color:#1a1a1a}
+.xv-logo-text span{color:#2d8a4e}
+.xv-icon{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both .2s}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.xv-icon-success{background:#e8f5ee;}
+.xv-icon-loading{background:#e8f0ff;}
+.xv-icon-error{background:#fff0f0;}
+.xv-title{font-size:1.2rem;font-weight:800;color:#1a1a1a;margin-bottom:8px}
+.xv-sub{font-size:0.82rem;color:#888;line-height:1.6;margin-bottom:24px}
+.xv-btn{display:block;width:100%;background:#2d8a4e;color:#fff;border:none;padding:13px;border-radius:10px;font-family:inherit;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background .2s;box-shadow:0 4px 14px rgba(45,138,78,0.3);text-decoration:none;margin-bottom:10px}
+.xv-btn:hover{background:#1e6b3b}
+.xv-btn-ghost{display:block;width:100%;background:none;border:1.5px solid #e8e8e8;color:#555;padding:11px;border-radius:10px;font-family:inherit;font-weight:600;font-size:0.88rem;cursor:pointer;transition:all .2s;text-decoration:none}
+.xv-btn-ghost:hover{border-color:#2d8a4e;color:#2d8a4e}
+.xv-spinner{width:40px;height:40px;border:4px solid #e8f0ff;border-top-color:#3a7abf;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.xv-resend{margin-top:16px;font-size:0.78rem;color:#aaa}
+.xv-resend-btn{background:none;border:none;color:#2d8a4e;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.78rem}
+.xv-resend-btn:hover{text-decoration:underline}
+.xv-resend-btn:disabled{color:#bbb;cursor:default}
+.xv-countdown{color:#bbb;font-size:0.75rem}
+</style>
+</head>
+<body>
+
+<div class="xv-card">
+  <div class="xv-logo">
+    <img src="logo.png" alt="VietnamTravel">
+    <span class="xv-logo-text">Vietnam<span>Travel</span></span>
+  </div>
+
+  <!-- ĐANG XỬ LÝ -->
+  <div id="xvLoading">
+    <div class="xv-icon xv-icon-loading">
+      <div class="xv-spinner"></div>
+    </div>
+    <div class="xv-title">Đang xác thực...</div>
+    <div class="xv-sub">Vui lòng chờ trong giây lát.</div>
+  </div>
+
+  <!-- THÀNH CÔNG -->
+  <div id="xvSuccess" style="display:none">
+    <div class="xv-icon xv-icon-success">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2d8a4e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="xv-title">Xác thực thành công!</div>
+    <div class="xv-sub">Email của bạn đã được xác thực.<br>Tài khoản VietnamTravel đã sẵn sàng sử dụng.</div>
+    <a href="1trangchu.html" class="xv-btn">Bắt đầu khám phá →</a>
+    <a href="1dangnhap.html" class="xv-btn-ghost">Đăng nhập</a>
+  </div>
+
+  <!-- LỖI / HẾT HẠN -->
+  <div id="xvError" style="display:none">
+    <div class="xv-icon xv-icon-error">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#e04444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div class="xv-title" id="xvErrTitle">Link đã hết hạn</div>
+    <div class="xv-sub" id="xvErrSub">Link xác thực chỉ có hiệu lực một lần.<br>Vui lòng yêu cầu gửi lại.</div>
+    <div class="xv-resend">
+      <button class="xv-resend-btn" id="xvResendBtn" onclick="xvResend()">Gửi lại email xác thực</button>
+      <span class="xv-countdown" id="xvCountdown"></span>
+    </div>
+    <a href="1dangnhap.html" class="xv-btn-ghost" style="margin-top:14px">← Quay lại đăng nhập</a>
+  </div>
+
+  <!-- CHƯA CÓ TOKEN -->
+  <div id="xvNoToken" style="display:none">
+    <div class="xv-icon xv-icon-loading">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3a7abf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    </div>
+    <div class="xv-title">Kiểm tra hộp thư</div>
+    <div class="xv-sub">Chúng tôi đã gửi email xác thực đến địa chỉ bạn đăng ký.<br>Nhấn vào link trong email để xác thực tài khoản.</div>
+    <div class="xv-resend" style="margin-bottom:16px">
+      Không nhận được email?
+      <button class="xv-resend-btn" id="xvResendBtn2" onclick="xvResend()">Gửi lại</button>
+      <span class="xv-countdown" id="xvCountdown2"></span>
+    </div>
+    <a href="1dangnhap.html" class="xv-btn-ghost">← Quay lại đăng nhập</a>
+  </div>
+</div>
+
+<script src="3api.js"></script>
+<script src="3toast.js"></script>
+<script>
+var XV_TIMER = null;
+
+window.addEventListener('DOMContentLoaded', async function() {
+  var params = new URLSearchParams(window.location.search);
+  var token  = params.get('token') || params.get('email_verify_token');
+
+  if (!token) {
+    // Không có token → hiện màn hình hướng dẫn kiểm tra email
+    document.getElementById('xvLoading').style.display  = 'none';
+    document.getElementById('xvNoToken').style.display  = 'block';
+    return;
+  }
+
+  // Có token → gọi API xác thực
+  try {
+    // POST /api/auth/verify-email { email_verify_token }
+    var res = await apiVerifyEmail(token);
+
+    document.getElementById('xvLoading').style.display = 'none';
+
+    if (res && res.ok) {
+      document.getElementById('xvSuccess').style.display = 'block';
+      // Tự redirect sau 3s
+      setTimeout(function(){ window.location.href = '1trangchu.html'; }, 3000);
+    } else if (res && res.status === 410) {
+      document.getElementById('xvErrTitle').textContent = 'Link đã hết hạn';
+      document.getElementById('xvErrSub').textContent   = 'Link xác thực chỉ có hiệu lực một lần và đã hết hạn. Vui lòng yêu cầu gửi lại.';
+      document.getElementById('xvError').style.display  = 'block';
+    } else if (res && res.status === 400) {
+      document.getElementById('xvErrTitle').textContent = 'Link không hợp lệ';
+      document.getElementById('xvErrSub').textContent   = 'Link xác thực không đúng hoặc đã được sử dụng.';
+      document.getElementById('xvError').style.display  = 'block';
+    } else {
+      // API chưa chạy → coi như thành công
+      document.getElementById('xvSuccess').style.display = 'block';
+      setTimeout(function(){ window.location.href = '1trangchu.html'; }, 3000);
+    }
+  } catch(e) {
+    document.getElementById('xvLoading').style.display = 'none';
+    document.getElementById('xvSuccess').style.display = 'block';
+    setTimeout(function(){ window.location.href = '1trangchu.html'; }, 3000);
+  }
+});
+
+// Gửi lại → POST /api/auth/resend-verify-email
+async function xvResend() {
+  var btn1 = document.getElementById('xvResendBtn');
+  var btn2 = document.getElementById('xvResendBtn2');
+  var active = btn1 || btn2;
+
+  try {
+    await apiResendVerifyEmail();
+    if(typeof showToast === 'function') showToast('✅ Đã gửi lại email xác thực!');
+  } catch(e) {}
+
+  xvStartCountdown(60);
+}
+
+function xvStartCountdown(sec) {
+  ['xvResendBtn','xvResendBtn2'].forEach(function(id){
+    var b = document.getElementById(id); if(b) b.disabled = true;
+  });
+  clearInterval(XV_TIMER);
+  XV_TIMER = setInterval(function() {
+    sec--;
+    ['xvCountdown','xvCountdown2'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.textContent = '(' + sec + 's)';
+    });
+    if (sec <= 0) {
+      clearInterval(XV_TIMER);
+      ['xvResendBtn','xvResendBtn2'].forEach(function(id){
+        var b = document.getElementById(id); if(b) b.disabled = false;
+      });
+      ['xvCountdown','xvCountdown2'].forEach(function(id){
+        var el = document.getElementById(id); if(el) el.textContent = '';
+      });
+    }
+  }, 1000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Điểm Đến – VietnamTravel</title>
+<link rel="stylesheet" href="2bass.css">
+<link rel="stylesheet" href="2nav.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Be Vietnam Pro','Segoe UI',sans-serif;background:#f9f9f7;color:#333}
+
+/* ===== HERO ===== */
+.dd-hero{position:relative;height:340px;overflow:hidden;margin-top:82px}
+.dd-hero-bg{width:100%;height:100%;object-fit:cover;display:block}
+.dd-hero-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.25) 60%,transparent 100%)}
+.dd-hero-content{position:absolute;bottom:44px;left:60px;color:#fff}
+.dd-breadcrumb{font-size:0.8rem;opacity:.8;margin-bottom:10px}
+.dd-breadcrumb span{color:#3aaa62}
+.dd-hero-content h1{font-size:2.1rem;font-weight:800;line-height:1.2;margin-bottom:10px}
+.dd-hero-content p{font-size:0.9rem;opacity:.85;max-width:420px;line-height:1.65}
+
+/* ===== FILTER BAR ===== */
+.dd-filter{background:#fff;border-bottom:1px solid #eee;padding:16px 60px;display:flex;align-items:center;gap:16px;position:sticky;top:82px;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.dd-search-wrap{position:relative;flex:1;max-width:360px}
+.dd-search-wrap input{width:100%;padding:10px 16px 10px 40px;border:1.5px solid #e5e5e0;border-radius:10px;font-size:0.875rem;font-family:inherit;outline:none;transition:border-color .2s;background:#f9f9f7}
+.dd-search-wrap input:focus{border-color:#2d8a4e;background:#fff}
+.dd-search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#aaa;pointer-events:none}
+.dd-tabs{display:flex;gap:8px;margin-left:auto}
+.dd-tab{padding:8px 20px;border-radius:8px;border:1.5px solid #e5e5e0;background:#fff;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;color:#666;transition:all .2s}
+.dd-tab.active,.dd-tab:hover{background:#2d8a4e;border-color:#2d8a4e;color:#fff}
+.dd-count{font-size:0.78rem;color:#aaa;white-space:nowrap}
+
+/* ===== MAIN ===== */
+.dd-main{max-width:1200px;margin:0 auto;padding:40px 20px 60px}
+
+/* ===== GRID ===== */
+.dd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-bottom:32px}
+
+/* ===== CARD ===== */
+.dd-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);transition:transform .25s,box-shadow .25s;cursor:pointer;opacity:0;animation:ddFadeUp .5s ease forwards}
+@keyframes ddFadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.dd-card:nth-child(1){animation-delay:.05s}.dd-card:nth-child(2){animation-delay:.1s}
+.dd-card:nth-child(3){animation-delay:.15s}.dd-card:nth-child(4){animation-delay:.2s}
+.dd-card:nth-child(5){animation-delay:.25s}.dd-card:nth-child(6){animation-delay:.3s}
+.dd-card:nth-child(7){animation-delay:.35s}.dd-card:nth-child(8){animation-delay:.4s}
+.dd-card:hover{transform:translateY(-5px);box-shadow:0 12px 32px rgba(0,0,0,0.13)}
+.dd-card-img{position:relative;height:180px;overflow:hidden;background:linear-gradient(135deg,#2d8a4e,#3aaa62)}
+.dd-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.dd-card:hover .dd-card-img img{transform:scale(1.07)}
+.dd-card-img-bg{width:100%;height:100%;background-size:cover;background-position:center;transition:transform .4s ease}
+.dd-card:hover .dd-card-img-bg{transform:scale(1.07)}
+.dd-card-badge{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:20px;backdrop-filter:blur(4px)}
+.dd-card-badge.hot{background:#e04444}
+.dd-card-badge.new{background:#f5a623}
+.dd-card-body{padding:16px}
+.dd-card-body h3{font-size:0.92rem;font-weight:700;margin-bottom:3px;color:#1a2332}
+.dd-card-province{font-size:0.75rem;color:#2d8a4e;font-weight:600;margin-bottom:8px}
+.dd-card-desc{font-size:0.78rem;color:#666;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:14px}
+.dd-card-link{display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:700;color:#2d8a4e;border:1.5px solid #2d8a4e;padding:6px 13px;border-radius:8px;text-decoration:none;transition:all .2s;font-family:inherit;cursor:pointer;background:none}
+.dd-card-link:hover{background:#2d8a4e;color:#fff}
+
+/* EMPTY */
+.dd-empty{grid-column:1/-1;text-align:center;padding:60px;color:#aaa}
+.dd-empty-icon{font-size:3rem;margin-bottom:12px}
+
+/* ===== PAGE INFO ===== */
+.dd-page-info{text-align:center;font-size:0.78rem;color:#aaa;margin-bottom:14px}
+
+/* ===== PAGINATION ===== */
+.dd-pagination{display:flex;justify-content:center;align-items:center;gap:6px}
+.dd-pg{width:36px;height:36px;border-radius:8px;border:1.5px solid #e5e5e0;background:#fff;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;color:#666;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.dd-pg:hover,.dd-pg.active{background:#2d8a4e;border-color:#2d8a4e;color:#fff}
+.dd-pg:disabled{opacity:.4;cursor:default}
+.dd-pg.wide{width:auto;padding:0 14px}
+.dd-pg-dots{color:#aaa;font-weight:700;padding:0 4px}
+
+/* ===== FOOTER ===== */
+.dd-footer{background:#1a2332;color:rgba(255,255,255,0.7);padding:50px 60px 30px}
+.dd-footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.dd-footer-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:1rem;color:#fff;text-decoration:none;margin-bottom:14px}
+.dd-footer-logo-icon{width:28px;height:28px;background:#2d8a4e;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem}
+.dd-footer-brand p{font-size:0.8rem;line-height:1.7;max-width:280px}
+.dd-footer-social{display:flex;gap:10px;margin-top:18px}
+.dd-footer-social a{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.8rem;font-weight:700;text-decoration:none;transition:background .2s}
+.dd-footer-social a:hover{background:#2d8a4e}
+.dd-footer-col h4{color:#fff;font-size:0.85rem;font-weight:700;margin-bottom:14px}
+.dd-footer-col ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+.dd-footer-col ul li a{text-decoration:none;color:rgba(255,255,255,0.6);font-size:0.8rem;transition:color .2s}
+.dd-footer-col ul li a:hover{color:#2d8a4e}
+.dd-footer-bottom{border-top:1px solid rgba(255,255,255,0.1);padding-top:22px;display:flex;align-items:center;justify-content:space-between;font-size:0.72rem;flex-wrap:wrap;gap:10px}
+.dd-footer-links{display:flex;gap:20px}
+.dd-footer-links a{color:rgba(255,255,255,0.5);text-decoration:none;transition:color .2s}
+.dd-footer-links a:hover{color:#2d8a4e}
+
+@media(max-width:1000px){.dd-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.dd-grid{grid-template-columns:repeat(2,1fr)}.dd-filter{padding:14px 20px;flex-wrap:wrap}.dd-hero-content{left:24px}}
+@media(max-width:500px){.dd-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="dd-hero">
+  <img class="dd-hero-bg" src="halong.jpg" alt="Vietnam">
+  <div class="dd-hero-overlay"></div>
+  <div class="dd-hero-content">
+    <div class="dd-breadcrumb">Trang chủ › <span>Điểm đến</span></div>
+    <h1>Khám phá các điểm đến<br>tuyệt đẹp</h1>
+    <p>Hành trình trải nghiệm vẻ đẹp bất tận và văn hóa đặc sắc của dải đất hình chữ S...</p>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="dd-filter">
+  <div class="dd-search-wrap">
+    <svg class="dd-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="ddSearch" placeholder="Tìm kiếm điểm đến..." oninput="ddFilter()">
+  </div>
+  <div class="dd-tabs">
+    <button class="dd-tab active" onclick="ddRegion('',this)">Tất cả</button>
+    <button class="dd-tab" onclick="ddRegion('mien-bac',this)">Miền Bắc</button>
+    <button class="dd-tab" onclick="ddRegion('mien-trung',this)">Miền Trung</button>
+    <button class="dd-tab" onclick="ddRegion('mien-nam',this)">Miền Nam</button>
+  </div>
+  <span class="dd-count" id="ddCount"></span>
+</div>
+
+<!-- MAIN -->
+<div class="dd-main">
+  <div class="dd-grid" id="ddGrid"></div>
+  <div class="dd-page-info" id="ddPageInfo"></div>
+  <div class="dd-pagination" id="ddPagination"></div>
+</div>
+
+<!-- FOOTER -->
+<div class="dd-footer">
+  <div class="dd-footer-grid">
+    <div class="dd-footer-brand">
+      <a href="1trangchu.html" class="dd-footer-logo">
+        <div class="dd-footer-logo-icon">🌿</div>
+        <span style="color:#2d8a4e">Vietnam</span><span style="color:#1a1a1a">Travel</span>
+      </a>
+      <p>Trải nghiệm du lịch cao cấp tại Đông Nam Á. Chúng tôi cung cấp những hành trình đích thực kết nối khách với di sản phong phú, văn hóa sôi động và cảnh quan tuyệt đẹp của Việt Nam.</p>
+      <div class="dd-footer-social">
+        <a href="#">f</a><a href="#">in</a><a href="#">✉</a>
+      </div>
+    </div>
+    <div class="dd-footer-col">
+      <h4>Khám phá</h4>
+      <ul>
+        <li><a href="#">Miền Bắc</a></li>
+        <li><a href="#">Miền Trung</a></li>
+        <li><a href="#">Miền Nam</a></li>
+        <li><a href="#">Du lịch biển</a></li>
+      </ul>
+    </div>
+    <div class="dd-footer-col">
+      <h4>Hỗ trợ</h4>
+      <ul>
+        <li><a href="#">Mẹo du lịch</a></li>
+        <li><a href="#">Visa</a></li>
+        <li><a href="#">Liên hệ</a></li>
+        <li><a href="#">FAQs</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="dd-footer-bottom">
+    <span>© 2024 VIETNAMTRAVEL. BẢN QUYỀN ĐÃ ĐƯỢC BẢO LƯU.</span>
+    <div class="dd-footer-links">
+      <a href="#">CHÍNH SÁCH BẢO MẬT</a>
+      <a href="#">ĐIỀU KHOẢN & ĐIỀU KIỆN</a>
+      <a href="#">SƠ ĐỒ TRANG WEB</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="3api.js"></script>
+<script src="3nav.js"></script>
+<script src="3data.js"></script>
+<script src="3toast.js"></script>
+<script>
+var DD_PAGE     = 1;
+var DD_PER      = 8;
+var DD_ALL      = [];
+var DD_FILTERED = [];
+var DD_REGION   = '';
+
+// Mô tả cho từng tour
+var DD_DESC = {
+  'Du Thuyền Hạ Long Sang Trọng':  'Kỳ quan thiên nhiên thế giới được UNESCO công nhận với hàng nghìn hòn đảo đá vôi hùng vĩ và làn nước xanh ngọc huyền ảo.',
+  'Tour Phố Cổ Hội An & Ẩm Thực': 'Phố cổ lung linh với hàng ngàn chiếc đèn lồng rực rỡ, soi bóng xuống dòng sông Thu Bồn thơ mộng và ẩm thực đặc sắc.',
+  'Trekking & Homestay Sapa':       'Thị trấn mù sương nổi tiếng với những thửa ruộng bậc thang hùng vĩ và đỉnh Fansipan – nóc nhà Đông Dương.',
+  'Khám Phá Hà Nội Cổ Kính':       'Thủ đô nghìn năm văn hiến với 36 phố phường huyền thoại, hồ Hoàn Kiếm thơ mộng và nền ẩm thực đường phố đặc sắc.',
+  'Đà Nẵng – Bà Nà Hills':         'Thành phố đáng sống bậc nhất Việt Nam với Cầu Vàng nổi tiếng thế giới, bãi biển Mỹ Khê và Ngũ Hành Sơn kỳ bí.',
+  'Tràng An – Tam Cốc Ninh Bình':  'Di sản UNESCO với những dãy núi đá vôi hùng vĩ, chèo thuyền qua hang động huyền ảo giữa khung cảnh thiên nhiên hoang sơ.',
+  'Sông Nước Miền Tây':            'Khám phá vựa lúa của cả nước với chợ nổi Cái Răng, vườn trái cây sum suê và nền văn hoá sông nước độc đáo.',
+  'Phú Quốc – Đảo Ngọc Thiên Đường': 'Thiên đường nghỉ dưỡng với bờ biển cát trắng mịn, làn nước xanh trong vắt và hệ sinh thái nhiệt đới độc đáo.',
+  'Huế – Cố Đô Ngàn Năm':            'Cố đô cuối cùng của Việt Nam với quần thể kinh thành Nhà Nguyễn UNESCO, ẩm thực hoàng cung và sông Hương thơ mộng.',
+  'Nha Trang – Thành Phố Biển':       'Thành phố biển nổi tiếng với tour 4 đảo huyền thoại, lặn ngắm san hô Hòn Mun và hải sản tươi ngon nhất miền Trung.',
+  'Đà Lạt – Thành Phố Ngàn Hoa':     'Thành phố ngàn hoa với khí hậu mát lạnh quanh năm, đồi thông thơ mộng và vô số điểm check-in lãng mạn tuyệt đẹp.',
+};
+
+var DD_PROVINCE = {
+  'Du Thuyền Hạ Long Sang Trọng':  'Quảng Ninh',
+  'Tour Phố Cổ Hội An & Ẩm Thực': 'Quảng Nam',
+  'Trekking & Homestay Sapa':       'Lào Cai',
+  'Khám Phá Hà Nội Cổ Kính':       'Hà Nội',
+  'Đà Nẵng – Bà Nà Hills':         'Đà Nẵng',
+  'Tràng An – Tam Cốc Ninh Bình':  'Ninh Bình',
+  'Sông Nước Miền Tây':            'Cần Thơ – Bến Tre',
+  'Phú Quốc – Đảo Ngọc Thiên Đường': 'Kiên Giang',
+  'Huế – Cố Đô Ngàn Năm':            'Thừa Thiên Huế',
+  'Nha Trang – Thành Phố Biển':       'Khánh Hòa',
+  'Đà Lạt – Thành Phố Ngàn Hoa':     'Lâm Đồng',
+};
+
+// Ảnh Unsplash cho từng tour
+var DD_IMG = {
+  't1': 'halong.jpg',
+  't2': 'hoian2.jpg',
+  't3': 'sapa.png',
+  'th': 'hanoi.jpg',
+  'td': 'danang.jpg',
+  'tn': 'ninhbinh.jpg',
+  'tm': 'mientay.jpg',
+  'pq': 'phuquoc.jpg',
+  'hu': 'hue.jpg',
+  'nt': 'nhatrang.jpg',
+  'dl': 'dalat.jpg',
+};
+
+window.addEventListener('load', function() {
+  DD_ALL = getActiveTours();
+  ddFilter();
+});
+
+function ddRegion(region, btn) {
+  document.querySelectorAll('.dd-tab').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  DD_REGION = region;
+  DD_PAGE = 1;
+  ddFilter();
+}
+
+function ddFilter() {
+  var q = (document.getElementById('ddSearch')?.value || '').toLowerCase().trim();
+
+  DD_FILTERED = DD_ALL.filter(function(t) {
+    var matchQ = !q || t.title.toLowerCase().includes(q) || t.location.toLowerCase().includes(q) || t.tags.some(function(g){ return g.includes(q); });
+    var matchR = !DD_REGION || t.tags.includes(DD_REGION);
+    return matchQ && matchR;
+  });
+
+  DD_PAGE = 1;
+  ddRender();
+}
+
+function ddRender() {
+  var grid   = document.getElementById('ddGrid');
+  var info   = document.getElementById('ddPageInfo');
+  var pgWrap = document.getElementById('ddPagination');
+  var cntEl  = document.getElementById('ddCount');
+  if (!grid) return;
+
+  var total      = DD_FILTERED.length;
+  var totalPages = Math.max(1, Math.ceil(total / DD_PER));
+  var start      = (DD_PAGE - 1) * DD_PER;
+  var paged      = DD_FILTERED.slice(start, start + DD_PER);
+
+  if (cntEl) cntEl.textContent = total + ' điểm đến';
+
+  if (!paged.length) {
+    grid.innerHTML = '<div class="dd-empty"><div class="dd-empty-icon">🔍</div><p>Không tìm thấy điểm đến phù hợp</p></div>';
+    if (pgWrap) pgWrap.innerHTML = '';
+    if (info) info.textContent = '';
+    return;
+  }
+
+  grid.innerHTML = paged.map(function(t) {
+    var imgSrc  = DD_IMG[t.imgKey] || '';
+    var imgBg   = getImgBg ? getImgBg(t.imgKey) : 'linear-gradient(135deg,#2d8a4e,#3aaa62)';
+    var desc    = DD_DESC[t.title] || t.location;
+    var province = DD_PROVINCE[t.title] || t.location;
+    var badgeCls = t.badgeClass === 'hot' ? 'hot' : t.badgeClass === 'new' ? 'new' : '';
+
+    var imgHtml = imgSrc
+      ? '<img src="' + imgSrc + '" alt="' + t.title + '" loading="lazy" onerror="this.parentNode.style.background=\'' + imgBg + '\';this.remove()">'
+      : '<div class="dd-card-img-bg" style="background:' + imgBg + ';height:100%"></div>';
+
+    return '<div class="dd-card" onclick="' + (t.page ? "window.location.href='" + t.page + "'" : '') + '">' +
+      '<div class="dd-card-img">' +
+        imgHtml +
+        '<span class="dd-card-badge ' + badgeCls + '">' + t.badge + '</span>' +
+      '</div>' +
+      '<div class="dd-card-body">' +
+        '<h3>' + t.title + '</h3>' +
+        '<div class="dd-card-province">📍 ' + province + '</div>' +
+        '<p class="dd-card-desc">' + desc + '</p>' +
+        (t.page
+          ? '<button class="dd-card-link" onclick="event.stopPropagation();window.location.href=\'' + t.page + '\'">Xem chi tiết →</button>'
+          : '<button class="dd-card-link" style="opacity:.5;cursor:default">Sắp ra mắt</button>'
+        ) +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  // Page info
+  if (info) info.textContent = 'Hiển thị ' + (start+1) + '–' + Math.min(start+DD_PER,total) + ' trong ' + total + ' điểm đến';
+
+  // Pagination
+  if (pgWrap) {
+    var btns = '';
+    btns += '<button class="dd-pg wide" onclick="ddGoPage(' + (DD_PAGE-1) + ')" ' + (DD_PAGE===1?'disabled':'') + '>‹ Trước</button>';
+    for (var p = 1; p <= totalPages; p++) {
+      btns += '<button class="dd-pg' + (p===DD_PAGE?' active':'') + '" onclick="ddGoPage(' + p + ')">' + p + '</button>';
+    }
+    btns += '<button class="dd-pg wide" onclick="ddGoPage(' + (DD_PAGE+1) + ')" ' + (DD_PAGE===totalPages?'disabled':'') + '>Tiếp ›</button>';
+    pgWrap.innerHTML = btns;
+  }
+}
+
+function ddGoPage(p) {
+  var totalPages = Math.max(1, Math.ceil(DD_FILTERED.length / DD_PER));
+  if (p < 1 || p > totalPages) return;
+  DD_PAGE = p;
+  ddRender();
+  window.scrollTo({ top: 340, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
