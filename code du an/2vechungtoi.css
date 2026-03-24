@@ -3,7 +3,9 @@
    VietnamTravel
    ══════════════════════════════════════════ */
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -22,7 +24,7 @@
 }
 
 body {
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: 'Inter', sans-serif;
   color: var(--text);
   background: var(--white);
   font-size: 14px;
@@ -32,7 +34,9 @@ body {
 /* ── NAV ── */
 nav {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -389,10 +393,21 @@ nav {
   overflow: hidden;
 }
 
-.member-avatar-1 { background: linear-gradient(140deg, #a8d8ea 0%, #6ab8d4 100%); }
-.member-avatar-2 { background: linear-gradient(140deg, #f9d8a0 0%, #f0b855 100%); }
-.member-avatar-3 { background: linear-gradient(140deg, #1a2a3a 0%, #2a3d50 100%); }
-.member-avatar-4 { background: linear-gradient(140deg, #c8dce8 0%, #8ab8d4 100%); }
+.member-avatar-1 {
+  background: linear-gradient(140deg, #a8d8ea 0%, #6ab8d4 100%);
+}
+
+.member-avatar-2 {
+  background: linear-gradient(140deg, #f9d8a0 0%, #f0b855 100%);
+}
+
+.member-avatar-3 {
+  background: linear-gradient(140deg, #1a2a3a 0%, #2a3d50 100%);
+}
+
+.member-avatar-4 {
+  background: linear-gradient(140deg, #c8dce8 0%, #8ab8d4 100%);
+}
 
 .member-body {
   padding: 14px 16px 18px;

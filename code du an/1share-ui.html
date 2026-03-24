@@ -62,7 +62,8 @@
     </div>
     <div class="modal-field" style="margin-top:12px;">
       <label>Ghi chú thêm</label>
-      <textarea id="mNote" placeholder="Yêu cầu đặc biệt, ăn kiêng, phòng đặc biệt..." class="modal-textarea"></textarea>
+      <textarea id="mNote" placeholder="Yêu cầu đặc biệt, ăn kiêng, phòng đặc biệt..."
+        class="modal-textarea"></textarea>
     </div>
     <div class="modal-summary">
       <div class="modal-summary-row"><span>Tour</span><span id="sumTour">—</span></div>
@@ -120,13 +121,20 @@
   <!-- STEP 3: Success -->
   <div class="modal-body" id="modalStep3" style="display:none; text-align:center; padding:32px 24px;">
     <div class="success-anim">✅</div>
-    <h3 style="font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--dark); margin:16px 0 8px;">Đặt tour thành công!</h3>
-    <p style="color:var(--muted); font-size:0.875rem; line-height:1.6; margin-bottom:20px;">Cảm ơn bạn đã tin tưởng VietnamTravel 🌿<br>Chúng tôi sẽ liên hệ xác nhận trong vòng <strong>2 giờ</strong>.</p>
+    <h3 style="font-family:'Inter',serif; font-size:1.4rem; color:var(--dark); margin:16px 0 8px;">Đặt tour thành công!
+    </h3>
+    <p style="color:var(--muted); font-size:0.875rem; line-height:1.6; margin-bottom:20px;">Cảm ơn bạn đã tin tưởng
+      VietnamTravel 🌿<br>Chúng tôi sẽ liên hệ xác nhận trong vòng <strong>2 giờ</strong>.</p>
     <div class="booking-code-box">
-      <div style="font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">Mã đặt chỗ của bạn</div>
-      <div id="bookingCode" style="font-size:1.8rem; font-weight:700; font-family:'Playfair Display',serif; color:var(--green); letter-spacing:4px;">VNT-XXXX</div>
+      <div
+        style="font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">
+        Mã đặt chỗ của bạn</div>
+      <div id="bookingCode"
+        style="font-size:1.8rem; font-weight:700; font-family:'Inter',serif; color:var(--green); letter-spacing:4px;">
+        VNT-XXXX</div>
     </div>
-    <p style="font-size:0.8rem; color:var(--muted); margin-top:12px;">Email xác nhận đã được gửi đến <strong id="confirmEmail">—</strong></p>
+    <p style="font-size:0.8rem; color:var(--muted); margin-top:12px;">Email xác nhận đã được gửi đến <strong
+        id="confirmEmail">—</strong></p>
     <button class="modal-btn-next" onclick="closeBookingModal()" style="margin-top:20px;">Đóng</button>
   </div>
 </div>
@@ -139,7 +147,10 @@
     <button class="fav-close" onclick="toggleFavPanel()">✕</button>
   </div>
   <div class="fav-list" id="favList">
-    <div class="fav-empty"><div class="fav-empty-icon">🤍</div><p>Chưa có tour yêu thích nào.<br>Nhấn ♡ để thêm vào danh sách!</p></div>
+    <div class="fav-empty">
+      <div class="fav-empty-icon">🤍</div>
+      <p>Chưa có tour yêu thích nào.<br>Nhấn ♡ để thêm vào danh sách!</p>
+    </div>
   </div>
 </div>
 
@@ -161,7 +172,8 @@
   </div>
   <div class="chat-messages" id="chatMessages">
     <div class="msg bot">
-      <div class="msg-bubble">Xin chào! Tôi là Linh, chuyên viên tư vấn du lịch của VietnamTravel 🌿 Tôi có thể giúp gì cho bạn hôm nay?</div>
+      <div class="msg-bubble">Xin chào! Tôi là Linh, chuyên viên tư vấn du lịch của VietnamTravel 🌿 Tôi có thể giúp gì
+        cho bạn hôm nay?</div>
       <div class="msg-time">Vừa xong</div>
     </div>
   </div>
@@ -172,7 +184,8 @@
     <button class="quick-reply" onclick="sendQuick('Tôi cần tư vấn lịch trình')">📅 Tư vấn</button>
   </div>
   <div class="chat-input-area">
-    <textarea class="chat-input" id="chatInput" placeholder="Nhập tin nhắn..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+    <textarea class="chat-input" id="chatInput" placeholder="Nhập tin nhắn..." rows="1" onkeydown="handleChatKey(event)"
+      oninput="autoResize(this)"></textarea>
     <button class="chat-send" onclick="sendMessage()">➤</button>
   </div>
 </div>
