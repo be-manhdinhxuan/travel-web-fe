@@ -12,44 +12,6 @@
   </head>
 
   <body>
-    <nav id="mainNav">
-      <a class="logo" href="1trangchu.html">
-        <img src="logo.png" alt="VietnamTravel" class="logo-img">
-      </a>
-      <ul class="nav-links">
-        <li><a href="1trangchu.html">Điểm đến</a></li>
-        <li><a href="1tourdulich.html">Tour du lịch</a></li>
-        <li><a href="1uudai.html">Ưu đãi</a></li>
-        <li><a href="1vechungtoi.html">Về chúng tôi</a></li>
-      </ul>
-      <div class="nav-cta">
-        <button class="fav-btn-nav" onclick="toggleFavPanel()">♥ Yêu thích <span class="fav-count" id="favCount"
-            style="display:none">0</span></button>
-        <button class="btn-primary" onclick="openBookingModal()">Đặt ngay</button>
-        <div id="navGuest" style="display:flex;gap:8px;align-items:center;">
-          <button class="btn-login-nav" onclick="window.location.href='1dangnhap.html'">Đăng nhập</button>
-          <button class="btn-register-nav" onclick="window.location.href='1dangky.html'">Đăng ký</button>
-        </div>
-        <div id="navUser" style="display:none;align-items:center;gap:10px;position:relative;">
-          <div class="nav-user-info" onclick="toggleUserMenu()">
-            <div class="nav-avatar" id="navAvatarEl">U</div>
-            <span class="nav-username" id="navUsernameEl">User</span>
-            <span style="font-size:0.7rem;color:var(--muted);">▾</span>
-          </div>
-          <div class="user-dropdown" id="userDropdown">
-            <div class="user-dropdown-header">
-              <div class="user-dropdown-name" id="dropName">—</div>
-              <div class="user-dropdown-email" id="dropEmail">—</div>
-            </div>
-            <a class="user-dropdown-item" href="1canhan.html">👤 Hồ sơ cá nhân</a>
-            <a class="user-dropdown-item" href="1trangchu.html">🏠 Trang chủ</a>
-            <a class="user-dropdown-item" id="adminMenuBtn" href="1admin.html" style="display:none">⚙️ Quản trị
-              Admin</a>
-            <a class="user-dropdown-item logout-item" onclick="doLogout()">🚪 Đăng xuất</a>
-          </div>
-        </div>
-      </div>
-    </nav>
     <!-- ============ PAGE: TOUR LIST ============ -->
     <div id="page-tours">
       <div style="margin-top:82px;">
@@ -302,52 +264,16 @@
       </div>
     </div>
 
-    <!-- CHAT FAB -->
-    <button class="chat-fab" id="chatFab" onclick="toggleChat()">
-      💬
-      <span class="chat-notif" id="chatNotif">1</span>
-    </button>
-
-    <!-- CHAT WINDOW -->
-    <div class="chat-window" id="chatWindow">
-      <div class="chat-header">
-        <div class="chat-header-avatar">👩‍💼</div>
-        <div class="chat-header-info">
-          <div class="chat-header-name">Linh – Tư vấn du lịch</div>
-          <div class="chat-header-status"><span class="online-dot"></span>Đang trực tuyến</div>
-        </div>
-        <button class="chat-close" onclick="toggleChat()">✕</button>
-      </div>
-      <div class="chat-messages" id="chatMessages">
-        <div class="msg bot">
-          <div class="msg-bubble">Xin chào! Tôi là Linh, chuyên viên tư vấn du lịch của VietnamTravel 🌿 Tôi có thể giúp
-            gì cho bạn hôm nay?</div>
-          <div class="msg-time">Vừa xong</div>
-        </div>
-      </div>
-      <div class="chat-quick-replies" id="quickReplies">
-        <button class="quick-reply" onclick="sendQuick('Tôi muốn đặt tour Hạ Long')">🚢 Tour Hạ Long</button>
-        <button class="quick-reply" onclick="sendQuick('Giá tour Sapa bao nhiêu?')">⛰️ Tour Sapa</button>
-        <button class="quick-reply" onclick="sendQuick('Tour nào đang giảm giá?')">🏷️ Ưu đãi</button>
-        <button class="quick-reply" onclick="sendQuick('Tôi cần tư vấn lịch trình')">📅 Tư vấn</button>
-      </div>
-      <div class="chat-input-area">
-        <textarea class="chat-input" id="chatInput" placeholder="Nhập tin nhắn..." rows="1"
-          onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
-        <button class="chat-send" onclick="sendMessage()">➤</button>
-      </div>
-    </div>
-
     <!-- TOAST -->
     <div class="toast" id="toast"></div>
 
 
+    <script src="config.js"></script>
+    <script src="3nav.js"></script>
     <script src="3api.js"></script>
-    <script src="3data.js"></script>
     <script src="3toast.js"></script>
     <script src="3booking.js"></script>
     <script src="3favouites.js"></script>
-    <script src="3chat.js"></script>
     <script>window.addEventListener('DOMContentLoaded', initNav);</script>
     <script src="3tours page.js"></script>
     <script>

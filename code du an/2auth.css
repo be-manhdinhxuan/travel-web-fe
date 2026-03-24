@@ -17,7 +17,7 @@ body {
 }
 
 body {
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Inter', sans-serif;
   background: #f5f7f4;
   color: #222;
 }
@@ -317,9 +317,13 @@ body {
 }
 
 .auth2-forgot {
-  font-size: 0.78rem;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+  font-size: 0.85rem;
   color: var(--green);
   text-decoration: none;
+
 }
 
 .auth2-forgot:hover {
@@ -424,6 +428,11 @@ body {
   color: var(--green);
   font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
+}
+
+.auth2-switch a:hover {
+  text-decoration: underline;
 }
 
 .auth2-check-label {

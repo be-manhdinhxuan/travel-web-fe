@@ -121,6 +121,14 @@
   cursor: pointer;
 }
 
+.search-field input {
+  cursor: text;
+}
+
+input[type="date"] {
+  cursor: pointer;
+}
+
 .search-btn {
   background: var(--green);
   color: white;
@@ -728,4 +736,5 @@ footer {
     height: 52px;
     justify-content: center;
   }
+
 }

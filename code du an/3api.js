@@ -82,3 +82,13 @@ async function apiGetTours(params = {}) {
 
   return apiCall('GET', '/tours' + qs)
 }
+
+async function apiLogin(email, password) {
+  return apiCall('POST', '/auths/login', {
+    email,
+    password
+  })
+}
+
+// export ra global (tránh lỗi not defined)
+window.apiLogin = apiLogin
