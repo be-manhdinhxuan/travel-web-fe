@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Du Lịch – VietnamTravel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet" href="../css/bass.css">
+    <link rel="stylesheet" href="../css/nav.css">
+    <link rel="stylesheet" href="../css/tours.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  </head>
+
+  <body>
+    <!-- ============ PAGE: TOUR LIST ============ -->
+    <main id="page-tours">
+      <section>
+
+        <!-- SIDEBAR + MAIN CONTENT -->
+        <div class="tl-layout">
+          <aside class="tl-sidebar">
+            <form onsubmit="event.preventDefault()">
+              <!-- SEARCH BAR -->
+              <div class="tl-main-search">
+                <input type="text" id="tlSearch" placeholder="Tìm kiếm tour..." oninput="handleSearch()"
+                  style="padding:10px 14px;border-radius:8px;border:1px solid #ddd;width:100%;max-width:500px;font-family: 'Inter', sans-serif;">
+              </div>
+
+              <!-- DURATION -->
+              <div class="tl-filter-box">
+                <div class="tl-filter-title">Thời gian</div>
+                <label><input type="radio" name="duration" value="" checked onchange="handleFilter()"> Tất cả</label>
+                <label><input type="radio" name="duration" value="1-2" onchange="handleFilter()"> 1-2 ngày</label>
+                <label><input type="radio" name="duration" value="3-5" onchange="handleFilter()"> 3-5 ngày</label>
+                <label><input type="radio" name="duration" value="6+" onchange="handleFilter()"> 6+ ngày</label>
+              </div>
+
+              <!-- SORT -->
+              <div class="tl-filter-box">
+                <div class="tl-filter-title">Sắp xếp</div>
+                <select class="tl-sort-item" id="tlSort" onchange="handleSort()">
+                  <option value="newest">Mới nhất</option>
+                  <option value="duration_asc">Ngắn ngày</option>
+                  <option value="duration_desc">Dài ngày</option>
+                  <option value="name_asc">Tên A → Z</option>
+                </select>
+              </div>
+
+              <!-- RESET -->
+              <button type="button" class="tl-reset-btn" onclick="resetFilters()">
+                Đặt lại bộ lọc
+              </button>
+            </form>
+          </aside>
+
+          <!-- MAIN CONTENT -->
+          <section class="tl-main">
+            <header class="tl-top-bar">
+              <div>
+                <h1 class="tl-page-title" id="tourListHeading">Khám phá tour du lịch</h1>
+                <p class="tl-page-sub">
+                  Tìm thấy <strong id="tlCount">0</strong> tour
+                </p>
+              </div>
+            </header>
+
+            <!-- GRID -->
+            <section class="tl-grid" id="tlGrid"></section>
+
+            <!-- PAGINATION  -->
+            <div class="tl-pagination" id="tlPagination"></div>
+          </section>
+        </div>
+
+
+      </section>
+    </main>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+
+    <script src="../js/config.js"></script>
+    <script src="../js/nav.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/booking.js"></script>
+    <script src="../js/favouites.js"></script>
+    <script src="../js/tours-page.js"></script>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        loadTours()
+      })
+    </script>
+  </body>
+
+</html>

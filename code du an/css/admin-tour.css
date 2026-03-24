@@ -1,0 +1,108 @@
+/* ============================================================
+   2admintour.css – Tour Create/Edit Page
+   ============================================================ */
+
+/* TOPBAR */
+.at-topbar{background:#fff;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;position:sticky;top:0;z-index:50;gap:16px}
+.at-title{font-size:1.1rem;font-weight:800;color:#1a1a1a}
+.at-sub{font-size:0.75rem;color:#aaa;margin-top:3px}
+.at-topbar-actions{display:flex;gap:10px;align-items:center;flex-shrink:0}
+
+/* BODY GRID */
+.at-body{display:block;padding:24px 32px;max-width:860px;margin:0 auto}
+.at-left{display:flex;flex-direction:column;gap:16px}
+.at-right{display:none}
+
+/* CARD */
+.at-card{background:#fff;border-radius:12px;padding:20px 22px;box-shadow:0 1px 8px rgba(0,0,0,0.06)}
+.at-card-title{display:flex;align-items:center;gap:8px;font-size:0.88rem;font-weight:700;color:#1a1a1a;margin-bottom:16px}
+.at-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+
+/* FORM FIELDS */
+.at-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}
+.at-row2:last-child{margin-bottom:0}
+.at-field{display:flex;flex-direction:column;gap:5px}
+.at-field label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#888}
+.at-req{color:#e55}
+.at-field input,.at-field select,.at-field textarea{border:1.5px solid #e8e8e8;border-radius:9px;padding:10px 13px;font-family:inherit;font-size:0.875rem;color:#222;background:#fafafa;outline:none;transition:border .2s,box-shadow .2s}
+.at-field input:focus,.at-field select:focus,.at-field textarea:focus{border-color:#2d8a4e;background:#fff;box-shadow:0 0 0 3px rgba(45,138,78,0.08)}
+.at-prefix-wrap{position:relative}.at-prefix-wrap span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#aaa;font-size:0.88rem;pointer-events:none}.at-prefix-wrap input{padding-left:26px;width:100%}
+
+/* EDITOR */
+.at-toolbar{display:flex;gap:3px;padding:6px 8px;background:#f8f8f8;border:1.5px solid #e8e8e8;border-bottom:none;border-radius:8px 8px 0 0}
+.at-tb{background:none;border:none;width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:0.82rem;color:#666;transition:all .15s;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.at-tb:hover{background:#e0e0e0}
+.at-editor{min-height:120px;border:1.5px solid #e8e8e8;border-radius:0 0 9px 9px;padding:12px 14px;font-size:0.875rem;color:#333;line-height:1.6;outline:none;background:#fafafa}
+.at-editor:focus{border-color:#2d8a4e;background:#fff}
+
+/* IMAGES */
+.at-img-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.at-img-add{border:2px dashed #e0e0e0;border-radius:9px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:all .2s;color:#bbb;font-size:0.68rem;font-weight:600}
+.at-img-add:hover{border-color:#2d8a4e;color:#2d8a4e}
+.at-img-preview{border-radius:9px;aspect-ratio:1;background:center/cover no-repeat;position:relative;overflow:hidden}
+.at-img-preview button{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.at-img-preview button:hover{background:rgba(200,0,0,0.8)}
+
+/* DAYS */
+.at-day-item{border:1.5px solid #eee;border-radius:9px;margin-bottom:10px;overflow:hidden;transition:box-shadow .2s}
+.at-day-item:hover{box-shadow:0 2px 10px rgba(0,0,0,0.06)}
+.at-day-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#f8faf9;border-bottom:1px solid #f0f0f0}
+.at-day-badge{background:#2d8a4e;color:#fff;font-size:0.65rem;font-weight:700;padding:3px 10px;border-radius:20px}
+.at-day-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.85rem;transition:color .2s}
+.at-day-del:hover{color:#e04444}
+.at-day-body{padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.at-day-body input,.at-day-body textarea{border:1.5px solid #e8e8e8;border-radius:7px;padding:8px 11px;font-size:0.8rem;font-family:inherit;color:#222;background:#fafafa;outline:none;transition:border .2s;width:100%}
+.at-day-body input:focus,.at-day-body textarea:focus{border-color:#2d8a4e;background:#fff}
+.at-day-body textarea{resize:vertical;min-height:60px}
+
+/* SCHEDULES */
+.at-sched-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.at-sched-date,.at-sched-slots{border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;font-size:0.8rem;font-family:inherit;outline:none;transition:border .2s;background:#fafafa}
+.at-sched-date{flex:1}.at-sched-slots{width:80px;flex:none}
+.at-sched-date:focus,.at-sched-slots:focus{border-color:#2d8a4e;background:#fff}
+.at-sched-del{background:#ffeaea;color:#c00;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:0.8rem;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.at-sched-del:hover{background:#c00;color:#fff}
+
+/* HIGHLIGHTS */
+.at-highlight-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.at-highlight-row input{flex:1;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 11px;font-size:0.8rem;font-family:inherit;outline:none;transition:border .2s;background:#fafafa}
+.at-highlight-row input:focus{border-color:#2d8a4e;background:#fff}
+.at-highlight-row button{background:#ffeaea;color:#c00;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:0.8rem;flex-shrink:0}
+.at-highlight-row button:hover{background:#c00;color:#fff}
+
+/* ADD BUTTON */
+.at-btn-add{background:#e8f5ee;color:#2d8a4e;border:1.5px solid #b6ddc5;border-radius:7px;padding:5px 12px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:all .2s}
+.at-btn-add:hover{background:#2d8a4e;color:#fff;border-color:#2d8a4e}
+
+/* TOGGLE */
+.at-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid #f5f5f5;gap:10px}
+.at-toggle-row:last-of-type{border-bottom:none}
+.at-toggle-label{font-size:0.82rem;font-weight:600;color:#1a1a1a}
+.at-toggle-desc{font-size:0.68rem;color:#aaa;margin-top:2px}
+.at-toggle{position:relative;width:42px;height:23px;flex-shrink:0}
+.at-toggle input{opacity:0;width:0;height:0}
+.at-slider{position:absolute;cursor:pointer;inset:0;background:#ddd;border-radius:23px;transition:.3s}
+.at-slider::before{content:'';position:absolute;height:17px;width:17px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+.at-toggle input:checked+.at-slider{background:#2d8a4e}
+.at-toggle input:checked+.at-slider::before{transform:translateX(19px)}
+
+/* BOTTOM ACTIONS */
+.at-bottom-actions{display:flex;flex-direction:column;gap:8px}
+
+@media(max-width:1000px){.at-body{grid-template-columns:1fr}.at-right{position:static}}
+@media(max-width:600px){.at-row2{grid-template-columns:1fr}.at-img-grid{grid-template-columns:repeat(3,1fr)}}
+
+
+/* Publish settings grid */
+.at-publish-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+
+/* 2 cards side by side */
+.at-row2-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* Final action bar */
+.at-final-actions{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:12px;padding:16px 22px;box-shadow:0 1px 8px rgba(0,0,0,0.06)}
+
+@media(max-width:700px){
+  .at-publish-grid{grid-template-columns:1fr}
+  .at-row2-cards{grid-template-columns:1fr}
+}
