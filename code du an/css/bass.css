@@ -66,7 +66,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--dark);
 }
 
-h1 { font-size: var(--fs-4xl); font-weight: var(--fw-black); }
+h1 { font-size: var(--fs-4xl); font-weight: var(--fw-bold); }
 h2 { font-size: var(--fs-3xl); }
 h3 { font-size: var(--fs-2xl); }
 h4 { font-size: var(--fs-xl);  }

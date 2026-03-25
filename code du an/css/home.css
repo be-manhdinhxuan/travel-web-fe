@@ -1,9 +1,9 @@
 ﻿/* ===== HERO ===== */
 .hero {
-  margin-top: 82px;
+  margin-top: 0;
   position: relative;
   height: 560px;
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,11 +42,12 @@
 }
 
 .hero h1 {
-  font-family: var(--font-heading);
-  font-size: 3.4rem;
-  font-weight: 900;
-  line-height: 1.1;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+  font-family: 'Inter', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #ffffff;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
   margin-bottom: 16px;
 }
 
@@ -56,6 +57,7 @@
   opacity: 0.9;
   margin-bottom: 32px;
   line-height: 1.6;
+  color: #ffffff;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
 }
 
@@ -132,7 +134,7 @@
   font-size: 0.9rem;
   font-family: var(--font-body);
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s;
   border-radius: 50px;
   flex-shrink: 0;
 }
@@ -145,9 +147,6 @@
   font-size: 0.85rem;
 }
 
-/* =========================
-   SUGGEST DROPDOWN
-========================= */
 .search-suggest {
   position: absolute;
   top: calc(100% + 12px);
@@ -173,7 +172,6 @@
 .search-suggest div:hover {
   background: #f0f7f2;
 }
-
 
 /* ===== SECTIONS ===== */
 section {
@@ -214,7 +212,6 @@ section {
   font-weight: 600;
   display: flex;
   align-items: center;
-  text-align: center;
   gap: 8px;
   transition: gap .2s;
   cursor: pointer;
@@ -231,13 +228,17 @@ section {
   font-size: 0.9rem;
   color: var(--muted);
   margin: 8px 0 0;
-  max-width: 100%;
   line-height: 1.6;
 }
 
 /* ===== DESTINATIONS ===== */
 .destinations {
   background: #EEF3F6;
+}
+
+.dest-nav {
+  display: flex;
+  gap: 8px;
 }
 
 .dest-nav button {
@@ -253,11 +254,6 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.dest-nav {
-  display: flex;
-  gap: 8px;
 }
 
 .dest-nav button:hover {
@@ -316,34 +312,6 @@ section {
   background-position: center;
 }
 
-.d1 {
-  background: url('halong.jpg') center/cover;
-}
-
-.d2 {
-  background: url('hanoi.jpg') center/cover;
-}
-
-.d3 {
-  background: url('danang.jpg') center/cover;
-}
-
-.d4 {
-  background: url('lehoian.jpg') center/cover;
-}
-
-.d5 {
-  background: url('sapa.png') center/cover;
-}
-
-.d6 {
-  background: url('ninhbinh.jpg') center/cover;
-}
-
-.d7 {
-  background: url('mientay.jpg') center/cover;
-}
-
 .dest-label {
   font-size: 0.8rem;
   font-weight: 500;
@@ -356,6 +324,7 @@ section {
   background: var(--green);
   color: white;
   padding: 12px 5%;
+  display: flex;
   align-items: center;
   justify-content: space-between;
 }
@@ -389,7 +358,7 @@ section {
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-  transition: transform .25s, box-shadow .25s, opacity .5s ease, translate .5s ease;
+  transition: transform .25s, box-shadow .25s;
 }
 
 .tour-card:hover {
@@ -555,19 +524,6 @@ footer {
   margin-bottom: 16px;
 }
 
-.footer-logo-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.footer-logo-icon::after {
-  content: '✓';
-  color: white;
-  font-size: 0.933rem;
-  font-weight: 700;
-}
-
 .footer-logo-text {
   font-weight: 700;
   color: white;
@@ -717,7 +673,7 @@ footer {
   color: white;
 }
 
-/* Responsive */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
   .tours-grid {
     grid-template-columns: 1fr 1fr;
@@ -729,7 +685,7 @@ footer {
   }
 
   .hero h1 {
-    font-size: 2.4rem;
+    font-size: 2rem;
   }
 }
 
@@ -743,24 +699,18 @@ footer {
   }
 
   .hero h1 {
-    font-size: 1.9rem;
+    font-size: 1.6rem;
   }
 
   .search-bar {
     flex-direction: column;
     border-radius: 14px;
-  }
-
-  .search-field {
-    border-right: none;
-    border-bottom: 1px solid #eee;
-    width: 100%;
+    padding: 12px;
   }
 
   .search-btn {
     width: 100%;
-    height: 52px;
     justify-content: center;
+    border-radius: 10px;
   }
-
 }

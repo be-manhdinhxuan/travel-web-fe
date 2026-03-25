@@ -1,4 +1,8 @@
-﻿/* ===== NAV ===== */
+﻿body {
+  padding-top: 82px;
+}
+
+/* ===== NAV ===== */
 
 #mainNav {
   position: fixed;
@@ -83,9 +87,7 @@ nav {
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  transition:
-    background 0.2s,
-    transform 0.15s;
+  transition: background 0.2s, transform 0.15s;
 }
 
 .btn-primary:hover {
@@ -126,7 +128,6 @@ nav {
   justify-content: center;
 }
 
-/* Nav buttons */
 .btn-login-nav {
   background: none;
   border: 1.5px solid var(--green);
@@ -162,7 +163,6 @@ nav {
   background: var(--green-light);
 }
 
-/* Nav user */
 #navUser {
   position: relative;
 }
@@ -174,7 +174,6 @@ nav {
   right: 0;
   width: 200px;
   height: 16px;
-  /* khoảng đệm */
 }
 
 #navUser:hover .user-dropdown {
@@ -232,22 +231,16 @@ nav {
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
-
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-
   border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-
   min-width: 240px;
   padding: 6px 0 0;
-
   opacity: 0;
   pointer-events: none;
-
   transform: translateY(-10px) scale(0.96);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-
   z-index: 999;
 }
 
@@ -256,13 +249,10 @@ nav {
   position: absolute;
   top: -6px;
   right: 20px;
-
   width: 12px;
   height: 12px;
-
   background: white;
   transform: rotate(45deg);
-
   box-shadow: -2px -2px 6px rgba(0, 0, 0, 0.05);
 }
 
@@ -293,13 +283,10 @@ nav {
   display: flex;
   align-items: center;
   gap: 10px;
-
   padding: 20px 18px;
   font-size: 0.9rem;
-
   color: black;
   text-decoration: none;
-
 }
 
 .user-dropdown-item:last-child {
@@ -314,8 +301,6 @@ nav {
   cursor: pointer;
 }
 
-
-/* Responsive */
 @media (max-width: 600px) {
   .nav-links {
     display: none;
