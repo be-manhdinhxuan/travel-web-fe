@@ -1,4 +1,4 @@
-/* ===== HERO ===== */
+﻿/* ===== HERO ===== */
 .hero {
   margin-top: 82px;
   position: relative;
@@ -42,7 +42,7 @@
 }
 
 .hero h1 {
-  font-family: 'Inter', serif;
+  font-family: var(--font-heading);
   font-size: 3.4rem;
   font-weight: 900;
   line-height: 1.1;
@@ -76,123 +76,73 @@
 }
 
 /* ===== SEARCH BAR ===== */
-
 .search-bar {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   width: 100%;
-  max-width: 900px;
-
-  background: rgba(255, 255, 255, 0.95);
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(10px);
-
-  border-radius: 20px;
+  border-radius: 50px;
   overflow: visible;
-
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18);
+  padding: 6px 6px 6px 20px;
 }
 
-/* =========================
-   FIELD
-========================= */
-.search-field {
+.search-input-wrap {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  padding: 10px 16px;
   position: relative;
-
-  border-right: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* bỏ border field cuối */
-.search-field:last-of-type {
-  border-right: none;
+.search-icon {
+  color: #aaa;
+  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
-/* =========================
-   LABEL
-========================= */
-.search-field label {
-  font-size: 0.7rem;
-  color: var(--muted);
-  margin-bottom: 2px;
-  font-weight: 500;
-}
-
-/* =========================
-   INPUT + SELECT
-========================= */
-.search-field input,
-.search-field select {
+.search-input-wrap input {
+  flex: 1;
   border: none;
   outline: none;
   background: transparent;
-
   font-size: 0.95rem;
   font-weight: 500;
   color: var(--dark);
-
-  padding: 4px 0;
-  height: 26px;
-
-  width: 100%;
-  min-width: 0;
+  font-family: var(--font-body);
+  padding: 8px 0;
 }
 
-/* placeholder */
-.search-field input::placeholder {
+.search-input-wrap input::placeholder {
   color: #aaa;
   font-weight: 400;
 }
 
-/* select arrow đẹp hơn */
-.search-field select {
-  cursor: pointer;
-}
-
-/* =========================
-   DATE INPUT FIX
-========================= */
-.search-field input[type="date"] {
-  line-height: 1;
-}
-
-
-/* =========================
-   BUTTON
-========================= */
 .search-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-
-  padding: 0 24px;
+  padding: 12px 24px;
   border: none;
-
   background: var(--green);
   color: white;
-
   font-weight: 600;
   font-size: 0.9rem;
-
+  font-family: var(--font-body);
   cursor: pointer;
-  transition: all 0.2s ease;
-
-  border-radius: 0 20px 20px 0;
+  transition: background 0.2s ease;
+  border-radius: 50px;
+  flex-shrink: 0;
 }
 
 .search-btn:hover {
   background: var(--green-light);
 }
 
-/* =========================
-   ICON
-========================= */
 .search-btn i {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 /* =========================
@@ -200,30 +150,24 @@
 ========================= */
 .search-suggest {
   position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-
-  width: 100%;
-
+  top: calc(100% + 12px);
+  left: -30px;
+  width: calc(100% + 30px);
   background: white;
-  border-radius: 12px;
-
+  border-radius: 14px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
   z-index: 999;
-
   max-height: 220px;
   overflow-y: auto;
 }
 
-/* item */
 .search-suggest div {
-  padding: 10px 14px;
+  padding: 10px 16px;
   cursor: pointer;
   font-size: 0.9rem;
   transition: 0.15s;
-  color: black;
+  color: var(--dark);
   border-bottom: 1px solid #f0f0f0;
-
 }
 
 .search-suggest div:hover {
@@ -246,7 +190,7 @@ section {
 }
 
 .section-title {
-  font-family: 'Inter', serif;
+  font-family: var(--font-heading);
   font-size: 2rem;
   font-weight: 700;
   color: var(--dark);
@@ -570,7 +514,7 @@ section {
   font-size: 1.1rem;
   color: var(--dark);
   font-weight: 700;
-  font-family: 'Inter', serif;
+  font-family: var(--font-heading);
 }
 
 .btn-book {
@@ -579,7 +523,7 @@ section {
   border: none;
   padding: 8px 16px;
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.8rem;
   cursor: pointer;
@@ -620,7 +564,7 @@ footer {
 .footer-logo-icon::after {
   content: '✓';
   color: white;
-  font-size: 14px;
+  font-size: 0.933rem;
   font-weight: 700;
 }
 
@@ -720,7 +664,7 @@ footer {
   border: none;
   outline: none;
   padding: 12px 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.825rem;
   color: white;
 }

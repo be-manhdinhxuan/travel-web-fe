@@ -1,4 +1,4 @@
-/* ===== NAV ===== */
+﻿/* ===== NAV ===== */
 
 #mainNav {
   position: fixed;
@@ -79,7 +79,7 @@ nav {
   border: none;
   padding: 9px 20px;
   border-radius: 8px;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
@@ -133,7 +133,7 @@ nav {
   color: var(--green);
   padding: 7px 16px;
   border-radius: 8px;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.82rem;
   cursor: pointer;
@@ -151,7 +151,7 @@ nav {
   border: none;
   padding: 7px 16px;
   border-radius: 8px;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.82rem;
   cursor: pointer;

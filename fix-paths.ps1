@@ -1,6 +1,3 @@
-# ============================================================
-# fix-paths.ps1 — Chạy trong VS Code terminal tại thư mục gốc
-# ============================================================
 
 $htmlDir = ".\code du an\html"
 $jsDir   = ".\code du an\js"

@@ -1,4 +1,4 @@
-/* ===== DETAIL PAGE ===== */
+﻿/* ===== DETAIL PAGE ===== */
 .detail-hero {
   margin-top: 82px;
   position: relative;
@@ -34,7 +34,7 @@
 }
 
 .detail-hero-content h1 {
-  font-family: 'Inter', serif;
+  font-family: var(--font-heading);
   font-size: 2.4rem;
   font-weight: 900;
 }
@@ -83,7 +83,7 @@
 }
 
 .detail-section h2 {
-  font-family: 'Inter', serif;
+  font-family: var(--font-heading);
   font-size: 1.3rem;
   color: var(--dark);
   margin-bottom: 14px;
@@ -267,7 +267,7 @@
 }
 
 .booking-price .price-main {
-  font-family: 'Inter', serif;
+  font-family: var(--font-heading);
   font-size: 2rem;
   font-weight: 700;
   color: var(--dark);
@@ -318,7 +318,7 @@
 .booking-field select {
   border: none;
   outline: none;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.875rem;
   color: var(--text);
   width: 100%;
@@ -356,7 +356,7 @@
   border: none;
   padding: 14px;
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
@@ -400,7 +400,7 @@
   background: none;
   border: none;
   color: var(--green);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;

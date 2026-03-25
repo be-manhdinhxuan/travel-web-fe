@@ -37,16 +37,10 @@ function goByCategory(categoryId) {
 
 function doSearch() {
   const dest = document.getElementById('searchDest').value.trim()
-  const date = document.getElementById('searchDate').value
-  const guests = document.getElementById('searchGuests').value
-
   const params = new URLSearchParams()
-
   if (dest) params.set('destination', dest)
-  if (date) params.set('date', date)
-  if (guests) params.set('guests', guests)
-
-  window.location.href = `tour-du-lich.html?${params.toString()}`
+  const qs = params.toString()
+  window.location.href = qs ? `tour-du-lich.html?${qs}` : 'tour-du-lich.html'
 }
 
 let allDestinations = []

@@ -1,4 +1,4 @@
-/* ===== PAGE HEADER ===== */
+﻿/* ===== PAGE HEADER ===== */
 .co-page-header {
   margin-top: 82px;
   background: linear-gradient(135deg, #1e4d2e 0%, #2d8a4e 100%);
@@ -40,7 +40,7 @@
 }
 
 .co-page-title {
-  font-family: 'Inter', serif;
+  font-family: var(--font-heading);
   font-size: 2rem;
   font-weight: 900;
   color: #fff;
@@ -76,7 +76,7 @@
 }
 
 .co-title {
-  font-family: 'Inter', serif;
+  font-family: var(--font-heading);
   font-size: 1.8rem;
   color: var(--dark);
   margin-bottom: 4px;
@@ -269,7 +269,7 @@
   padding: 10px 14px;
   border: 1.5px solid #e4e4e4;
   border-radius: 9px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.875rem;
   outline: none;
   transition: border-color .2s;
@@ -351,7 +351,7 @@
 }
 
 .co-summary-name {
-  font-family: 'Inter', serif;
+  font-family: var(--font-heading);
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--dark);
@@ -405,7 +405,7 @@
 }
 
 .co-price-total span:last-child {
-  font-family: 'Inter', serif;
+  font-family: var(--font-heading);
   font-size: 1.2rem;
 }
 
@@ -416,7 +416,7 @@
   border: none;
   padding: 14px;
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-weight: 700;
   font-size: 0.92rem;
   cursor: pointer;
