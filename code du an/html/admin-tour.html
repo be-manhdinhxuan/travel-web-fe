@@ -1,13 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tạo Tour Mới – VietnamTravel Admin</title>
-    <link rel="stylesheet" href="2bass.css">
-    <link rel="stylesheet" href="2admin.css">
-    <link rel="stylesheet" href="2admintour.css">
+    <link rel="stylesheet" href="../css/bass.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/admin-tour.css">
   </head>
 
   <body class="admin-body">
@@ -25,7 +25,7 @@
           </div>
         </div>
         <nav class="admin-nav">
-          <a class="admin-nav-item" href="1admin.html" onclick="window.location.href='1admin.html'">
+          <a class="admin-nav-item" href="admin.html" onclick="window.location.href='admin.html'">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="7" height="7" />
@@ -35,7 +35,7 @@
             </svg>
             Dashboard
           </a>
-          <a class="admin-nav-item active" href="1admin.html">
+          <a class="admin-nav-item active" href="admin.html">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10" />
@@ -44,7 +44,7 @@
             </svg>
             Quản lý Tour
           </a>
-          <a class="admin-nav-item" href="1admin.html">
+          <a class="admin-nav-item" href="admin.html">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <path
@@ -52,7 +52,7 @@
             </svg>
             Quản lý Ưu đãi
           </a>
-          <a class="admin-nav-item" href="1admin.html">
+          <a class="admin-nav-item" href="admin.html">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -60,7 +60,7 @@
             </svg>
             Quản lý Nhân viên
           </a>
-          <a class="admin-nav-item" href="1admin.html">
+          <a class="admin-nav-item" href="admin.html">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="20" x2="18" y2="10" />
@@ -69,7 +69,7 @@
             </svg>
             Thống kê
           </a>
-          <a class="admin-nav-item" href="1admin.html">
+          <a class="admin-nav-item" href="admin.html">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="3" />
@@ -343,7 +343,7 @@
 
             <!-- BOTTOM ACTIONS -->
             <div class="at-final-actions">
-              <button class="admin-btn-ghost" onclick="window.location.href='1admin.html'">Hủy thay đổi</button>
+              <button class="admin-btn-ghost" onclick="window.location.href='admin.html'">Hủy thay đổi</button>
               <div style="display:flex;gap:10px">
                 <button class="admin-btn-ghost" onclick="atSave('draft')">Lưu bản nháp</button>
                 <button class="admin-btn-primary" onclick="atSave('publish')" style="min-width:120px">Gửi duyệt</button>
@@ -360,10 +360,10 @@
 
     <div class="toast" id="toast"></div>
     <script>window.NO_NAV = true;</script>
-    <script src="3api.js"></script>
-    <script src="3data.js"></script>
-    <script src="3toast.js"></script>
-    <script src="3admin.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/admin.js"></script>
     <script>
       // Init
       document.addEventListener('DOMContentLoaded', async function () {

@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // 3nav.js – Nav dùng chung (match HTML của bạn)
 // ============================================================
 (function () {
@@ -32,8 +32,8 @@
   <ul class="nav-links">
     <li><a href="trang-chu.html">Điểm đến</a></li>
     <li><a href="tour-du-lich.html">Tour du lịch</a></li>
-    <li><a href="1uudai.html">Ưu đãi</a></li>
-    <li><a href="1vechungtoi.html">Về chúng tôi</a></li>
+    <li><a href="uu-dai.html">Ưu đãi</a></li>
+    <li><a href="ve-chung-toi.html">Về chúng tôi</a></li>
   </ul>
 
   <div class="nav-cta">
@@ -41,7 +41,7 @@
     <!-- Guest -->
     <div id="navGuest" style="display:flex;gap:8px;align-items:center;">
       <button class="btn-login-nav" onclick="location.href='dang-nhap.html'">Đăng nhập</button>
-      <button class="btn-register-nav" onclick="location.href='1dangky.html'">Đăng ký</button>
+      <button class="btn-register-nav" onclick="location.href='dang-ky.html'">Đăng ký</button>
     </div>
 
     <!-- User -->
@@ -58,8 +58,8 @@
           <div class="user-dropdown-email" id="dropEmail">—</div>
         </div>
 
-        <a class="user-dropdown-item" href="1canhan.html">Hồ sơ cá nhân</a>
-        <a class="user-dropdown-item" id="adminMenuBtn" href="1admin.html" style="display:none">⚙️ Quản trị Admin</a>
+        <a class="user-dropdown-item" href="ca-nhan.html">Hồ sơ cá nhân</a>
+        <a class="user-dropdown-item" id="adminMenuBtn" href="admin.html" style="display:none">⚙️ Quản trị Admin</a>
         <a class="user-dropdown-item logout-item" onclick="doLogout()">Đăng xuất</a>
       </div>
     </div>
