@@ -46,7 +46,7 @@
 
     <!-- User -->
     <div id="navUser" style="display:none;align-items:center;gap:10px;position:relative;">
-      <div class="nav-user-info" ">
+      <div class="nav-user-info" onclick="toggleUserMenu()">
         <div class="nav-avatar" id="navAvatarEl"></div>
         <span class="nav-username" id="navUsernameEl"></span>
         <i class="fa-solid fa-angle-down nav-icon" style="color:var(--muted);"></i>
@@ -167,3 +167,14 @@
   // ==========================
   initNav();
 })();
+window.toggleUserMenu = function () {
+  const dd = document.getElementById('userDropdown')
+  if (dd) dd.classList.toggle('open')
+}
+
+document.addEventListener('click', function (e) {
+  if (!e.target.closest('.nav-user-info') && !e.target.closest('.user-dropdown')) {
+    const dd = document.getElementById('userDropdown')
+    if (dd) dd.classList.remove('open')
+  }
+})

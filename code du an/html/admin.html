@@ -906,20 +906,22 @@
     <script src="../js/data.js"></script>
     <script src="../js/toast.js"></script>
     <script src="../js/admin.js"></script>
-    <!-- <script>
+    <script>
       document.addEventListener('DOMContentLoaded', function () {
         var u = loadUser();
-        if (!u || u.role !== 'admin') { window.location.href = 'dang-nhap.html'; return; }
-        var n = u.name || 'Admin';
-        document.getElementById('sideUserName').textContent = n;
-        document.getElementById('sideUserAvatar').textContent = n[0].toUpperCase();
-        renderUsersTable();
-        adminRenderTours();
-        adminUpdateDashStats();
-        adminRenderPromoPreview();
+        if (!u) { window.location.href = 'dang-nhap.html'; return; }
+        // Chấp nhận role = 1 (số), 'admin' (string), ROLE.ADMIN
+        var isAdmin = u.role === 1 || u.role === 'admin' || (window.ROLE && u.role === window.ROLE.ADMIN);
+        if (!isAdmin) { window.location.href = 'dang-nhap.html'; return; }
+        var n = u.full_name || u.name || 'Admin';
+        var nameEl = document.getElementById('sideUserName');
+        var avatarEl = document.getElementById('sideUserAvatar');
+        if (nameEl) nameEl.textContent = n;
+        if (avatarEl) avatarEl.textContent = n[0].toUpperCase();
         switchTab('tours');
+        if (typeof adminLoadStats === 'function') adminLoadStats('month');
       });
-    </script> -->
+    </script>
   </body>
 
 </html>
