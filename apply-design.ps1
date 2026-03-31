@@ -1,5 +1,3 @@
-# apply-design.ps1 — Copy giao diện mới từ code-demo vào project
-# Chạy tại thư mục gốc: .\apply-design.ps1
 
 $css  = ".\code du an\css"
 $html = ".\code du an\html"
