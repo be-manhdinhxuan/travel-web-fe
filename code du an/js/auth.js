@@ -169,3 +169,52 @@ async function doLogout() {
   apiLogoutLocal()
   window.location.href = 'dang-nhap.html'
 }
+// ==========================
+// doLogin — alias cho trang dang-nhap.html (code-demo dùng id loginEmail/loginPassword)
+// ==========================
+
+async function doLogin() {
+  const email = (document.getElementById('loginEmail')?.value || '').trim()
+  const password = (document.getElementById('loginPassword')?.value || '').trim()
+  const errorBox = document.getElementById('loginError')
+
+  if (errorBox) { errorBox.style.display = 'none'; errorBox.innerText = '' }
+
+  if (!email || !password) {
+    showAuthError('loginError', 'Vui lòng nhập đầy đủ thông tin')
+    return
+  }
+
+  try {
+    const res = await apiLogin(email, password)
+
+    if (!res || !res.ok) {
+      let message = 'Đăng nhập thất bại'
+      if (res?.data?.errors) {
+        const firstError = Object.values(res.data.errors)[0]
+        if (firstError?.msg) message = firstError.msg
+      } else if (res?.data?.message) {
+        message = res.data.message
+      }
+      showAuthError('loginError', message)
+      return
+    }
+
+    const { access_token, refresh_token, user } = res.data.result
+    localStorage.setItem('vt_access_token', access_token)
+    localStorage.setItem('vt_refresh_token', refresh_token)
+    localStorage.setItem('vt_user', JSON.stringify(user))
+
+    if (user.role === 1 || user.role === 'admin') {
+      window.location.href = 'admin.html'
+    } else if (user.role === 2 || user.role === 'staff') {
+      window.location.href = 'nhan-vien.html'
+    } else {
+      window.location.href = 'trang-chu.html'
+    }
+
+  } catch (err) {
+    console.error(err)
+    showAuthError('loginError', 'Không thể kết nối server')
+  }
+}

@@ -1,179 +1,253 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Đăng Nhập – VietnamTravel</title>
-<link rel="stylesheet" href="../css/bass.css">
-<link rel="stylesheet" href="../css/auth.css">
-</head>
-<body>
 
-<div id="page-auth">
-  <div class="auth2-wrapper">
-    <!-- NAV mini -->
-    <div class="auth2-nav">
-      <a href="trang-chu.html" style="display:flex;align-items:center;gap:9px;text-decoration:none">
-        <div style="width:34px;height:34px;background:#e8f5ee;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2d8a4e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </div>
-        <div style="line-height:1;font-size:0.95rem;font-weight:800">
-          <span style="color:#2d8a4e">Vietnam</span><span style="color:#1a1a1a">Travel</span>
-        </div>
-      </a>
-      <div class="auth2-nav-right">
-        <span id="authNavHint" style="font-size:0.82rem;color:var(--muted)">Chưa có tài khoản?</span>
-        <button class="auth2-nav-switch" id="authNavBtn" onclick="window.location.href='dang-ky.html'">Đăng ký</button>
-      </div>
-    </div>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập – VietnamTravel</title>
+    <link rel="stylesheet" href="../css/bass.css">
+    <link rel="stylesheet" href="../css/auth.css">
+  </head>
 
-    <!-- BODY -->
-    <div class="auth2-body">
+  <body>
 
-      <!-- ===== LOGIN CARD ===== -->
-      <div id="authLoginForm" class="auth2-card auth2-login-card">
-        <!-- Fullscreen BG for login -->
-        <div class="auth2-login-bg"></div>
-        <div class="auth2-login-overlay"></div>
-        <!-- Floating form -->
-        <div class="auth2-login-box">
-          <h2 class="auth2-title">Đăng nhập Vietnam Travel</h2>
-          <p class="auth2-subtitle">Chào mừng bạn quay trở lại với hành trình khám phá Việt Nam</p>
-
-          <div class="auth2-field">
-            <label>Email hoặc Tên đăng nhập</label>
-            <div class="auth2-input-wrap">
-              <svg class="auth2-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              <input type="email" id="loginEmail" placeholder="Nhập email hoặc tên đăng nhập" onkeydown="if(event.key==='Enter') doLogin()">
+    <div id="page-auth">
+      <div class="auth2-wrapper">
+        <!-- NAV mini -->
+        <div class="auth2-nav">
+          <a href="trang-chu.html" style="display:flex;align-items:center;gap:9px;text-decoration:none">
+            <div
+              style="width:34px;height:34px;background:#e8f5ee;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2d8a4e" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
             </div>
+            <div style="line-height:1;font-size:0.95rem;font-weight:800">
+              <span style="color:#2d8a4e">Vietnam</span><span style="color:#1a1a1a">Travel</span>
+            </div>
+          </a>
+          <div class="auth2-nav-right">
+            <span id="authNavHint" style="font-size:0.82rem;color:var(--muted)">Chưa có tài khoản?</span>
+            <button class="auth2-nav-switch" id="authNavBtn" onclick="window.location.href='dang-ky.html'">Đăng
+              ký</button>
           </div>
-
-          <div class="auth2-field">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <label style="margin-bottom:0">Mật khẩu</label>
-              <a class="auth2-forgot" href="quen-mat-khau.html">Quên mật khẩu?</a>
-            </div>
-            <div class="auth2-input-wrap">
-              <svg class="auth2-icon" viewBox="0 0 20 20" fill="none"><rect x="3.5" y="8.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              <input type="password" id="loginPassword" placeholder="Nhập mật khẩu" onkeydown="if(event.key==='Enter') doLogin()">
-              <button class="auth2-eye" onclick="togglePwd('loginPassword',this)" tabindex="-1">
-                <svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <div id="loginError" class="auth2-error" style="display:none"></div>
-          <button class="auth2-submit" onclick="doLogin()">Đăng nhập</button>
-
-          <div class="auth2-divider"><span>Hoặc tiếp tục với</span></div>
-          <div class="auth2-socials">
-            <button class="auth2-social">
-              <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-              Google
-            </button>
-            <button class="auth2-social">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-              Facebook
-            </button>
-          </div>
-          <p class="auth2-switch">Bạn chưa có tài khoản? <a onclick="window.location.href='dang-ky.html'">Đăng ký ngay</a></p>
-
         </div>
-      </div>
 
-      <!-- ===== REGISTER CARD ===== -->
-      <div id="authRegisterForm" style="display:none" class="auth2-card auth2-register-card" style="display:none">
-        <div class="auth2-reg-inner">
-          <!-- Left: form -->
-          <div class="auth2-reg-form">
-            <h2 class="auth2-title">Tham gia cùng Vietnam Travel</h2>
-            <p class="auth2-subtitle" style="color:var(--green);font-weight:600">Khám phá vẻ đẹp bất tận của Việt Nam</p>
+        <!-- BODY -->
+        <div class="auth2-body">
 
-            <div class="auth2-field">
-              <label>Họ và tên</label>
-              <div class="auth2-input-wrap">
-                <svg class="auth2-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                <input type="text" id="regFullName" placeholder="Nhập đầy đủ họ tên của bạn">
-              </div>
-            </div>
+          <!-- ===== LOGIN CARD ===== -->
+          <div id="authLoginForm" class="auth2-card auth2-login-card">
+            <!-- Fullscreen BG for login -->
+            <div class="auth2-login-bg"></div>
+            <div class="auth2-login-overlay"></div>
+            <!-- Floating form -->
+            <div class="auth2-login-box">
+              <h2 class="auth2-title">Đăng nhập Vietnam Travel</h2>
+              <p class="auth2-subtitle">Chào mừng bạn quay trở lại với hành trình khám phá Việt Nam</p>
 
-            <div class="auth2-two-col">
               <div class="auth2-field">
-                <label>Email</label>
+                <label>Email hoặc Tên đăng nhập</label>
                 <div class="auth2-input-wrap">
-                  <svg class="auth2-icon" viewBox="0 0 20 20" fill="none"><path d="M2.5 6.667A2.083 2.083 0 0 1 4.583 4.583h10.834A2.083 2.083 0 0 1 17.5 6.667v6.666a2.083 2.083 0 0 1-2.083 2.084H4.583A2.083 2.083 0 0 1 2.5 13.333V6.667Z" stroke="currentColor" stroke-width="1.5"/><path d="m2.5 7.5 7.5 4.167 7.5-4.167" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                  <input type="email" id="regEmail" placeholder="example@email.com">
+                  <svg class="auth2-icon" viewBox="0 0 20 20" fill="none">
+                    <circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="1.5"
+                      stroke-linecap="round" />
+                  </svg>
+                  <input type="email" id="loginEmail" placeholder="Nhập email hoặc tên đăng nhập"
+                    onkeydown="if(event.key==='Enter') doLogin()">
                 </div>
               </div>
+
               <div class="auth2-field">
-                <label>Số điện thoại</label>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                  <label style="margin-bottom:0">Mật khẩu</label>
+                  <a class="auth2-forgot" href="quen-mat-khau.html">Quên mật khẩu?</a>
+                </div>
                 <div class="auth2-input-wrap">
-                  <svg class="auth2-icon" viewBox="0 0 20 20" fill="none"><path d="M4 3h3l1.5 4-2 1.5a11 11 0 0 0 5 5L13 11.5l4 1.5v3A1 1 0 0 1 16 17C8.82 17 3 11.18 3 4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5"/></svg>
-                  <input type="tel" id="regPhone" placeholder="0901 234 567">
+                  <svg class="auth2-icon" viewBox="0 0 20 20" fill="none">
+                    <rect x="3.5" y="8.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.5"
+                      stroke-linecap="round" />
+                  </svg>
+                  <input type="password" id="loginPassword" placeholder="Nhập mật khẩu"
+                    onkeydown="if(event.key==='Enter') doLogin()">
+                  <button class="auth2-eye" onclick="togglePwd('loginPassword',this)" tabindex="-1">
+                    <svg viewBox="0 0 20 20" fill="none" width="16" height="16">
+                      <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />
+                      <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />
+                    </svg>
+                  </button>
                 </div>
               </div>
-            </div>
 
-            <div class="auth2-field">
-              <label>Mật khẩu</label>
-              <div class="auth2-input-wrap">
-                <svg class="auth2-icon" viewBox="0 0 20 20" fill="none"><rect x="3.5" y="8.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                <input type="password" id="regPassword" placeholder="••••••••" oninput="checkPasswordStrength(this.value)">
-                <button class="auth2-eye" onclick="togglePwd('regPassword',this)" tabindex="-1">
-                  <svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg>
+              <div id="loginError" class="auth2-error" style="display:none"></div>
+              <button class="auth2-submit" onclick="doLogin()">Đăng nhập</button>
+
+              <div class="auth2-divider"><span>Hoặc tiếp tục với</span></div>
+              <div class="auth2-socials">
+                <button class="auth2-social">
+                  <svg width="16" height="16" viewBox="0 0 24 24">
+                    <path
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      fill="#4285F4" />
+                    <path
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      fill="#34A853" />
+                    <path
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                      fill="#FBBC05" />
+                    <path
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      fill="#EA4335" />
+                  </svg>
+                  Google
+                </button>
+                <button class="auth2-social">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2">
+                    <path
+                      d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                  </svg>
+                  Facebook
                 </button>
               </div>
-              <div class="pwd-strength" id="pwdStrength" style="display:none">
-                <div class="pwd-bar"><div class="pwd-bar-fill" id="pwdBarFill"></div></div>
-                <span id="pwdStrengthText"></span>
-              </div>
+              <p class="auth2-switch">Bạn chưa có tài khoản? <a onclick="window.location.href='dang-ky.html'">Đăng ký
+                  ngay</a></p>
+
             </div>
-
-            <div class="auth2-field">
-              <label>Xác nhận mật khẩu</label>
-              <div class="auth2-input-wrap">
-                <svg class="auth2-icon" viewBox="0 0 20 20" fill="none"><rect x="3.5" y="8.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                <input type="password" id="regConfirm" placeholder="••••••••" onkeydown="if(event.key==='Enter') doRegister()">
-              </div>
-            </div>
-
-            <label class="auth2-check-label">
-              <input type="checkbox" id="agreeTerms">
-              Tôi đồng ý với <a href="#">Điều khoản & Điều kiện</a> và <a href="#">Chính sách bảo mật</a> của Vietnam Travel
-            </label>
-
-            <div id="regError" class="auth2-error" style="display:none"></div>
-            <button class="auth2-submit" onclick="doRegister()">Đăng ký ngay</button>
-            <p class="auth2-switch">Bạn đã có tài khoản? <a onclick="window.location.href='dang-nhap.html'">Đăng nhập</a></p>
           </div>
 
-          <!-- Right: image -->
-          <div class="auth2-reg-img">
-            <div class="auth2-reg-img-bg"></div>
-            <div class="auth2-reg-img-overlay"></div>
-            <div class="auth2-reg-img-content">
-              <div class="auth2-stars">★★★★★</div>
-              <p class="auth2-quote-text">"Hành trình vạn dặm bắt đầu từ bước chân đầu tiên."</p>
-              <div class="auth2-quote-sub">— Khám phá Việt Nam theo cách của bạn</div>
-              <div class="auth2-reg-stats">
-                <div><strong>100+</strong><span>ĐIỂM ĐẾN</span></div>
-                <div><strong>50k+</strong><span>THÀNH VIÊN</span></div>
+          <!-- ===== REGISTER CARD ===== -->
+          <div id="authRegisterForm" style="display:none" class="auth2-card auth2-register-card" style="display:none">
+            <div class="auth2-reg-inner">
+              <!-- Left: form -->
+              <div class="auth2-reg-form">
+                <h2 class="auth2-title">Tham gia cùng Vietnam Travel</h2>
+                <p class="auth2-subtitle" style="color:var(--green);font-weight:600">Khám phá vẻ đẹp bất tận của Việt
+                  Nam</p>
+
+                <div class="auth2-field">
+                  <label>Họ và tên</label>
+                  <div class="auth2-input-wrap">
+                    <svg class="auth2-icon" viewBox="0 0 20 20" fill="none">
+                      <circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.5" />
+                      <path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" />
+                    </svg>
+                    <input type="text" id="regFullName" placeholder="Nhập đầy đủ họ tên của bạn">
+                  </div>
+                </div>
+
+                <div class="auth2-two-col">
+                  <div class="auth2-field">
+                    <label>Email</label>
+                    <div class="auth2-input-wrap">
+                      <svg class="auth2-icon" viewBox="0 0 20 20" fill="none">
+                        <path
+                          d="M2.5 6.667A2.083 2.083 0 0 1 4.583 4.583h10.834A2.083 2.083 0 0 1 17.5 6.667v6.666a2.083 2.083 0 0 1-2.083 2.084H4.583A2.083 2.083 0 0 1 2.5 13.333V6.667Z"
+                          stroke="currentColor" stroke-width="1.5" />
+                        <path d="m2.5 7.5 7.5 4.167 7.5-4.167" stroke="currentColor" stroke-width="1.5"
+                          stroke-linecap="round" />
+                      </svg>
+                      <input type="email" id="regEmail" placeholder="example@email.com">
+                    </div>
+                  </div>
+                  <div class="auth2-field">
+                    <label>Số điện thoại</label>
+                    <div class="auth2-input-wrap">
+                      <svg class="auth2-icon" viewBox="0 0 20 20" fill="none">
+                        <path
+                          d="M4 3h3l1.5 4-2 1.5a11 11 0 0 0 5 5L13 11.5l4 1.5v3A1 1 0 0 1 16 17C8.82 17 3 11.18 3 4a1 1 0 0 1 1-1Z"
+                          stroke="currentColor" stroke-width="1.5" />
+                      </svg>
+                      <input type="tel" id="regPhone" placeholder="0901 234 567">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="auth2-field">
+                  <label>Mật khẩu</label>
+                  <div class="auth2-input-wrap">
+                    <svg class="auth2-icon" viewBox="0 0 20 20" fill="none">
+                      <rect x="3.5" y="8.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                      <path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" />
+                    </svg>
+                    <input type="password" id="regPassword" placeholder="••••••••"
+                      oninput="checkPasswordStrength(this.value)">
+                    <button class="auth2-eye" onclick="togglePwd('regPassword',this)" tabindex="-1">
+                      <svg viewBox="0 0 20 20" fill="none" width="16" height="16">
+                        <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />
+                        <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="pwd-strength" id="pwdStrength" style="display:none">
+                    <div class="pwd-bar">
+                      <div class="pwd-bar-fill" id="pwdBarFill"></div>
+                    </div>
+                    <span id="pwdStrengthText"></span>
+                  </div>
+                </div>
+
+                <div class="auth2-field">
+                  <label>Xác nhận mật khẩu</label>
+                  <div class="auth2-input-wrap">
+                    <svg class="auth2-icon" viewBox="0 0 20 20" fill="none">
+                      <rect x="3.5" y="8.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                      <path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" />
+                    </svg>
+                    <input type="password" id="regConfirm" placeholder="••••••••"
+                      onkeydown="if(event.key==='Enter') doRegister()">
+                  </div>
+                </div>
+
+                <label class="auth2-check-label">
+                  <input type="checkbox" id="agreeTerms">
+                  Tôi đồng ý với <a href="#">Điều khoản & Điều kiện</a> và <a href="#">Chính sách bảo mật</a> của
+                  Vietnam Travel
+                </label>
+
+                <div id="regError" class="auth2-error" style="display:none"></div>
+                <button class="auth2-submit" onclick="doRegister()">Đăng ký ngay</button>
+                <p class="auth2-switch">Bạn đã có tài khoản? <a onclick="window.location.href='dang-nhap.html'">Đăng
+                    nhập</a></p>
+              </div>
+
+              <!-- Right: image -->
+              <div class="auth2-reg-img">
+                <div class="auth2-reg-img-bg"></div>
+                <div class="auth2-reg-img-overlay"></div>
+                <div class="auth2-reg-img-content">
+                  <div class="auth2-stars">★★★★★</div>
+                  <p class="auth2-quote-text">"Hành trình vạn dặm bắt đầu từ bước chân đầu tiên."</p>
+                  <div class="auth2-quote-sub">— Khám phá Việt Nam theo cách của bạn</div>
+                  <div class="auth2-reg-stats">
+                    <div><strong>100+</strong><span>ĐIỂM ĐẾN</span></div>
+                    <div><strong>50k+</strong><span>THÀNH VIÊN</span></div>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="auth2-footer">
+          <span>© 2026 Vietnam Travel. Bản quyền đã được bảo lưu.</span>
+          <div><a href="#">Chính sách bảo mật</a><a href="#">Điều khoản & điều kiện</a><a href="#">Sơ đồ trang web</a>
           </div>
         </div>
       </div>
-
     </div>
+    <script src="../js/api.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/auth.js"></script>
+  </body>
 
-    <!-- Footer -->
-    <div class="auth2-footer">
-      <span>© 2026 Vietnam Travel. Bản quyền đã được bảo lưu.</span>
-      <div><a href="#">Chính sách bảo mật</a><a href="#">Điều khoản & điều kiện</a><a href="#">Sơ đồ trang web</a></div>
-    </div>
-  </div>
-</div>
-<script src="../js/data.js"></script>
-<script src="../js/auth.js"></script>
-</body>
 </html>
