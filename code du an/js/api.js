@@ -60,28 +60,28 @@ async function apiCall(method, endpoint, body = null, requireAuth = false) {
 // AUTH
 // ============================================================
 
-// POST /auth/register
+// POST /auths/register
 async function apiRegister(full_name, email, password, confirm_password) {
-  return apiCall("POST", "/auth/register", { full_name, email, password, confirm_password });
+  return apiCall("POST", "/auths/register", { full_name, email, password, confirm_password });
 }
 
-// POST /auth/login
+// POST /auths/login
 async function apiLogin(email, password) {
-  return apiCall("POST", "/auth/login", { email, password });
+  return apiCall("POST", "/auths/login", { email, password });
 }
 
-// POST /auth/logout
+// POST /auths/logout
 async function apiLogout(refresh_token) {
-  return apiCall("POST", "/auth/logout", { refresh_token }, true);
+  return apiCall("POST", "/auths/logout", { refresh_token }, true);
 }
 
-// POST /auth/refresh-token
+// POST /auths/refresh-token
 async function apiRefreshToken() {
   try {
     const refresh_token = localStorage.getItem("vt_refresh_token");
     if (!refresh_token) return false;
 
-    const res = await fetch(API_BASE + "/auth/refresh-token", {
+    const res = await fetch(API_BASE + "/auths/refresh-token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token }),
@@ -103,24 +103,24 @@ async function apiRefreshToken() {
   }
 }
 
-// POST /auth/verify-email
+// POST /auths/verify-email
 async function apiVerifyEmail(email_verify_token) {
-  return apiCall("POST", "/auth/verify-email", { email_verify_token });
+  return apiCall("POST", "/auths/verify-email", { email_verify_token });
 }
 
-// POST /auth/resend-verify-email
+// POST /auths/resend-verify-email
 async function apiResendVerifyEmail() {
-  return apiCall("POST", "/auth/resend-verify-email", null, true);
+  return apiCall("POST", "/auths/resend-verify-email", null, true);
 }
 
-// POST /auth/forgot-password
+// POST /auths/forgot-password
 async function apiForgotPassword(email) {
-  return apiCall("POST", "/auth/forgot-password", { email });
+  return apiCall("POST", "/auths/forgot-password", { email });
 }
 
-// POST /auth/reset-password
+// POST /auths/reset-password
 async function apiResetPassword(forgot_password_token, password, confirm_password) {
-  return apiCall("POST", "/auth/reset-password", {
+  return apiCall("POST", "/auths/reset-password", {
     forgot_password_token,
     password,
     confirm_password,
