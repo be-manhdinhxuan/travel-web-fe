@@ -2,6 +2,25 @@
 // home.js — Trang chủ
 // ============================================================
 
+let userWishlist = []
+async function loadMe() {
+  try {
+    const res = await apiGetMe()
+
+    if (!res.ok) {
+      userWishlist = []
+      return
+    }
+
+    const data = await res.data
+
+    userWishlist = (data.result?.wishlist || []).map(id => id.toString())
+
+  } catch (e) {
+    console.error('loadMe error', e)
+    userWishlist = []
+  }
+}
 // ===== CATEGORIES =====
 async function loadCategories() {
   const res = await apiGetCategories({ limit: 20 })
@@ -74,6 +93,8 @@ async function loadTours() {
   if (!grid) return
   grid.innerHTML = '<p style="padding:20px;color:var(--muted)">Đang tải tour...</p>'
 
+  await loadMe() // Load thông tin user trước để biết wishlist
+
   const res = await apiGetTours({ page: 1, limit: 6 })
 
   if (!res || !res.ok) {
@@ -96,16 +117,15 @@ function renderTours(tours) {
   if (!grid) return
 
   grid.innerHTML = tours.map(tour => {
+    const liked = userWishlist.includes(tour._id.toString())
     const img = tour.images?.[0] || ''
     const name = tour.name || '—'
     const location = tour.destination || '—'
     const days = tour.duration_days || 0
     const nights = tour.duration_nights || 0
-    const price = tour.schedules?.[0]?.price_adult
-      ? tour.schedules[0].price_adult.toLocaleString('vi-VN') + 'đ'
-      : (tour.min_price ? tour.min_price.toLocaleString('vi-VN') + 'đ' : '—')
-    const rating = tour.rating || 4.8
-    const ratingCount = tour.rating_count || 0
+    const price = tour.price
+      ? tour.price.toLocaleString('vi-VN') + 'đ'
+      : '—'
     const slug = tour.slug || tour._id || ''
     const badge = days ? `${days} ngày ${nights} đêm` : ''
     const slots = tour.available_slots
@@ -117,13 +137,15 @@ function renderTours(tours) {
       <div class="tour-img">
         <div class="tour-img-inner" style="background:url('${img}') center/cover no-repeat;${!img ? 'background:linear-gradient(135deg,#2d8a4e,#3aaa62)' : ''}"></div>
         ${badge ? `<span class="tour-badge">${badge}</span>` : ''}
-        <button class="tour-wishlist" onclick="event.stopPropagation();handleWishlist(this,'${tour._id}')" title="Yêu thích">♡</button>
+        <button class="tour-wishlist ${liked ? 'liked' : ''}"
+  onclick="event.stopPropagation();handleWishlist(this,'${tour._id}')"
+  title="Yêu thích">
+  <svg viewBox="0 0 24 24" width="20" height="20">
+    <path d="M12 21s-6.7-4.35-10-9C-1 7 2 2 7 2c2.5 0 4 1.5 5 3 1-1.5 2.5-3 5-3 5 0 8 5 5 10-3.3 4.65-10 9-10 9z"/>
+  </svg>
+</button>
       </div>
       <div class="tour-body">
-        <div class="tour-stars">
-          <span style="color:var(--gold)">★★★★★</span>
-          <span style="color:var(--muted);font-size:0.75rem;margin-left:4px">${rating} (${ratingCount} đánh giá)</span>
-        </div>
         <div class="tour-title">${name}</div>
         <div class="tour-location">📍 ${location}</div>
         ${urgency}
@@ -143,12 +165,22 @@ function renderTours(tours) {
 async function handleWishlist(btn, tourId) {
   try {
     const res = await apiToggleWishlist(tourId)
+
     if (res.ok) {
       const added = res.data?.result?.added
-      btn.textContent = added ? '♥' : '♡'
+
       btn.classList.toggle('liked', added)
+
+      // update local state
+      if (added) {
+        userWishlist.push(tourId.toString())
+      } else {
+        userWishlist = userWishlist.filter(id => id !== tourId.toString())
+      }
     }
-  } catch (e) { }
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 // ===== FILTER =====
