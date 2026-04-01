@@ -2,6 +2,26 @@
 // tours-page.js — Trang danh sách tour
 // ============================================================
 
+let userWishlist = []
+async function loadMe() {
+  try {
+    const res = await apiGetMe()
+
+    if (!res.ok) {
+      userWishlist = []
+      return
+    }
+
+    const data = await res.data
+
+    userWishlist = (data.result?.wishlist || []).map(id => id.toString())
+
+  } catch (e) {
+    console.error('loadMe error', e)
+    userWishlist = []
+  }
+}
+
 async function loadTours() {
   const params = new URLSearchParams(window.location.search)
   const page = Number(params.get('page')) || 1
@@ -11,6 +31,10 @@ async function loadTours() {
   const duration = params.get('duration') || ''
   const categoryId = params.get('category_id') || ''
   const sort = (params.get('sort') || 'newest').toLowerCase().trim()
+  const max_price = params.get('max_price')
+  const min_price = params.get('min_price')
+  const departure_from = params.get('departure_from')
+  const departure_to = params.get('departure_to')
 
   // Sync UI
   const searchInput = document.getElementById('tlSearch')
@@ -22,15 +46,30 @@ async function loadTours() {
     if (radio) radio.checked = true
   }
 
+  if (min_price && max_price) {
+    const val = `${min_price}-${max_price}`
+    const checkbox = document.querySelector(`input[name="price"][value="${val}"]`)
+    if (checkbox) checkbox.checked = true
+  }
+
+  if (!min_price && !max_price) {
+    const defaultPrice = document.querySelector('input[name="price"][value=""]')
+    if (defaultPrice) defaultPrice.checked = true
+  }
+
   // Build params
   const queryParams = { page, limit }
   if (keyword) queryParams.keyword = keyword
   if (destination) queryParams.destination = destination
   if (duration) queryParams.duration = duration
   if (categoryId) queryParams.category_id = categoryId
+  if (max_price) queryParams.max_price = Number(max_price)
+  if (min_price) queryParams.min_price = Number(min_price)
+  if (departure_from) queryParams.departure_from = departure_from
+  if (departure_to) queryParams.departure_to = departure_to
   const allowed = ['newest', 'name_asc', 'name_desc', 'duration_asc', 'duration_desc', 'price_asc', 'price_desc']
   queryParams.sort = allowed.includes(sort) ? sort : 'newest'
-
+  await loadMe()
   const res = await apiGetTours(queryParams)
 
   if (!res.ok) {
@@ -54,58 +93,48 @@ async function loadTours() {
 
 // ===== RENDER TOURS =====
 function renderTours(tours) {
-  const grid = document.getElementById('tlGrid')
+  const grid = document.getElementById('tourGrid')
   if (!grid) return
 
-  if (!tours || !tours.length) {
-    grid.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">
-        <div style="font-size:3rem;margin-bottom:16px">🔍</div>
-        <p style="font-weight:600;color:var(--dark);margin-bottom:8px">Không tìm thấy tour phù hợp</p>
-        <p style="font-size:0.875rem">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
-      </div>`
-    return
-  }
-
   grid.innerHTML = tours.map(tour => {
+    const liked = userWishlist.includes(tour._id.toString())
     const img = tour.images?.[0] || ''
     const name = tour.name || '—'
     const location = tour.destination || '—'
     const days = tour.duration_days || 0
     const nights = tour.duration_nights || 0
-    const price = tour.schedules?.[0]?.price_adult
-      ? tour.schedules[0].price_adult.toLocaleString('vi-VN') + 'đ'
-      : (tour.min_price ? tour.min_price.toLocaleString('vi-VN') + 'đ' : '—')
-    const rating = tour.rating || 4.8
-    const ratingCount = tour.rating_count || 0
+    const price = tour.min_price
+      ? tour.min_price.toLocaleString('vi-VN') + 'đ'
+      : '—'
     const slug = tour.slug || tour._id || ''
-    const badge = days ? `${days}N${nights}Đ` : ''
+    const badge = days ? `${days} ngày ${nights} đêm` : ''
     const slots = tour.available_slots
     const urgency = slots != null && slots <= 5
-      ? `<div style="font-size:0.75rem;font-weight:600;color:#e63946;margin-bottom:6px">Còn ${slots} chỗ cuối</div>` : ''
+      ? `<div class="tour-urgency">Còn ${slots} chỗ cuối cùng</div>` : ''
 
     return `
-    <div class="tour-card" onclick="window.location.href='dat-tour.html?tour=${slug}'" style="cursor:pointer">
-      <div class="tour-img" style="height:200px;position:relative;overflow:hidden">
-        ${img
-        ? `<img src="${img}" alt="${name}" style="width:100%;height:100%;object-fit:cover;transition:transform .4s" onerror="this.parentNode.style.background='linear-gradient(135deg,#2d8a4e,#3aaa62)';this.remove()">`
-        : `<div style="width:100%;height:100%;background:linear-gradient(135deg,#2d8a4e,#3aaa62)"></div>`}
-        ${badge ? `<span style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:0.65rem;font-weight:600;padding:4px 10px;border-radius:20px">${badge}</span>` : ''}
-        <button class="tour-wishlist" onclick="event.stopPropagation();handleWishlist(this,'${tour._id}')" title="Yêu thích">♡</button>
+    <div class="tour-card" onclick="window.location.href='chi-tiet-tour.html?tour=${slug}'" style="cursor:pointer">
+      <div class="tour-img">
+        <div class="tour-img-inner" style="background:url('${img}') center/cover no-repeat;${!img ? 'background:linear-gradient(135deg,#2d8a4e,#3aaa62)' : ''}"></div>
+        ${badge ? `<span class="tour-badge">${badge}</span>` : ''}
+        <button class="tour-wishlist ${liked ? 'liked' : ''}"
+          onclick="event.stopPropagation();handleWishlist(this,'${tour._id}')"
+          title="Yêu thích">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path d="M12 21s-6.7-4.35-10-9C-1 7 2 2 7 2c2.5 0 4 1.5 5 3 1-1.5 2.5-3 5-3 5 0 8 5 5 10-3.3 4.65-10 9-10 9z"/>
+          </svg>
+        </button>
       </div>
-      <div class="tour-body" style="padding:14px 16px 16px">
-        <div style="font-size:0.78rem;color:var(--gold);margin-bottom:5px">
-          ★★★★★ <span style="color:var(--muted)">${rating} (${ratingCount} lượt)</span>
-        </div>
-        <div class="tour-title" style="font-weight:700;font-size:0.95rem;color:var(--dark);line-height:1.35;margin-bottom:5px">${name}</div>
-        <div class="tour-location" style="color:var(--muted);font-size:0.8rem;margin-bottom:4px">📍 ${location}</div>
+      <div class="tour-body">
+        <div class="tour-title">${name}</div>
+        <div class="tour-location">📍 ${location}</div>
         ${urgency}
-        <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid #f0f0f0;margin-top:8px">
-          <div>
-            <div style="font-size:0.7rem;color:var(--muted)">Giá từ / người</div>
-            <div style="font-size:1.05rem;font-weight:700;color:var(--dark)">${price}</div>
+        <div class="tour-footer">
+          <div class="tour-price">
+            <span style="font-size:0.7rem;color:var(--muted)">Giá từ / người</span>
+            <strong>${price}</strong>
           </div>
-          <button class="btn-book" onclick="event.stopPropagation();window.location.href='dat-tour.html?tour=${slug}'">Đặt ngay</button>
+          <button class="btn-book" onclick="event.stopPropagation();window.location.href='chi-tiet-tour.html?tour=${slug}'">Xem chi tiết</button>
         </div>
       </div>
     </div>`
@@ -116,12 +145,22 @@ function renderTours(tours) {
 async function handleWishlist(btn, tourId) {
   try {
     const res = await apiToggleWishlist(tourId)
+
     if (res.ok) {
       const added = res.data?.result?.added
-      btn.textContent = added ? '♥' : '♡'
+
       btn.classList.toggle('liked', added)
+
+      // update local state
+      if (added) {
+        userWishlist.push(tourId.toString())
+      } else {
+        userWishlist = userWishlist.filter(id => id !== tourId.toString())
+      }
     }
-  } catch (e) { }
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 // ===== PAGINATION =====
@@ -145,27 +184,47 @@ function goPage(page) {
 }
 
 // ===== SEARCH =====
-let searchTimeout = null
+let searchTimeout
 
 function handleSearch() {
-  const keyword = document.getElementById('tlSearch')?.value.trim() || ''
+  const keyword = document.getElementById('tlSearch').value.trim()
+
   clearTimeout(searchTimeout)
+
   searchTimeout = setTimeout(() => {
-    const params = new URLSearchParams(window.location.search)
-    keyword ? params.set('keyword', keyword) : params.delete('keyword')
-    params.set('page', '1')
-    window.history.pushState({}, '', '?' + params.toString())
-    loadTours()
+    updateURLAndReload({ keyword, page: 1 })
   }, 400)
 }
 
 function handleSort() {
-  updateURLAndReload({ sort: document.getElementById('tlSort')?.value, page: 1 })
+  const sort = document.getElementById('tlSort').value
+  updateURLAndReload({ sort, page: 1 })
 }
 
 function handleFilter() {
-  const dur = document.querySelector('input[name="duration"]:checked')?.value || ''
-  updateURLAndReload({ duration: dur, page: 1 })
+  const duration = document.querySelector('input[name="duration"]:checked')?.value
+  const departure_from = document.getElementById('tlStartDate')?.value
+  const departure_to = document.getElementById('tlEndDate')?.value
+
+  // ✅ dùng radio
+  const selectedPrice = document.querySelector('input[name="price"]:checked')
+
+  let min_price, max_price
+
+  if (selectedPrice && selectedPrice.value) {
+    const [min, max] = selectedPrice.value.split('-')
+    min_price = min
+    max_price = max
+  }
+
+  updateURLAndReload({
+    duration,
+    departure_from,
+    departure_to,
+    min_price,
+    max_price,
+    page: 1
+  })
 }
 
 function updateURLAndReload(newParams) {
@@ -179,14 +238,20 @@ function updateURLAndReload(newParams) {
 
 function resetFilters() {
   const url = new URL(window.location)
-    ;['duration', 'sort', 'keyword'].forEach(k => url.searchParams.delete(k))
+
+    ;['duration', 'sort', 'keyword', 'min_price', 'max_price', 'departure_from', 'departure_to'].forEach(k => url.searchParams.delete(k))
+
   url.searchParams.set('page', '1')
+
   window.history.pushState({}, '', url)
-  const searchEl = document.getElementById('tlSearch')
-  if (searchEl) searchEl.value = ''
-  const sortEl = document.getElementById('tlSort')
-  if (sortEl) sortEl.value = 'newest'
-  const allRadio = document.querySelector('input[name="duration"][value=""]')
-  if (allRadio) allRadio.checked = true
+
+  // reset UI
+  document.getElementById('tlSearch').value = ''
+  document.getElementById('tlSort').value = 'newest'
+  const defaultPrice = document.querySelector('input[name="price"][value=""]')
+  if (defaultPrice) defaultPrice.checked = true
+  document.getElementById('tlStartDate').value = ''
+  document.getElementById('tlEndDate').value = ''
+
   loadTours()
 }

@@ -123,8 +123,8 @@ function renderTours(tours) {
     const location = tour.destination || '—'
     const days = tour.duration_days || 0
     const nights = tour.duration_nights || 0
-    const price = tour.price
-      ? tour.price.toLocaleString('vi-VN') + 'đ'
+    const price = tour.min_price
+      ? tour.min_price.toLocaleString('vi-VN') + 'đ'
       : '—'
     const slug = tour.slug || tour._id || ''
     const badge = days ? `${days} ngày ${nights} đêm` : ''
@@ -138,12 +138,12 @@ function renderTours(tours) {
         <div class="tour-img-inner" style="background:url('${img}') center/cover no-repeat;${!img ? 'background:linear-gradient(135deg,#2d8a4e,#3aaa62)' : ''}"></div>
         ${badge ? `<span class="tour-badge">${badge}</span>` : ''}
         <button class="tour-wishlist ${liked ? 'liked' : ''}"
-  onclick="event.stopPropagation();handleWishlist(this,'${tour._id}')"
-  title="Yêu thích">
-  <svg viewBox="0 0 24 24" width="20" height="20">
-    <path d="M12 21s-6.7-4.35-10-9C-1 7 2 2 7 2c2.5 0 4 1.5 5 3 1-1.5 2.5-3 5-3 5 0 8 5 5 10-3.3 4.65-10 9-10 9z"/>
-  </svg>
-</button>
+          onclick="event.stopPropagation();handleWishlist(this,'${tour._id}')"
+          title="Yêu thích">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path d="M12 21s-6.7-4.35-10-9C-1 7 2 2 7 2c2.5 0 4 1.5 5 3 1-1.5 2.5-3 5-3 5 0 8 5 5 10-3.3 4.65-10 9-10 9z"/>
+          </svg>
+        </button>
       </div>
       <div class="tour-body">
         <div class="tour-title">${name}</div>

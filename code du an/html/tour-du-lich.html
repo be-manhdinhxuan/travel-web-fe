@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tour Du Lịch – VietnamTravel</title>
     <link rel="stylesheet" href="../css/bass.css">
-  <link rel="stylesheet" href="../css/nav.css">
-  <link rel="stylesheet" href="../css/home.css">
+    <link rel="stylesheet" href="../css/nav.css">
+    <link rel="stylesheet" href="../css/home.css">
     <link rel="stylesheet" href="../css/nav.css">
     <link rel="stylesheet" href="../css/tours.css">
     <link rel="stylesheet" href="../css/companents.css">
@@ -20,8 +20,7 @@
         <!-- Breadcrumb -->
         <div class="tl-breadcrumb">
           <a onclick="window.location.href='trang-chu.html'">Trang chủ</a> <span>›</span>
-          <a href='tourdulich.html'>Tour du lịch</a> <span>›</span>
-          <span id="tlBreadActive">Tìm kiếm & Lọc tour</span>
+          <a id="tlBreadActive" href='tour-du-lich.html'>Tour du lịch</a>
         </div>
 
         <div class="tl-layout">
@@ -39,46 +38,40 @@
                   <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.8" />
                   <path d="m16 16-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
                 </svg>
-                <input type="text" id="tlSearch" placeholder="Tìm kiếm tour..." oninput="applyTourFilters()">
+                <input type="text" id="tlSearch" placeholder="Tìm kiếm tour..." oninput="handleSearch()">
               </div>
             </div>
 
             <div class="tl-filter-box">
-              <div class="tl-filter-title">Khoảng giá</div>
-              <div class="tl-price-range">
-                <input type="range" id="tlMaxPrice" min="500000" max="10000000" step="500000" value="10000000"
-                  oninput="updatePriceDisplay(); applyTourFilters()">
-                <div class="tl-price-labels">
-                  <span>500K</span><span id="tlPriceDisplay">20.000.000đ</span>
-                </div>
+              <div class="tl-filter-title">Khoảng giá/người</div>
+
+              <div class="tl-filter-price">
+                <label>
+                  <input type="radio" name="price" value="" checked>
+                  Tất cả
+                </label>
+                <label><input type="radio" name="price" value="0-1000000"> Dưới 1 triệu</label>
+                <label><input type="radio" name="price" value="1000000-5000000"> 1 - 5 triệu</label>
+                <label><input type="radio" name="price" value="5000000-10000000"> 5 - 10 triệu</label>
+                <label><input type="radio" name="price" value="10000000-999999999"> Trên 10 triệu</label>
+
               </div>
             </div>
 
             <div class="tl-filter-box">
-              <div class="tl-filter-title">Loại hình Tour</div>
-              <label class="tl-check"><input type="checkbox" value="thuyen" onchange="applyTourFilters()" checked> Du
-                thuyền/Cruise</label>
-              <label class="tl-check"><input type="checkbox" value="trekking" onchange="applyTourFilters()" checked>
-                Trekking & Leo núi</label>
-              <label class="tl-check"><input type="checkbox" value="pho-co" onchange="applyTourFilters()" checked> Phố
-                cổ/Di sản</label>
-              <label class="tl-check"><input type="checkbox" value="am-thuc" onchange="applyTourFilters()" checked> Ẩm
-                thực địa phương</label>
-              <label class="tl-check"><input type="checkbox" value="song-nuoc" onchange="applyTourFilters()" checked>
-                Nghỉ dưỡng biển</label>
+              <div class="tl-filter-title">khởi hành từ</div>
+              <div class="tl-search-box" style="margin-bottom:10px;">
+                <input type="date" id="tlStartDate" aria-label="Từ ngày khởi hành">
+              </div>
+              <div class="tl-filter-title">đến</div>
+              <div class="tl-search-box">
+                <input type="date" id="tlEndDate" aria-label="Đến ngày khởi hành">
+              </div>
             </div>
 
-            <div class="tl-filter-box">
-              <div class="tl-filter-title">Đánh giá</div>
-              <label class="tl-check tl-stars-check" onclick="setStarFilter(5, this)"><span
-                  style="color:var(--gold)">★★★★★</span></label>
-              <label class="tl-check tl-stars-check" onclick="setStarFilter(4, this)"><span
-                  style="color:var(--gold)">★★★★</span><span style="color:#ddd">★</span></label>
-              <label class="tl-check tl-stars-check" onclick="setStarFilter(0, this)"><span
-                  style="color:var(--green);font-size:0.8rem;font-weight:600">Tất cả</span></label>
-            </div>
+            <button class="tl-apply-btn" onclick="handleFilter()">Áp dụng bộ lọc</button>
 
-            <button class="tl-reset-btn" onclick="resetTourFilters()">↺ Đặt lại bộ lọc</button>
+            <button class="tl-reset-btn" onclick="resetFilters()">Đặt lại bộ lọc</button>
           </aside>
 
           <!-- MAIN CONTENT -->
@@ -86,21 +79,23 @@
             <div class="tl-top-bar">
               <div>
                 <h1 class="tl-page-title">Khám phá vẻ đẹp Việt Nam</h1>
-                <p class="tl-page-sub">Tìm thấy <strong id="tlCount">7</strong> tour du lịch đặc biệt được lựa chọn kỹ
-                  lưỡng cho bạn.</p>
+                <p class="tl-page-sub">Tìm thấy <strong id="tlCount">0</strong> tour du lịch</p>
               </div>
               <div class="tl-sort-wrap">
                 <label style="font-size:0.78rem;color:var(--muted)">Sắp xếp:</label>
-                <select id="tlSort" onchange="applyTourFilters()" class="tl-sort-select">
-                  <option value="popular">Phổ biến nhất</option>
-                  <option value="price-asc">Giá thấp → cao</option>
-                  <option value="price-desc">Giá cao → thấp</option>
-                  <option value="rating">Đánh giá cao nhất</option>
+                <select id="tlSort" onchange="handleSort()" class="tl-sort-select">
+                  <option value="newest">Mới nhất</option>
+                  <option value="price_asc">Giá thấp → cao</option>
+                  <option value="price_desc">Giá cao → thấp</option>
+                  <option value="name_asc">Tên A → Z</option>
+                  <option value="name_desc">Tên Z → A</option>
+                  <option value="duration_asc">Thời gian ngắn → dài</option>
+                  <option value="duration_desc">Thời gian dài → ngắn</option>
                 </select>
               </div>
             </div>
 
-            <div class="tl-grid" id="tlGrid"></div>
+            <div class="tours-grid" id="tourGrid"></div>
 
             <!-- Pagination -->
             <div class="tl-pagination" id="tlPagination"></div>
@@ -270,67 +265,71 @@
     <div class="toast" id="toast"></div>
 
 
+    <footer>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <div class="footer-logo-icon"></div>
+            <span class="footer-logo-text">Vietnam<span>Travel</span></span>
+          </div>
+          <p class="footer-desc">Trải nghiệm du lịch cao cấp tại Đông Nam Á. Chúng tôi cung cấp những dịch vụ lữ hành
+            kết nối bạn với sắc phong phú, văn hóa đa dạng và cảnh quan tuyệt đẹp của miền Việt Nam.</p>
+          <div class="footer-social">
+            <div class="social-btn">f</div>
+            <div class="social-btn">in</div>
+            <div class="social-btn">yt</div>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Về chúng tôi</h4>
+          <ul>
+            <li><a href="#">Câu chuyện thương hiệu</a></li>
+            <li><a href="#">Đối tác kinh doanh</a></li>
+            <li><a href="#">Cơ hội nghề nghiệp</a></li>
+            <li><a href="#">Tin tức &amp; sự kiện</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Hỗ trợ khách hàng</h4>
+          <ul>
+            <li><a href="#">Trung tâm trợ giúp</a></li>
+            <li><a href="#">Chính sách bảo hộ</a></li>
+            <li><a href="#">Điều khoản dịch vụ</a></li>
+            <li><a href="#">Hướng dẫn đặt tour</a></li>
+          </ul>
+        </div>
+        <div class="footer-newsletter">
+          <h4>Bản tin</h4>
+          <p>Đăng ký nhận ưu đãi và thông tin tốt từ đội ngũ chúng tôi mỗi tuần.</p>
+          <div class="newsletter-form">
+            <input type="email" placeholder="Nhập email của bạn...">
+            <button>➤</button>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 VIETNAMTRAVEL. Bản quyền đã được bảo lưu.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Chính sách bảo mật</a>
+          <a href="#">Điều khoản &amp; điều kiện</a>
+        </div>
+      </div>
+    </footer>
+
+
+    <script src="../js/config.js"></script>
     <script src="../js/api.js"></script>
-    <script src="../js/data.js"></script>
+    <script src="../js/nav.js"></script>
     <script src="../js/toast.js"></script>
     <script src="../js/booking.js"></script>
     <script src="../js/favouites.js"></script>
-    <script>window.addEventListener('DOMContentLoaded', initNav);</script>
     <script src="../js/tours-page.js"></script>
     <script>
-      window.addEventListener('DOMContentLoaded', () => { tlPage = 1; updatePriceDisplay(); applyTourFilters(); });
+      document.addEventListener('DOMContentLoaded', () => {
+
+        loadTours()
+      })
     </script>
-    <script src="../js/nav.js"></script>
-  <footer>
-        <div class="footer-grid">
-          <div class="footer-brand">
-            <div class="footer-logo">
-              <div class="footer-logo-icon"></div>
-              <span class="footer-logo-text">Vietnam<span>Travel</span></span>
-            </div>
-            <p class="footer-desc">Trải nghiệm du lịch cao cấp tại Đông Nam Á. Chúng tôi cung cấp những dịch vụ lữ hành
-              kết nối bạn với sắc phong phú, văn hóa đa dạng và cảnh quan tuyệt đẹp của miền Việt Nam.</p>
-            <div class="footer-social">
-              <div class="social-btn">f</div>
-              <div class="social-btn">in</div>
-              <div class="social-btn">yt</div>
-            </div>
-          </div>
-          <div class="footer-col">
-            <h4>Về chúng tôi</h4>
-            <ul>
-              <li><a href="#">Câu chuyện thương hiệu</a></li>
-              <li><a href="#">Đối tác kinh doanh</a></li>
-              <li><a href="#">Cơ hội nghề nghiệp</a></li>
-              <li><a href="#">Tin tức &amp; sự kiện</a></li>
-            </ul>
-          </div>
-          <div class="footer-col">
-            <h4>Hỗ trợ khách hàng</h4>
-            <ul>
-              <li><a href="#">Trung tâm trợ giúp</a></li>
-              <li><a href="#">Chính sách bảo hộ</a></li>
-              <li><a href="#">Điều khoản dịch vụ</a></li>
-              <li><a href="#">Hướng dẫn đặt tour</a></li>
-            </ul>
-          </div>
-          <div class="footer-newsletter">
-            <h4>Bản tin</h4>
-            <p>Đăng ký nhận ưu đãi và thông tin tốt từ đội ngũ chúng tôi mỗi tuần.</p>
-            <div class="newsletter-form">
-              <input type="email" placeholder="Nhập email của bạn...">
-              <button>➤</button>
-            </div>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <p>© 2026 VIETNAMTRAVEL. Bản quyền đã được bảo lưu.</p>
-          <div class="footer-bottom-links">
-            <a href="#">Chính sách bảo mật</a>
-            <a href="#">Điều khoản &amp; điều kiện</a>
-          </div>
-        </div>
-      </footer>
-</body>
+  </body>
 
 </html>
