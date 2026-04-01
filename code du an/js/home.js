@@ -133,7 +133,7 @@ function renderTours(tours) {
       ? `<div class="tour-urgency">Còn ${slots} chỗ cuối cùng</div>` : ''
 
     return `
-    <div class="tour-card" onclick="window.location.href='dat-tour.html?tour=${slug}'" style="cursor:pointer">
+    <div class="tour-card" onclick="window.location.href='chi-tiet-tour.html?tour=${slug}'" style="cursor:pointer">
       <div class="tour-img">
         <div class="tour-img-inner" style="background:url('${img}') center/cover no-repeat;${!img ? 'background:linear-gradient(135deg,#2d8a4e,#3aaa62)' : ''}"></div>
         ${badge ? `<span class="tour-badge">${badge}</span>` : ''}
@@ -154,7 +154,7 @@ function renderTours(tours) {
             <span style="font-size:0.7rem;color:var(--muted)">Giá từ / người</span>
             <strong>${price}</strong>
           </div>
-          <button class="btn-book" onclick="event.stopPropagation();window.location.href='dat-tour.html?tour=${slug}'">Đặt ngay</button>
+          <button class="btn-book" onclick="event.stopPropagation();window.location.href='chi-tiet-tour.html?tour=${slug}'">Xem chi tiết</button>
         </div>
       </div>
     </div>`
