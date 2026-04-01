@@ -1,0 +1,247 @@
+/* ===== CHI TIẾT TOUR ===== */
+
+/* BREADCRUMB */
+.ct-breadcrumb {
+  padding: 14px 5%;
+  font-size: 0.78rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  margin-top: 82px;
+}
+.ct-breadcrumb a { color: var(--green); cursor: pointer; text-decoration: none; }
+.ct-breadcrumb a:hover { text-decoration: underline; }
+
+/* LOADING & ERROR */
+.ct-loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 100px 20px; color: var(--muted);
+}
+.ct-spinner {
+  width: 40px; height: 40px; border: 3px solid #e0e0e0;
+  border-top-color: var(--green); border-radius: 50%;
+  animation: spin .8s linear infinite; margin-bottom: 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* HERO IMAGE */
+.ct-hero {
+  position: relative; height: 440px; overflow: hidden; background: #1a1a1a;
+}
+.ct-hero-img {
+  width: 100%; height: 100%; object-fit: cover; opacity: 0.85;
+}
+.ct-hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%);
+}
+.ct-hero-info {
+  position: absolute; bottom: 32px; left: 5%; right: 5%;
+  color: white;
+}
+.ct-hero-badge {
+  display: inline-block; background: var(--green); color: white;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; padding: 5px 14px; border-radius: 20px; margin-bottom: 12px;
+}
+.ct-hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem; font-weight: 900; line-height: 1.15;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.4); margin-bottom: 12px;
+}
+.ct-hero-meta {
+  display: flex; gap: 20px; flex-wrap: wrap;
+}
+.ct-hero-meta span {
+  font-size: 0.875rem; opacity: 0.9;
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* MAIN LAYOUT */
+.ct-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 32px;
+  padding: 36px 5%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* LEFT CONTENT */
+.ct-content { display: flex; flex-direction: column; gap: 28px; }
+
+.ct-section {
+  background: white; border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.ct-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem; font-weight: 700; color: var(--dark);
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+  display: flex; align-items: center; gap: 10px;
+}
+.ct-section-title span { font-size: 1.1rem; }
+
+/* DESCRIPTION */
+.ct-desc {
+  font-size: 0.95rem; line-height: 1.8; color: var(--text);
+}
+
+/* HIGHLIGHTS */
+.ct-highlights {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.ct-highlight-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: #f5faf7;
+  border-radius: 10px; font-size: 0.875rem; color: var(--dark); font-weight: 500;
+}
+.ct-highlight-item::before {
+  content: '✓'; width: 22px; height: 22px; background: var(--green);
+  color: white; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
+}
+
+/* ITINERARY */
+.ct-itinerary { display: flex; flex-direction: column; gap: 0; }
+.ct-day {
+  display: flex; gap: 16px; position: relative;
+}
+.ct-day:not(:last-child)::after {
+  content: ''; position: absolute; left: 17px; top: 36px;
+  width: 2px; height: calc(100% - 16px); background: #e0e0e0;
+}
+.ct-day-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--green); color: white;
+  font-weight: 700; font-size: 0.8rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px; position: relative; z-index: 1;
+}
+.ct-day-body { padding-bottom: 20px; flex: 1; }
+.ct-day-title {
+  font-weight: 700; font-size: 0.95rem; color: var(--dark);
+  margin-bottom: 4px;
+}
+.ct-day-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.65; }
+
+/* INCLUDES/EXCLUDES */
+.ct-inc-exc { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.ct-inc h4, .ct-exc h4 {
+  font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 12px;
+}
+.ct-inc h4 { color: var(--green); }
+.ct-exc h4 { color: #e55; }
+.ct-inc ul, .ct-exc ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.ct-inc li, .ct-exc li {
+  font-size: 0.875rem; display: flex; align-items: center; gap: 8px;
+}
+.ct-inc li::before { content: '✓'; color: var(--green); font-weight: 700; }
+.ct-exc li::before { content: '✕'; color: #e55; font-weight: 700; }
+
+/* ===== SIDEBAR (BOOKING) ===== */
+.ct-sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+.ct-booking-card {
+  background: white; border-radius: 16px;
+  padding: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+  position: sticky; top: 100px;
+}
+.ct-booking-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; font-weight: 700; color: var(--dark);
+  margin-bottom: 16px;
+}
+
+/* SCHEDULE SELECT */
+.ct-schedule-label {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted); margin-bottom: 8px;
+}
+.ct-schedule-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.ct-schedule-item {
+  border: 1.5px solid #e0e0e0; border-radius: 10px;
+  padding: 11px 14px; cursor: pointer; transition: all .2s;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.ct-schedule-item:hover { border-color: var(--green); background: #f5faf7; }
+.ct-schedule-item.active { border-color: var(--green); background: #f0faf5; }
+.ct-schedule-date { font-size: 0.875rem; font-weight: 600; color: var(--dark); }
+.ct-schedule-slots { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+.ct-schedule-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; font-weight: 700; color: var(--green);
+}
+
+/* GUEST COUNT */
+.ct-guests { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.ct-guest-item { display: flex; flex-direction: column; gap: 4px; }
+.ct-guest-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; }
+.ct-guest-ctrl {
+  display: flex; align-items: center; gap: 6px;
+  border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 6px 10px;
+}
+.ct-guest-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid #ddd; background: white;
+  cursor: pointer; font-size: 0.9rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s; color: var(--dark); flex-shrink: 0;
+}
+.ct-guest-btn:hover { border-color: var(--green); color: var(--green); }
+.ct-guest-num { flex: 1; text-align: center; font-size: 0.875rem; font-weight: 700; }
+
+/* PRICE SUMMARY */
+.ct-price-summary {
+  background: #f5faf7; border-radius: 10px;
+  padding: 14px; margin-bottom: 16px;
+}
+.ct-price-row {
+  display: flex; justify-content: space-between;
+  font-size: 0.82rem; color: #555; padding: 3px 0;
+}
+.ct-price-row.total {
+  font-weight: 700; color: var(--dark);
+  font-size: 1rem; border-top: 1px solid #d0e8d8;
+  margin-top: 6px; padding-top: 10px;
+}
+.ct-price-row.total .ct-price-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem; color: var(--green);
+}
+
+.ct-btn-book {
+  width: 100%; background: var(--green); color: white;
+  border: none; padding: 14px; border-radius: 12px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-weight: 700; font-size: 0.95rem;
+  cursor: pointer; transition: background .2s, transform .15s;
+}
+.ct-btn-book:hover { background: var(--green-light); transform: translateY(-1px); }
+.ct-btn-book:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+.ct-hotline {
+  text-align: center; font-size: 0.8rem; color: var(--muted); margin-top: 12px;
+}
+.ct-hotline strong { color: var(--green); }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .ct-layout { grid-template-columns: 1fr; }
+  .ct-sidebar { order: -1; }
+  .ct-booking-card { position: static; }
+  .ct-hero-title { font-size: 1.8rem; }
+  .ct-highlights { grid-template-columns: 1fr; }
+  .ct-inc-exc { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .ct-hero { height: 300px; }
+  .ct-hero-title { font-size: 1.4rem; }
+  .ct-guests { grid-template-columns: 1fr 1fr; }
+}

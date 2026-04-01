@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Tiết Tour – VietnamTravel</title>
+  <link rel="stylesheet" href="../css/bass.css">
+  <link rel="stylesheet" href="../css/nav.css">
+  <link rel="stylesheet" href="../css/chi-tiet-tour.css">
+</head>
+<body>
+
+<!-- NAV được inject bởi nav.js -->
+
+<!-- BREADCRUMB -->
+<div class="ct-breadcrumb" id="ctBreadcrumb">
+  <a href="trang-chu.html">Trang chủ</a>
+  <span>›</span>
+  <a href="tour-du-lich.html">Tour du lịch</a>
+  <span>›</span>
+  <span id="ctBreadcrumbName">Đang tải...</span>
+</div>
+
+<!-- LOADING STATE -->
+<div class="ct-loading" id="ctLoading">
+  <div class="ct-spinner"></div>
+  <p>Đang tải thông tin tour...</p>
+</div>
+
+<!-- MAIN CONTENT (ẩn cho đến khi load xong) -->
+<div id="ctMain" style="display:none">
+
+  <!-- HERO -->
+  <div class="ct-hero">
+    <img class="ct-hero-img" id="ctHeroImg" src="" alt="">
+    <div class="ct-hero-overlay"></div>
+    <div class="ct-hero-info">
+      <div class="ct-hero-badge" id="ctDuration">5 ngày 4 đêm</div>
+      <h1 class="ct-hero-title" id="ctHeroTitle">Tên tour</h1>
+      <div class="ct-hero-meta">
+        <span>📍 <span id="ctDestination">—</span></span>
+        <span>🛫 Xuất phát: <span id="ctDepartureCity">—</span></span>
+        <span>⭐ <span id="ctRating">4.8</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAYOUT -->
+  <div class="ct-layout">
+
+    <!-- LEFT: NỘI DUNG -->
+    <div class="ct-content">
+
+      <!-- MÔ TẢ -->
+      <div class="ct-section">
+        <div class="ct-section-title"><span>📋</span> Mô tả tour</div>
+        <p class="ct-desc" id="ctDesc">—</p>
+      </div>
+
+      <!-- ĐIỂM NỔI BẬT -->
+      <div class="ct-section" id="ctHighlightsSection">
+        <div class="ct-section-title"><span>✨</span> Điểm nổi bật</div>
+        <div class="ct-highlights" id="ctHighlights"></div>
+      </div>
+
+      <!-- LỊCH TRÌNH -->
+      <div class="ct-section" id="ctItinerarySection">
+        <div class="ct-section-title"><span>🗓️</span> Lịch trình chi tiết</div>
+        <div class="ct-itinerary" id="ctItinerary"></div>
+      </div>
+
+      <!-- BAO GỒM / KHÔNG BAO GỒM -->
+      <div class="ct-section">
+        <div class="ct-section-title"><span>📦</span> Dịch vụ</div>
+        <div class="ct-inc-exc">
+          <div class="ct-inc">
+            <h4>✅ Bao gồm</h4>
+            <ul id="ctIncludes"></ul>
+          </div>
+          <div class="ct-exc">
+            <h4>❌ Không bao gồm</h4>
+            <ul id="ctExcludes"></ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: BOOKING -->
+    <div class="ct-sidebar">
+      <div class="ct-booking-card">
+        <div class="ct-booking-title">Chọn lịch khởi hành</div>
+
+        <!-- SCHEDULES -->
+        <div class="ct-schedule-label">Lịch trình có sẵn</div>
+        <div class="ct-schedule-list" id="ctScheduleList">
+          <p style="color:var(--muted);font-size:0.875rem">Đang tải lịch trình...</p>
+        </div>
+
+        <!-- GUESTS -->
+        <div class="ct-schedule-label">Số lượng khách</div>
+        <div class="ct-guests">
+          <div class="ct-guest-item">
+            <div class="ct-guest-label">Người lớn</div>
+            <div class="ct-guest-ctrl">
+              <button class="ct-guest-btn" onclick="changeGuest('adult',-1)">−</button>
+              <span class="ct-guest-num" id="gAdult">2</span>
+              <button class="ct-guest-btn" onclick="changeGuest('adult',1)">+</button>
+            </div>
+          </div>
+          <div class="ct-guest-item">
+            <div class="ct-guest-label">Trẻ em</div>
+            <div class="ct-guest-ctrl">
+              <button class="ct-guest-btn" onclick="changeGuest('child',-1)">−</button>
+              <span class="ct-guest-num" id="gChild">0</span>
+              <button class="ct-guest-btn" onclick="changeGuest('child',1)">+</button>
+            </div>
+          </div>
+          <div class="ct-guest-item">
+            <div class="ct-guest-label">Em bé</div>
+            <div class="ct-guest-ctrl">
+              <button class="ct-guest-btn" onclick="changeGuest('baby',-1)">−</button>
+              <span class="ct-guest-num" id="gBaby">0</span>
+              <button class="ct-guest-btn" onclick="changeGuest('baby',1)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRICE SUMMARY -->
+        <div class="ct-price-summary">
+          <div class="ct-price-row">
+            <span>Người lớn × <span id="sumAdult">2</span></span>
+            <span id="sumAdultPrice">—</span>
+          </div>
+          <div class="ct-price-row">
+            <span>Trẻ em × <span id="sumChild">0</span></span>
+            <span id="sumChildPrice">—</span>
+          </div>
+          <div class="ct-price-row">
+            <span>Em bé × <span id="sumBaby">0</span></span>
+            <span id="sumBabyPrice">—</span>
+          </div>
+          <div class="ct-price-row total">
+            <span>Tổng cộng</span>
+            <span class="ct-price-val" id="sumTotal">—</span>
+          </div>
+        </div>
+
+        <button class="ct-btn-book" id="ctBtnBook" onclick="goToBooking()">
+          🎫 Đặt tour ngay
+        </button>
+
+        <div class="ct-hotline">
+          Hotline: <strong>1900 x709</strong> (8:00 – 22:00)
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ERROR STATE -->
+<div id="ctError" style="display:none; text-align:center; padding:80px 20px; color:var(--muted)">
+  <div style="font-size:3rem; margin-bottom:16px">😕</div>
+  <p style="font-size:1rem; font-weight:600; color:var(--dark); margin-bottom:8px">Không tìm thấy tour</p>
+  <p style="font-size:0.875rem; margin-bottom:20px">Tour này không tồn tại hoặc đã bị xóa.</p>
+  <button onclick="window.location.href='tour-du-lich.html'"
+    style="background:var(--green);color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-weight:600">
+    Xem các tour khác
+  </button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <div class="footer-logo-icon"></div>
+        <span class="footer-logo-text">Vietnam<span>Travel</span></span>
+      </div>
+      <p class="footer-desc">Trải nghiệm du lịch cao cấp tại Đông Nam Á. Chúng tôi cung cấp những dịch vụ lữ hành
+        kết nối bạn với sắc phong phú, văn hóa đa dạng và cảnh quan tuyệt đẹp của miền Việt Nam.</p>
+      <div class="footer-social">
+        <div class="social-btn">f</div>
+        <div class="social-btn">in</div>
+        <div class="social-btn">yt</div>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Về chúng tôi</h4>
+      <ul>
+        <li><a href="#">Câu chuyện thương hiệu</a></li>
+        <li><a href="#">Đối tác kinh doanh</a></li>
+        <li><a href="#">Cơ hội nghề nghiệp</a></li>
+        <li><a href="#">Tin tức & sự kiện</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Hỗ trợ khách hàng</h4>
+      <ul>
+        <li><a href="#">Trung tâm trợ giúp</a></li>
+        <li><a href="#">Chính sách bảo hộ</a></li>
+        <li><a href="#">Điều khoản dịch vụ</a></li>
+        <li><a href="#">Hướng dẫn đặt tour</a></li>
+      </ul>
+    </div>
+    <div class="footer-newsletter">
+      <h4>Bản tin</h4>
+      <p>Đăng ký nhận ưu đãi và thông tin tốt từ đội ngũ chúng tôi mỗi tuần.</p>
+      <div class="newsletter-form">
+        <input type="email" placeholder="Nhập email của bạn...">
+        <button>➤</button>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 VIETNAMTRAVEL. Bản quyền đã được bảo lưu.</p>
+    <div class="footer-bottom-links">
+      <a href="#">Chính sách bảo mật</a>
+      <a href="#">Điều khoản & điều kiện</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/toast.js"></script>
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let tourData     = null
+let schedules    = []
+let selectedSchedule = null
+let guests = { adult: 2, child: 0, baby: 0 }
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', async () => {
+  const params = new URLSearchParams(window.location.search)
+  const slug   = params.get('slug') || params.get('tour') || params.get('id')
+
+  if (!slug) { showError(); return }
+
+  await loadTour(slug)
+})
+
+// ============================================================
+// LOAD TOUR
+// ============================================================
+async function loadTour(slug) {
+  try {
+    const res = await apiGetTour(slug)
+
+    if (!res || !res.ok) { showError(); return }
+
+    const result = res.data?.result?.tour || res.data?.result
+    tourData  = result?.tour  || result
+    schedules = result?.schedules || []
+
+    renderTour()
+    renderSchedules()
+
+    document.getElementById('ctLoading').style.display = 'none'
+    document.getElementById('ctMain').style.display    = 'block'
+
+  } catch (e) {
+    console.error(e)
+    showError()
+  }
+}
+
+// ============================================================
+// RENDER TOUR
+// ============================================================
+function renderTour() {
+  const t = tourData
+  if (!t) return
+
+  // Breadcrumb
+  document.getElementById('ctBreadcrumbName').textContent = t.name || '—'
+  document.title = (t.name || 'Chi tiết tour') + ' – VietnamTravel'
+
+  // Hero
+  const img = t.images?.[0] || ''
+  const heroImg = document.getElementById('ctHeroImg')
+  if (img) { heroImg.src = img; heroImg.alt = t.name }
+  else { heroImg.parentElement.style.background = 'linear-gradient(135deg,#2d8a4e,#3aaa62)' }
+
+  document.getElementById('ctDuration').textContent =
+    t.duration_days ? `${t.duration_days} ngày ${t.duration_nights} đêm` : '—'
+  document.getElementById('ctHeroTitle').textContent = t.name || '—'
+  document.getElementById('ctDestination').textContent   = t.destination    || '—'
+  document.getElementById('ctDepartureCity').textContent = t.departure_city || '—'
+
+  // Description
+  document.getElementById('ctDesc').textContent = t.description || '—'
+
+  // Highlights
+  if (t.highlights?.length) {
+    document.getElementById('ctHighlights').innerHTML =
+      t.highlights.map(h => `<div class="ct-highlight-item">${h}</div>`).join('')
+  } else {
+    document.getElementById('ctHighlightsSection').style.display = 'none'
+  }
+
+  // Itinerary
+  if (t.itinerary?.length) {
+    document.getElementById('ctItinerary').innerHTML =
+      t.itinerary.map(day => `
+        <div class="ct-day">
+          <div class="ct-day-num">${day.day}</div>
+          <div class="ct-day-body">
+            <div class="ct-day-title">${day.title}</div>
+            <div class="ct-day-desc">${day.description}</div>
+          </div>
+        </div>`).join('')
+  } else {
+    document.getElementById('ctItinerarySection').style.display = 'none'
+  }
+
+  // Includes
+  if (t.includes?.length) {
+    document.getElementById('ctIncludes').innerHTML =
+      t.includes.map(i => `<li>${i}</li>`).join('')
+  }
+
+  // Excludes
+  if (t.excludes?.length) {
+    document.getElementById('ctExcludes').innerHTML =
+      t.excludes.map(i => `<li>${i}</li>`).join('')
+  }
+}
+
+// ============================================================
+// RENDER SCHEDULES
+// ============================================================
+function renderSchedules() {
+  const list = document.getElementById('ctScheduleList')
+
+  if (!schedules.length) {
+    list.innerHTML = '<p style="color:var(--muted);font-size:0.875rem">Hiện chưa có lịch khởi hành</p>'
+    document.getElementById('ctBtnBook').disabled = true
+    return
+  }
+
+  list.innerHTML = schedules.map((s, i) => {
+    const dep  = new Date(s.departure_date).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' })
+    const ret  = new Date(s.return_date).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' })
+    const price = s.price_adult.toLocaleString('vi-VN') + 'đ'
+    const slots = s.available_slots
+    const slotsText = slots <= 3 ? `<span style="color:#e55;font-weight:600">Còn ${slots} chỗ!</span>`
+                    : slots <= 10 ? `<span style="color:var(--gold)">Còn ${slots} chỗ</span>`
+                    : `<span style="color:var(--muted)">${slots} chỗ trống</span>`
+
+    return `
+    <div class="ct-schedule-item ${i===0?'active':''}" onclick="selectSchedule(${i}, this)">
+      <div>
+        <div class="ct-schedule-date">🗓️ ${dep} → ${ret}</div>
+        <div class="ct-schedule-slots">${slotsText}</div>
+      </div>
+      <div class="ct-schedule-price">${price}</div>
+    </div>`
+  }).join('')
+
+  // Chọn schedule đầu tiên mặc định
+  selectSchedule(0, list.querySelector('.ct-schedule-item'))
+}
+
+function selectSchedule(idx, el) {
+  document.querySelectorAll('.ct-schedule-item').forEach(i => i.classList.remove('active'))
+  if (el) el.classList.add('active')
+  selectedSchedule = schedules[idx]
+  updateSummary()
+}
+
+// ============================================================
+// GUESTS
+// ============================================================
+function changeGuest(type, delta) {
+  const min = type === 'adult' ? 1 : 0
+  guests[type] = Math.max(min, (guests[type] || 0) + delta)
+  document.getElementById('g' + type.charAt(0).toUpperCase() + type.slice(1)).textContent = guests[type]
+  updateSummary()
+}
+
+// ============================================================
+// PRICE SUMMARY
+// ============================================================
+function updateSummary() {
+  if (!selectedSchedule) return
+
+  const pa = selectedSchedule.price_adult  || 0
+  const pc = selectedSchedule.price_child  || 0
+  const pb = selectedSchedule.price_baby   || 0
+
+  const totalAdult = pa * guests.adult
+  const totalChild = pc * guests.child
+  const totalBaby  = pb * guests.baby
+  const total      = totalAdult + totalChild + totalBaby
+
+  const fmt = n => n > 0 ? n.toLocaleString('vi-VN') + 'đ' : '0đ'
+
+  document.getElementById('sumAdult').textContent      = guests.adult
+  document.getElementById('sumAdultPrice').textContent = fmt(totalAdult)
+  document.getElementById('sumChild').textContent      = guests.child
+  document.getElementById('sumChildPrice').textContent = guests.child > 0 ? fmt(totalChild) : '—'
+  document.getElementById('sumBaby').textContent       = guests.baby
+  document.getElementById('sumBabyPrice').textContent  = guests.baby  > 0 ? fmt(totalBaby)  : '—'
+  document.getElementById('sumTotal').textContent      = fmt(total)
+}
+
+// ============================================================
+// GO TO BOOKING
+// ============================================================
+function goToBooking() {
+  if (!selectedSchedule) { showToast('⚠️ Vui lòng chọn lịch khởi hành'); return }
+
+  const u = null
+  try { Object.assign(u || {}, JSON.parse(localStorage.getItem('vt_user'))) } catch(e) {}
+  if (!localStorage.getItem('vt_access_token')) {
+    showToast('⚠️ Vui lòng đăng nhập để đặt tour')
+    setTimeout(() => window.location.href = 'dang-nhap.html', 1200)
+    return
+  }
+
+  const params = new URLSearchParams({
+    tour:     tourData?.slug || tourData?._id || '',
+    schedule: selectedSchedule._id,
+    adult:    guests.adult,
+    child:    guests.child,
+    baby:     guests.baby,
+  })
+  window.location.href = 'dat-tour.html?' + params.toString()
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function showError() {
+  document.getElementById('ctLoading').style.display = 'none'
+  document.getElementById('ctMain').style.display    = 'none'
+  document.getElementById('ctError').style.display   = 'block'
+}
+</script>
+</body>
+</html>
