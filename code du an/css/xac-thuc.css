@@ -1,0 +1,213 @@
+/* ============================================================
+   XAC-THUC PAGE – Email Verification
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  background: url('../images/nen.jpg') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* ===== CARD ===== */
+.xv-card {
+  background: #fff;
+  border-radius: 20px;
+  width: 420px;
+  max-width: 100%;
+  padding: 40px 36px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  animation: slideUp 0.45s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== LOGO ===== */
+.xv-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.xv-logo img {
+  height: 32px;
+}
+
+.xv-logo-text {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #2d8a4e;
+}
+
+.xv-logo-text span {
+  color: #1a1a1a;
+
+}
+
+/* ===== ICON ===== */
+.xv-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both 0.2s;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.xv-icon-success {
+  background: #e8f5ee;
+}
+
+.xv-icon-loading {
+  background: #e8f0ff;
+}
+
+.xv-icon-error {
+  background: #fff0f0;
+}
+
+.xv-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e8f0ff;
+  border-top-color: #3a7abf;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== TEXT ===== */
+.xv-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.xv-sub {
+  font-size: 0.82rem;
+  color: #888;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* ===== BUTTONS ===== */
+.xv-btn {
+  display: block;
+  width: 100%;
+  background: #2d8a4e;
+  color: #fff;
+  border: none;
+  padding: 13px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 4px 14px rgba(45, 138, 78, 0.3);
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+
+.xv-btn:hover {
+  background: #1e6b3b;
+}
+
+.xv-btn-ghost {
+  display: block;
+  width: 100%;
+  background: none;
+  border: 1.5px solid #e8e8e8;
+  color: #555;
+  padding: 11px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  margin-top: 24px;
+}
+
+.xv-btn-ghost:hover {
+  border-color: #2d8a4e;
+  color: #2d8a4e;
+}
+
+/* ===== RESEND ===== */
+.xv-resend {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.xv-resend-btn {
+  background: none;
+  border: none;
+  color: #2d8a4e;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.xv-resend-btn:hover {
+  text-decoration: underline;
+}
+
+.xv-resend-btn:disabled {
+  color: #bbb;
+  cursor: default;
+}
+
+.xv-countdown {
+  color: #bbb;
+  font-size: 0.75rem;
+}
