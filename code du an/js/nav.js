@@ -68,7 +68,12 @@
 </nav>
 `;
 
-  document.body.insertAdjacentHTML('afterbegin', NAV_HTML);
+  const navMount = document.getElementById('mainNav');
+  if (navMount) {
+    navMount.outerHTML = NAV_HTML;
+  } else {
+    document.body.insertAdjacentHTML('afterbegin', NAV_HTML);
+  }
   document.body.style.paddingTop = '82px';
 
   // ==========================
