@@ -322,19 +322,22 @@
             renderTours(getActiveTours().slice(0, 6), 'tourGrid');
           }
 
-          // Gợi ý cá nhân hóa
-          setTimeout(function () {
-            var u = loadMe();
-            if (u) {
-              var recTours = recGetTours(4);
-              if (recTours.length) {
-                document.getElementById('recSection').style.display = 'block';
-                recRender('recGrid');
-                var name = u.name ? u.name.split(' ').slice(-1)[0] : '';
-                if (name) document.getElementById('recSubtitle').textContent = 'Dựa trên sở thích của ' + name;
+          // Gợi ý cá nhân hóa — chỉ khi user đã login
+          if (localStorage.getItem('vt_access_token')) {
+            setTimeout(async function () {
+              await loadMe();
+              var u = JSON.parse(localStorage.getItem('vt_user') || 'null');
+              if (u) {
+                var recTours = recGetTours(4);
+                if (recTours.length) {
+                  document.getElementById('recSection').style.display = 'block';
+                  recRender('recGrid');
+                  var name = u.name ? u.name.split(' ').slice(-1)[0] : '';
+                  if (name) document.getElementById('recSubtitle').textContent = 'Dựa trên sở thích của ' + name;
+                }
               }
-            }
-          }, 300);
+            }, 300);
+          }
           document.querySelectorAll('.dest-card').forEach((el, i) => {
             el.style.opacity = '0'; el.style.transform = 'translateY(20px)';
             el.style.transition = `opacity .5s ease ${i * 60}ms, transform .5s ease ${i * 60}ms`;

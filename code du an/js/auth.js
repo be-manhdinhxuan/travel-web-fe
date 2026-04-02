@@ -6,10 +6,38 @@
 // UI HELPERS
 // ==========================
 
-function togglePwd(id) {
+function togglePwd(id, btn) {
   const inp = document.getElementById(id)
   if (!inp) return
+
   inp.type = inp.type === 'password' ? 'text' : 'password'
+
+  if (!btn) return
+  const svg = btn.querySelector('svg')
+  if (!svg) return
+
+  const isHidden = inp.type === 'password'
+  svg.setAttribute('viewBox', '0 0 20 20')
+  svg.setAttribute('fill', 'none')
+  svg.setAttribute('width', '16')
+  svg.setAttribute('height', '16')
+
+  if (isHidden) {
+    // Mật khẩu đang ẩn -> icon mắt mở
+    svg.innerHTML = `
+      <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />
+    `
+    btn.setAttribute('aria-label', 'Hiện mật khẩu')
+  } else {
+    // Mật khẩu đang hiện -> icon mắt đóng
+    svg.innerHTML = `
+      <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />
+      <path d="M3 17L17 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+    `
+    btn.setAttribute('aria-label', 'Ẩn mật khẩu')
+  }
 }
 
 function showAuthError(id, msg) {
