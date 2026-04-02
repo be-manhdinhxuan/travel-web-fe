@@ -112,6 +112,7 @@ async function handleLogin() {
 async function doRegister() {
   const name = (document.getElementById('regFullName')?.value || '').trim()
   const email = (document.getElementById('regEmail')?.value || '').trim()
+  const dob = (document.getElementById('regDob')?.value || '').trim()
   const pwd = (document.getElementById('regPassword')?.value || '')
   const conf = (document.getElementById('regConfirm')?.value || '')
   const agree = document.getElementById('agreeTerms')?.checked
@@ -121,13 +122,25 @@ async function doRegister() {
 
   if (!name) return showAuthError('regError', 'Vui lòng nhập họ và tên')
   if (!email) return showAuthError('regError', 'Vui lòng nhập email')
+  if (!dob) return showAuthError('regError', 'Vui lòng chọn ngày sinh')
   if (!pwd) return showAuthError('regError', 'Vui lòng nhập mật khẩu')
   if (pwd.length < 6) return showAuthError('regError', 'Mật khẩu tối thiểu 6 ký tự')
   if (pwd !== conf) return showAuthError('regError', 'Mật khẩu xác nhận không khớp')
   if (!agree) return showAuthError('regError', 'Vui lòng đồng ý điều khoản sử dụng')
 
+  const dobDate = new Date(`${dob}T00:00:00.000Z`)
+  if (Number.isNaN(dobDate.getTime())) {
+    return showAuthError('regError', 'Ngày sinh không hợp lệ')
+  }
+  const dobISO = dobDate.toISOString()
+
   try {
-    const res = await apiRegister(name, email, pwd, conf)
+    if (typeof apiRegister !== 'function') {
+      return showAuthError('regError', 'Thiếu hàm apiRegister. Vui lòng kiểm tra file api.js')
+    }
+
+    // Khớp chữ ký API đã khai báo: apiRegister(full_name, email, password, confirm_password, date_of_birth)
+    const res = await apiRegister(name, email, pwd, conf, dobISO)
 
     if (!res || !res.ok) {
       let msg = 'Đăng ký thất bại'
@@ -140,13 +153,24 @@ async function doRegister() {
       return showAuthError('regError', msg)
     }
 
-    const { access_token, refresh_token, user } = res.data.result
-    localStorage.setItem('vt_access_token', access_token)
-    localStorage.setItem('vt_refresh_token', refresh_token)
-    localStorage.setItem('vt_user', JSON.stringify(user))
+    const result = res?.data?.result || {}
+    const accessToken = result.access_token
+    const refreshToken = result.refresh_token
+    const user = result.user
+
+    // API có thể trả token ngay hoặc chỉ trả thông báo + user.
+    if (accessToken) localStorage.setItem('vt_access_token', accessToken)
+    if (refreshToken) localStorage.setItem('vt_refresh_token', refreshToken)
+    if (user) localStorage.setItem('vt_user', JSON.stringify(user))
+
+    if (typeof showToast === 'function') {
+      showToast('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.')
+    }
 
     // Chuyển sang xác thực email
-    window.location.href = 'xac-thuc.html'
+    setTimeout(() => {
+      window.location.href = 'xac-thuc.html'
+    }, 900)
 
   } catch (err) {
     console.error(err)

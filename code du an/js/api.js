@@ -61,8 +61,8 @@ async function apiCall(method, endpoint, body = null, requireAuth = false) {
 // ============================================================
 
 // POST /auths/register
-async function apiRegister(full_name, email, password, confirm_password) {
-  return apiCall("POST", "/auths/register", { full_name, email, password, confirm_password });
+async function apiRegister(full_name, email, password, confirm_password, date_of_birth) {
+  return apiCall("POST", "/auths/register", { full_name, email, password, confirm_password, date_of_birth });
 }
 
 // POST /auths/login
