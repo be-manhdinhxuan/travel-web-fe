@@ -1,407 +1,369 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quên Mật Khẩu – VietnamTravel</title>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Be Vietnam Pro','Segoe UI',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0d3d22 0%,#1a5c35 40%,#2d8a4e 100%);display:flex;align-items:center;justify-content:center;padding:20px}
-.fp-card{background:#fff;border-radius:20px;width:440px;max-width:100%;padding:40px 36px;box-shadow:0 24px 80px rgba(0,0,0,0.25);animation:slideUp .45s cubic-bezier(.34,1.2,.64,1) both}
-@keyframes slideUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
-.fp-logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:28px}
-.fp-logo img{height:32px}
-.fp-logo-text{font-size:1rem;font-weight:800;color:#1a1a1a}
-.fp-logo-text span{color:#2d8a4e}
-.fp-steps{display:flex;align-items:center;justify-content:center;margin-bottom:28px}
-.fp-step{width:32px;height:32px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#aaa;transition:all .3s;position:relative}
-.fp-step.active{background:#2d8a4e;color:#fff;box-shadow:0 4px 12px rgba(45,138,78,0.35)}
-.fp-step.done{background:#e8f5ee;color:#2d8a4e}
-.fp-step-line{flex:1;height:2px;background:#eee;max-width:48px;transition:background .3s}
-.fp-step-line.done{background:#2d8a4e}
-.fp-step-label{position:absolute;top:38px;font-size:0.6rem;color:#aaa;white-space:nowrap;font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
-.fp-step.active .fp-step-label{color:#2d8a4e}
-.fp-title{font-size:1.35rem;font-weight:800;color:#1a1a1a;margin-bottom:6px}
-.fp-sub{font-size:0.82rem;color:#888;margin-bottom:22px;line-height:1.6}
-.fp-sub strong{color:#2d8a4e}
-.fp-field{margin-bottom:14px}
-.fp-field label{display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:#aaa;margin-bottom:5px}
-.fp-input-wrap{position:relative;display:flex;align-items:center}
-.fp-input-icon{position:absolute;left:12px;color:#ccc;font-size:0.88rem;pointer-events:none}
-.fp-input-wrap input{width:100%;padding:11px 42px;border:1.5px solid #e8e8e8;border-radius:10px;font-family:inherit;font-size:0.875rem;color:#222;background:#fafafa;outline:none;transition:border .2s,box-shadow .2s}
-.fp-input-wrap input:focus{border-color:#2d8a4e;background:#fff;box-shadow:0 0 0 3px rgba(45,138,78,0.09)}
-.fp-error{background:#fff0f0;border:1px solid #fcc;border-radius:8px;padding:9px 13px;font-size:0.8rem;color:#c33;margin-bottom:12px;display:none}
-.fp-btn{width:100%;background:#2d8a4e;color:#fff;border:none;padding:13px;border-radius:10px;font-family:inherit;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background .2s,transform .15s;box-shadow:0 4px 14px rgba(45,138,78,0.3);margin-bottom:6px}
-.fp-btn:hover{background:#1e6b3b;transform:translateY(-1px)}
-.fp-footer{text-align:center;font-size:0.8rem;color:#aaa;margin-top:14px}
-.fp-footer a{color:#2d8a4e;font-weight:600;text-decoration:none}
-.fp-footer a:hover{text-decoration:underline}
 
-/* Sent state */
-.fp-sent-box{background:#f0faf5;border:1.5px solid #b6ddc5;border-radius:12px;padding:20px;text-align:center;margin-bottom:16px}
-.fp-sent-icon{font-size:2.5rem;margin-bottom:10px}
-.fp-sent-title{font-size:0.9rem;font-weight:700;color:#1a1a1a;margin-bottom:6px}
-.fp-sent-sub{font-size:0.78rem;color:#888;line-height:1.6}
-.fp-sent-email{color:#2d8a4e;font-weight:700}
-.fp-resend{text-align:center;font-size:0.78rem;color:#888;margin-top:12px}
-.fp-resend-btn{background:none;border:none;color:#2d8a4e;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.78rem}
-.fp-resend-btn:hover{text-decoration:underline}
-.fp-resend-btn:disabled{color:#bbb;cursor:default}
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quên Mật Khẩu – VietnamTravel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet" href="../css/quen-mat-khau.css">
+  </head>
 
-/* Password strength */
-.fp-strength-wrap{margin:8px 0 4px}
-.fp-strength-bar{height:4px;background:#eee;border-radius:4px;overflow:hidden}
-.fp-strength-fill{height:100%;width:0;border-radius:4px;transition:width .3s,background .3s}
-.fp-strength-text{font-size:0.72rem;font-weight:700;margin-top:4px}
-.fp-eye{position:absolute;right:12px;background:none;border:none;cursor:pointer;color:#bbb;font-size:0.9rem}
+  <body>
 
-/* Success */
-.fp-success-icon{width:72px;height:72px;background:#e8f5ee;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both}
-@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-.fp-success-icon svg{stroke:#2d8a4e}
+    <main class="fp-card">
 
-/* Info box */
-.fp-info-box{background:#f8fdf9;border:1px solid #d4eadb;border-radius:10px;padding:14px 16px;font-size:0.78rem;color:#555;line-height:1.7;margin-bottom:16px}
-.fp-info-box li{margin-left:16px;margin-top:4px}
-</style>
-</head>
-<body>
+      <!-- LOGO -->
+      <header class="fp-logo">
+        <svg fill=" #2d8a4e" height=" 40px" width="40px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 268.321 268.321" xml:space="preserve">
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+          <g id="SVGRepo_iconCarrier">
+            <g>
+              <g>
+                <path
+                  d="M259.342,39.744l0.159-0.154c9.298-9.305,9.598-24.138,0.668-33.07c-4.204-4.204-9.86-6.52-15.92-6.52 c-6.421,0-12.514,2.553-17.152,7.188l-20.41,21.81l-73-21.854l-15.131,15.135c-1.907,1.902-2.956,4.437-2.956,7.131 c0,2.696,1.049,5.227,2.956,7.129l0.664,0.664l52.728,29.018l-7.715,8.372c-10.226-6.622-21.62-11.498-33.85-14.282 c-7.724-1.761-15.624-2.652-23.479-2.652c-3.963,0-7.874,0.238-11.734,0.664l-0.366-0.406c-0.172,0.154-0.366,0.328-0.555,0.505 c-43.823,5.198-79.893,37.113-89.931,81.18c-6.252,27.427-1.446,55.647,13.528,79.458c14.974,23.809,38.329,40.362,65.758,46.609 c7.724,1.761,15.625,2.652,23.479,2.652c49.415,0,91.602-33.689,102.589-81.927c1.962-8.606,2.833-17.291,2.643-25.89 c0.6-2.204,0.496-4.607-0.436-7.224c-1.49-16.284-6.776-32.106-15.735-46.347c-1.089-1.73-2.235-3.415-3.415-5.061l7.832-7.219 l29.254,53.151l0.67,0.668c1.905,1.898,4.435,2.945,7.122,2.945c2.687,0,5.211-1.045,7.12-2.947l15.14-15.137l-21.999-73.498 L259.342,39.744z M54.354,238.588c-10.012-6.968-18.622-15.935-25.313-26.574c-11.901-18.924-16.429-41.032-13.054-62.915 c5.897,1.589,11.851,3.937,14.137,5.57c-0.086,0.608-0.181,1.226-0.276,1.841c-0.884,5.738-2.22,14.405,4.845,19.548 c6.183,4.497,11.842,0.291,14.423-1.883c1.036,0.835,2.165,1.666,3.326,2.524c1.812,1.336,5.008,3.695,6.157,5.13 c-0.364,1.268-0.899,2.766-1.422,4.226c-2.052,5.731-4.175,11.654-0.225,15.816c1.362,1.675,5.434,9.375,6.474,12.148 c-0.022,0.924,0.046,1.975,0.134,3.344c0.093,1.411,0.298,4.592,0.088,5.886c-0.005-0.001-8.024,10.099-7.561,12.491 L54.354,238.588z M196.776,183.45c-9.609,42.183-46.49,71.642-89.693,71.642c-6.869,0-13.779-0.78-20.542-2.321 c-8.282-1.885-16.125-4.872-23.404-8.798c6.454-5.458,12.04-14.225,12.124-14.366c1.957-3.307,1.845-7.698,1.497-13.096 c-0.057-0.904-0.123-1.68-0.11-2.178c-0.009,0.311-0.066,0.558-0.108,0.734c1.06-4.693-5.319-15.497-8.388-20.099 c0.317-1.217,0.992-3.099,1.475-4.453c0.8-2.235,1.627-4.545,2.123-6.737c1.823-7.929-5.542-13.361-11.458-17.723 c-1.689-1.245-3.434-2.533-4.208-3.353c-2.663-2.808-7.149-4.975-13.693-0.104c0.117-1.4,0.362-2.985,0.529-4.078 c0.22-1.424,0.434-2.846,0.571-4.215c0.761-7.673-7.523-13.764-24.579-18.122c9.355-30.96,33.747-54.121,64.081-62.189 c-1.353,3.304-2.423,7.124-2.914,11.571c-0.284,2.568-0.652,4.894-0.977,6.942c-1.294,8.176-2.762,17.443,8.981,22.672 c6.401,2.859,10.867,3.329,14.458,3.708c1.585,0.165,2.912,0.306,4.29,0.619c0.399,1.988,0.145,6.073,0.042,7.751 c-0.145,2.343-0.302,4.869,0.447,6.988c0.968,5.348,5.641,24.889,23.814,37.494c-2.557,1.525-5.919,3.086-8.74,3.628 c-1.53,0.293-3.097,0.489-4.614,0.679c-6.205,0.778-14.703,1.838-18.259,11.639c-1.581,4.332-0.555,7.486,0.584,9.369 c2.83,4.68,8.337,5.418,12.358,5.956c0.648,0.086,1.558,0.209,2.105,0.317c2.489,1.823,10.257,6.986,18.309,6.986 c3.639,0,7.336-1.056,10.632-3.948c1.325-1.124,7.607-1.051,10.632-1.012c6.401,0.075,12.446,0.15,16.303-3.75 c1.894-1.918,2.861-4.422,2.795-7.25c-0.137-5.524,10.438-11.465,18.935-16.24c2.05-1.151,4.146-2.334,6.183-3.562 C197.976,177.522,197.451,180.492,196.776,183.45z M198.951,157.783c-1.918,2.429-8.903,6.357-13.257,8.802 c-11.377,6.393-24.171,13.581-25.56,25.465c-1.666,0.134-4.067,0.101-5.833,0.082c-6.774-0.075-14.432-0.174-19.524,4.303 c-2.202,1.933-8.903-1.043-12.73-4.025c-2.143-1.673-4.704-2.081-7.422-2.449c1.043-0.265,2.55-0.505,4.797-0.783 c1.644-0.207,3.509-0.439,5.462-0.813c5.93-1.137,21.382-7.625,22.67-16.198c0.536-3.567-1.186-6.871-4.504-8.63 c-19.685-10.4-22.705-31.423-22.822-32.285l-0.231-1.858c0.024-0.436,0.053-0.908,0.077-1.314 c0.392-6.309,1.12-18.054-8.147-20.891c-3.073-0.935-5.689-1.21-8-1.453c-3.203-0.335-5.967-0.626-10.455-2.63 c-1.6-0.712-1.933-1.182-1.933-1.182c-0.403-0.827,0.194-4.592,0.63-7.341c0.348-2.196,0.741-4.682,1.06-7.561 c0.857-7.737,3.974-12.596,6.948-15.88c2.226-0.159,4.466-0.258,6.73-0.258c6.867,0,13.777,0.78,20.54,2.321 c9.933,2.264,19.237,6.104,27.68,11.271l-0.661,0.716c-1.16,1.171-2.218,2.412-3.168,3.712l-23.648-6.122l-10.369,10.372 c-1.744,1.739-2.705,4.054-2.705,6.518c0,2.467,0.959,4.786,2.703,6.529l0.743,0.745l27.239,13.824l0.979,0.979l13.824,27.244 l0.745,0.743c1.741,1.744,4.06,2.705,6.525,2.705c2.467,0,4.786-0.961,6.52-2.7l10.376-10.372l-6.247-24.133 c1.228-0.906,2.396-1.911,3.505-3.007l1.415-1.303c0.693,1.002,1.389,2.002,2.044,3.043 C193.381,127.378,198.1,142.39,198.951,157.783z M244.93,129.556l-6.49,6.49l-34.432-62.567l-31.573,29.109l-0.187,0.179 c-1.453,1.448-3.073,2.619-4.814,3.476l-4.823,2.381l6.924,26.737l-1.032,1.032l-11.421-22.504l-3.955-3.959l-22.502-11.416 l1.029-1.029l26.351,6.822l2.354-4.902c0.864-1.792,2.059-3.461,3.553-4.958l29.199-31.672l-62.143-34.201l6.49-6.492 l73.288,21.938l25.769-27.543c2.134-2.096,4.874-3.249,7.733-3.249c2.526,0,4.858,0.939,6.567,2.645 c3.754,3.754,3.478,10.149-0.6,14.297l-27.368,25.599L244.93,129.556z">
+                </path>
+              </g>
+            </g>
+          </g>
+        </svg>
+        <span class="fp-logo-text">Vietnam<span>Travel</span></span>
+      </header>
 
-<div class="fp-card">
+      <!-- STEP INDICATOR -->
+      <nav class="fp-steps" id="fpSteps" aria-label="Các bước đặt lại mật khẩu">
+        <div class="fp-step active" id="fpDot1">1<span class="fp-step-label">Email</span></div>
+        <div class="fp-step-line" id="fpLine1"></div>
+        <div class="fp-step" id="fpDot2">2<span class="fp-step-label">Kiểm tra email</span></div>
+        <div class="fp-step-line" id="fpLine2"></div>
+        <div class="fp-step" id="fpDot3">3<span class="fp-step-label">Mật khẩu mới</span></div>
+      </nav>
 
-  <!-- LOGO -->
-  <a class="fp-logo" href="trang-chu.html">
-    <img src="../images/logo.png" alt="VietnamTravel">
-    <span class="fp-logo-text">Vietnam<span>Travel</span></span>
-  </a>
+      <!-- BƯỚC 1: Nhập email -->
+      <section id="stepEmail" class="fp-state">
+        <h1 class="fp-title">Quên mật khẩu?</h1>
+        <p class="fp-sub">Nhập email tài khoản, chúng tôi sẽ gửi link đặt lại mật khẩu về email của bạn.</p>
+        <div class="fp-field">
+          <label>Email khôi phục</label>
+          <div class="fp-input-wrap">
+            <svg class="fp-input-icon" viewBox="0 0 20 20" fill="none">
+              <path
+                d="M2.5 6.667A2.083 2.083 0 0 1 4.583 4.583h10.834A2.083 2.083 0 0 1 17.5 6.667v6.666a2.083 2.083 0 0 1-2.083 2.084H4.583A2.083 2.083 0 0 1 2.5 13.333V6.667Z"
+                stroke="currentColor" stroke-width="1.5"></path>
+              <path d="m2.5 7.5 7.5 4.167 7.5-4.167" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              </path>
+            </svg>
+            <input type="email" id="fpEmail" placeholder="email@example.com">
+          </div>
+        </div>
+        <div class="fp-error" id="fpErr" hidden></div>
+        <button class="fp-btn" onclick="fpSendLink()">Gửi liên kết đặt lại →</button>
+        <div class="fp-footer">Quay lại <a href="dang-nhap.html">Đăng nhập</a></div>
+      </section>
 
-  <!-- STEP INDICATOR -->
-  <div class="fp-steps" id="fpSteps">
-    <div class="fp-step active" id="fpDot1">1<span class="fp-step-label">Email</span></div>
-    <div class="fp-step-line" id="fpLine1"></div>
-    <div class="fp-step" id="fpDot2">2<span class="fp-step-label">Kiểm tra email</span></div>
-    <div class="fp-step-line" id="fpLine2"></div>
-    <div class="fp-step" id="fpDot3">3<span class="fp-step-label">Mật khẩu mới</span></div>
-  </div>
+      <!-- BƯỚC 2: Đã gửi email -->
+      <section id="stepSent" class="fp-state" hidden>
+        <h1 class="fp-title">Kiểm tra hộp thư</h1>
+        <div class="fp-sent-box">
+          <div class="fp-sent-icon">📧</div>
+          <div class="fp-sent-title">Link đặt lại đã được gửi!</div>
+          <div class="fp-sent-sub">Chúng tôi đã gửi link đặt lại mật khẩu đến<br><span class="fp-sent-email"
+              id="fpEmailShow"></span></div>
+        </div>
+        <div class="fp-info-box">
+          <strong>Hướng dẫn:</strong>
+          <ul>
+            <li>Mở email và nhấn vào link đặt lại mật khẩu</li>
+            <li>Link có hiệu lực trong <strong>15 phút</strong></li>
+            <li>Kiểm tra thư mục Spam nếu không thấy</li>
+          </ul>
+        </div>
+        <div class="fp-resend">
+          Không nhận được email?
+          <button class="fp-resend-btn" id="fpResendBtn" onclick="fpResend()">Gửi lại</button>
+          <span id="fpCountdown" class="fp-countdown"></span>
+        </div>
+        <div class="fp-footer fp-footer-spaced"><a href="dang-nhap.html">← Quay lại đăng nhập</a></div>
+      </section>
 
-  <!-- BƯỚC 1: Nhập email -->
-  <div id="stepEmail">
-    <div class="fp-title">Quên mật khẩu?</div>
-    <div class="fp-sub">Nhập email tài khoản, chúng tôi sẽ gửi link đặt lại mật khẩu về email của bạn.</div>
-    <div class="fp-field">
-      <label>Địa chỉ Email</label>
-      <div class="fp-input-wrap">
-        <span class="fp-input-icon">✉️</span>
-        <input type="email" id="fpEmail" placeholder="email@example.com">
-      </div>
-    </div>
-    <div class="fp-error" id="fpErr"></div>
-    <button class="fp-btn" onclick="fpSendLink()">Gửi link đặt lại →</button>
-    <div class="fp-footer">Nhớ mật khẩu rồi? <a href="dang-nhap.html">Đăng nhập</a></div>
-  </div>
+      <!-- BƯỚC 3: Đặt mật khẩu mới (dùng khi có token từ URL) -->
+      <section id="stepReset" class="fp-state" hidden>
+        <h1 class="fp-title">Đặt mật khẩu mới</h1>
+        <p class="fp-sub">Mật khẩu mới phải có ít nhất 6 ký tự.</p>
+        <div class="fp-field">
+          <label>Mật khẩu mới</label>
+          <div class="fp-input-wrap">
+            <svg class="fp-input-icon" viewBox="0 0 20 20" fill="none">
+              <rect x="3.5" y="8.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"></rect>
+              <path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round"></path>
+            </svg>
+            <input type="password" id="fpNewPwd" placeholder="Tối thiểu 6 ký tự" oninput="fpStrength(this.value)">
+            <button class="fp-eye" type="button" onclick="fpToggle('fpNewPwd',this)" aria-label="Hiện mật khẩu">
+              <svg viewBox="0 0 20 20" fill="none" width="16" height="16">
+                <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />
+                <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />
+              </svg>
+            </button>
+          </div>
+          <div class="fp-strength-wrap">
+            <div class="fp-strength-bar">
+              <div class="fp-strength-fill" id="fpStrFill"></div>
+            </div>
+            <div class="fp-strength-text" id="fpStrText"></div>
+          </div>
+        </div>
+        <div class="fp-field">
+          <label>Xác nhận mật khẩu mới</label>
+          <div class="fp-input-wrap">
+            <svg class="fp-input-icon" viewBox="0 0 20 20" fill="none">
+              <rect x="3.5" y="8.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"></rect>
+              <path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round"></path>
+            </svg>
+            <input type="password" id="fpConfPwd" placeholder="Nhập lại mật khẩu mới">
+            <button class="fp-eye" type="button" onclick="fpToggle('fpConfPwd',this)" aria-label="Hiện mật khẩu">
+              <svg viewBox="0 0 20 20" fill="none" width="16" height="16">
+                <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />
+                <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="fp-error" id="resetErr" hidden></div>
+        <button class="fp-btn" onclick="fpResetPwd()">Cập nhật mật khẩu →</button>
+        <div class="fp-footer fp-footer-spaced"><a href="dang-nhap.html">← Quay lại đăng nhập</a></div>
+      </section>
 
-  <!-- BƯỚC 2: Đã gửi email -->
-  <div id="stepSent" style="display:none">
-    <div class="fp-title">Kiểm tra hộp thư</div>
-    <div class="fp-sent-box">
-      <div class="fp-sent-icon">📧</div>
-      <div class="fp-sent-title">Link đặt lại đã được gửi!</div>
-      <div class="fp-sent-sub">Chúng tôi đã gửi link đặt lại mật khẩu đến<br><span class="fp-sent-email" id="fpEmailShow"></span></div>
-    </div>
-    <div class="fp-info-box">
-      <strong>Hướng dẫn:</strong>
-      <ul>
-        <li>Mở email và nhấn vào link đặt lại mật khẩu</li>
-        <li>Link có hiệu lực trong <strong>15 phút</strong></li>
-        <li>Kiểm tra thư mục Spam nếu không thấy</li>
-      </ul>
-    </div>
-    <div class="fp-resend">
-      Không nhận được email?
-      <button class="fp-resend-btn" id="fpResendBtn" onclick="fpResend()">Gửi lại</button>
-      <span id="fpCountdown" style="color:#bbb;font-size:0.75rem"></span>
-    </div>
-    <div class="fp-footer" style="margin-top:16px"><a href="dang-nhap.html">← Quay lại đăng nhập</a></div>
-  </div>
+      <!-- BƯỚC 4: Thành công -->
+      <section id="stepDone" class="fp-state fp-done-state" hidden>
+        <div class="fp-success-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+        <h1 class="fp-title">Đổi mật khẩu thành công!</h1>
+        <p class="fp-sub">Mật khẩu đã được cập nhật. Đăng nhập lại để tiếp tục.</p>
+        <a href="dang-nhap.html" class="fp-btn">Đăng nhập ngay</a>
+      </section>
 
-  <!-- BƯỚC 3: Đặt mật khẩu mới (dùng khi có token từ URL) -->
-  <div id="stepReset" style="display:none">
-    <div class="fp-title">Đặt mật khẩu mới</div>
-    <div class="fp-sub">Mật khẩu mới phải có ít nhất 6 ký tự.</div>
-    <div class="fp-field">
-      <label>Mật khẩu mới</label>
-      <div class="fp-input-wrap">
-        <span class="fp-input-icon">🔒</span>
-        <input type="password" id="fpNewPwd" placeholder="Tối thiểu 6 ký tự" oninput="fpStrength(this.value)">
-        <button class="fp-eye" type="button" onclick="fpToggle('fpNewPwd',this)">👁</button>
-      </div>
-      <div class="fp-strength-wrap">
-        <div class="fp-strength-bar"><div class="fp-strength-fill" id="fpStrFill"></div></div>
-        <div class="fp-strength-text" id="fpStrText"></div>
-      </div>
-    </div>
-    <div class="fp-field">
-      <label>Xác nhận mật khẩu mới</label>
-      <div class="fp-input-wrap">
-        <span class="fp-input-icon">🔒</span>
-        <input type="password" id="fpConfPwd" placeholder="Nhập lại mật khẩu mới">
-        <button class="fp-eye" type="button" onclick="fpToggle('fpConfPwd',this)">👁</button>
-      </div>
-    </div>
-    <div class="fp-error" id="resetErr"></div>
-    <button class="fp-btn" onclick="fpResetPwd()">Cập nhật mật khẩu →</button>
-  </div>
+    </main>
 
-  <!-- BƯỚC 4: Thành công -->
-  <div id="stepDone" style="display:none;text-align:center">
-    <div class="fp-success-icon">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-    </div>
-    <div class="fp-title" style="text-align:center">Đổi mật khẩu thành công!</div>
-    <div class="fp-sub" style="text-align:center;margin-bottom:24px">Mật khẩu đã được cập nhật. Đăng nhập lại để tiếp tục.</div>
-    <a href="dang-nhap.html" class="fp-btn" style="display:block;text-decoration:none;text-align:center">Đăng nhập ngay</a>
-  </div>
-
-</div>
-
-<script>window.NO_NAV = true;</script>
+    <script>window.NO_NAV = true;</script>
     <script src="../js/api.js"></script>
-<script src="../js/toast.js"></script>
-<script>
-var FP_EMAIL = '';
-var FP_TOKEN = '';
-var FP_TIMER = null;
+    <script src="../js/toast.js"></script>
+    <script>
+      var FP_EMAIL = '';
+      var FP_TOKEN = '';
+      var FP_TIMER = null;
 
-// Kiểm tra URL có token không (user click link từ email)
-window.addEventListener('DOMContentLoaded', function() {
-  var params = new URLSearchParams(window.location.search);
-  var token  = params.get('token') || params.get('forgot_password_token');
+      function showStep(id) {
+        ['stepEmail', 'stepSent', 'stepReset', 'stepDone'].forEach(function (stepId) {
+          var section = document.getElementById(stepId);
+          if (section) section.hidden = true;
+        });
 
-  if (token) {
-    FP_TOKEN = token;
-    // Verify token trước khi cho đặt mật khẩu mới
-    fpVerifyToken(token);
-  }
-});
-
-// BƯỚC 1: Gửi link qua API
-async function fpSendLink() {
-  var email = (document.getElementById('fpEmail').value || '').trim().toLowerCase();
-  var err   = document.getElementById('fpErr');
-  err.style.display = 'none';
-
-  if (!email) { showFpErr(err, '⚠️ Vui lòng nhập email'); return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFpErr(err, '⚠️ Email không hợp lệ'); return; }
-
-  var btn = document.querySelector('#stepEmail .fp-btn');
-  btn.disabled = true; btn.textContent = 'Đang gửi...';
-
-  try {
-    // POST /api/auth/forgot-password { email }
-    var res = await apiForgotPassword(email);
-    if (res && res.ok) {
-      FP_EMAIL = email;
-      document.getElementById('fpEmailShow').textContent = email;
-      document.getElementById('stepEmail').style.display = 'none';
-      document.getElementById('stepSent').style.display  = 'block';
-      setStep(2);
-      fpStartCountdown(60);
-    } else if (res) {
-      showFpErr(err, '❌ ' + (res.data?.message || 'Không thể gửi email'));
-    } else {
-      // Fallback: API chưa chạy, vẫn hiển thị màn hình đã gửi
-      FP_EMAIL = email;
-      document.getElementById('fpEmailShow').textContent = email;
-      document.getElementById('stepEmail').style.display = 'none';
-      document.getElementById('stepSent').style.display  = 'block';
-      setStep(2);
-      fpStartCountdown(60);
-    }
-  } catch(e) {
-    showFpErr(err, '⚠️ Không thể kết nối, thử lại sau');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Gửi link đặt lại →';
-  }
-}
-
-// Gửi lại
-async function fpResend() {
-  if (!FP_EMAIL) return;
-  try { await apiForgotPassword(FP_EMAIL); } catch(e) {}
-  fpStartCountdown(60);
-}
-
-// Countdown
-function fpStartCountdown(sec) {
-  var btn = document.getElementById('fpResendBtn');
-  var cd  = document.getElementById('fpCountdown');
-  if (btn) btn.disabled = true;
-  clearInterval(FP_TIMER);
-  FP_TIMER = setInterval(function() {
-    sec--;
-    if (cd) cd.textContent = '(' + sec + 's)';
-    if (sec <= 0) { clearInterval(FP_TIMER); if(btn) btn.disabled=false; if(cd) cd.textContent=''; }
-  }, 1000);
-}
-
-// Verify token từ URL → POST /api/auth/verify-forgot-password
-async function fpVerifyToken(token) {
-  try {
-    var res = await apiVerifyForgotPassword(token);
-    if (res && res.ok) {
-      // Token hợp lệ → cho đặt mật khẩu mới
-      document.getElementById('stepEmail').style.display = 'none';
-      document.getElementById('stepReset').style.display = 'block';
-      setStep(3);
-    } else if (res && res.status === 410) {
-      // Token hết hạn
-      document.getElementById('stepEmail').style.display = 'block';
-      var err = document.getElementById('fpErr');
-      showFpErr(err, '❌ Link đã hết hạn. Vui lòng gửi lại.');
-    } else {
-      // API chưa chạy → cho vào luôn
-      document.getElementById('stepEmail').style.display = 'none';
-      document.getElementById('stepReset').style.display = 'block';
-      setStep(3);
-    }
-  } catch(e) {
-    document.getElementById('stepEmail').style.display = 'none';
-    document.getElementById('stepReset').style.display = 'block';
-    setStep(3);
-  }
-}
-
-// Đặt mật khẩu mới → POST /api/auth/reset-password
-async function fpResetPwd() {
-  var pwd  = document.getElementById('fpNewPwd').value  || '';
-  var conf = document.getElementById('fpConfPwd').value || '';
-  var err  = document.getElementById('resetErr');
-  err.style.display = 'none';
-
-  if (pwd.length < 6)  { showFpErr(err, '⚠️ Mật khẩu phải có ít nhất 6 ký tự'); return; }
-  if (pwd.length > 50) { showFpErr(err, '⚠️ Mật khẩu không được quá 50 ký tự'); return; }
-  if (pwd !== conf)    { showFpErr(err, '⚠️ Mật khẩu xác nhận không khớp'); return; }
-
-  var btn = document.querySelector('#stepReset .fp-btn');
-  btn.disabled = true; btn.textContent = 'Đang cập nhật...';
-
-  try {
-    // POST /api/auth/reset-password { forgot_password_token, new_password, confirm_password }
-    var res = await apiResetPassword(FP_TOKEN, pwd, conf);
-    if (res && res.ok) {
-      document.getElementById('stepReset').style.display = 'none';
-      document.getElementById('stepDone').style.display  = 'block';
-      document.getElementById('fpSteps').style.display   = 'none';
-    } else if (res && res.status === 410) {
-      showFpErr(err, '❌ Token đã hết hạn. Vui lòng thực hiện lại từ đầu.');
-    } else if (res) {
-      showFpErr(err, '❌ ' + (res.data?.message || 'Không thể cập nhật'));
-    } else {
-      // Fallback local khi chưa có backend
-      var db = [];
-      try { db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]'); } catch(e2) {}
-      var email = new URLSearchParams(window.location.search).get('email') || FP_EMAIL;
-      var user  = db.find(function(u){ return u.email === email; });
-      if (user) {
-        user.password = pwd;
-        try { localStorage.setItem('vt_userdb', JSON.stringify(db)); } catch(e2) {}
-        try { sessionStorage.setItem('vt_userdb', JSON.stringify(db)); } catch(e2) {}
+        var active = document.getElementById(id);
+        if (active) active.hidden = false;
       }
-      document.getElementById('stepReset').style.display = 'none';
-      document.getElementById('stepDone').style.display  = 'block';
-      document.getElementById('fpSteps').style.display   = 'none';
-    }
-  } catch(e) {
-    showFpErr(err, '⚠️ Không thể kết nối, thử lại sau');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Cập nhật mật khẩu →';
-  }
-}
 
-// Password strength
-function fpStrength(val) {
-  var fill = document.getElementById('fpStrFill');
-  var txt  = document.getElementById('fpStrText');
-  if (!fill) return;
-  var s = 0;
-  if (val.length >= 8)           s++;
-  if (/[A-Z]/.test(val))         s++;
-  if (/[0-9]/.test(val))         s++;
-  if (/[^A-Za-z0-9]/.test(val)) s++;
-  var lv = [{w:'0%',c:'#eee',t:''},{w:'25%',c:'#e04444',t:'Yếu'},{w:'50%',c:'#f90',t:'Trung bình'},{w:'75%',c:'#3aaa62',t:'Khá'},{w:'100%',c:'#2d8a4e',t:'Mạnh'}][s];
-  fill.style.width=lv.w; fill.style.background=lv.c;
-  txt.textContent=lv.t; txt.style.color=lv.c;
-}
+      // Kiểm tra URL có token không (user click link từ email)
+      window.addEventListener('DOMContentLoaded', function () {
+        var params = new URLSearchParams(window.location.search);
+        var token = params.get('token') || params.get('forgot_password_token');
 
-function fpToggle(id, btn) {
-  var inp = document.getElementById(id);
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
-}
+        if (token) {
+          FP_TOKEN = token;
+          // Verify token trước khi cho đặt mật khẩu mới
+          fpVerifyToken(token);
+        }
+      });
 
-function showFpErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+      // BƯỚC 1: Gửi link qua API
+      async function fpSendLink() {
+        var email = (document.getElementById('fpEmail').value || '').trim().toLowerCase();
+        var err = document.getElementById('fpErr');
+        err.hidden = true;
 
-function setStep(n) {
-  for (var i = 1; i <= 3; i++) {
-    var dot  = document.getElementById('fpDot' + i);
-    var line = document.getElementById('fpLine' + i);
-    if (!dot) continue;
-    dot.classList.remove('active','done');
-    if (i < n)  { dot.classList.add('done'); dot.innerHTML = '✓<span class="fp-step-label">' + dot.querySelector('.fp-step-label')?.textContent + '</span>'; }
-    if (i === n) dot.classList.add('active');
-    if (line)   line.classList.toggle('done', i < n);
-  }
-}
-</script>
-<footer>
-        <div class="footer-grid">
-          <div class="footer-brand">
-            <div class="footer-logo">
-              <div class="footer-logo-icon"></div>
-              <span class="footer-logo-text">Vietnam<span>Travel</span></span>
-            </div>
-            <p class="footer-desc">Trải nghiệm du lịch cao cấp tại Đông Nam Á. Chúng tôi cung cấp những dịch vụ lữ hành
-              kết nối bạn với sắc phong phú, văn hóa đa dạng và cảnh quan tuyệt đẹp của miền Việt Nam.</p>
-            <div class="footer-social">
-              <div class="social-btn">f</div>
-              <div class="social-btn">in</div>
-              <div class="social-btn">yt</div>
-            </div>
-          </div>
-          <div class="footer-col">
-            <h4>Về chúng tôi</h4>
-            <ul>
-              <li><a href="#">Câu chuyện thương hiệu</a></li>
-              <li><a href="#">Đối tác kinh doanh</a></li>
-              <li><a href="#">Cơ hội nghề nghiệp</a></li>
-              <li><a href="#">Tin tức &amp; sự kiện</a></li>
-            </ul>
-          </div>
-          <div class="footer-col">
-            <h4>Hỗ trợ khách hàng</h4>
-            <ul>
-              <li><a href="#">Trung tâm trợ giúp</a></li>
-              <li><a href="#">Chính sách bảo hộ</a></li>
-              <li><a href="#">Điều khoản dịch vụ</a></li>
-              <li><a href="#">Hướng dẫn đặt tour</a></li>
-            </ul>
-          </div>
-          <div class="footer-newsletter">
-            <h4>Bản tin</h4>
-            <p>Đăng ký nhận ưu đãi và thông tin tốt từ đội ngũ chúng tôi mỗi tuần.</p>
-            <div class="newsletter-form">
-              <input type="email" placeholder="Nhập email của bạn...">
-              <button>➤</button>
-            </div>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <p>© 2026 VIETNAMTRAVEL. Bản quyền đã được bảo lưu.</p>
-          <div class="footer-bottom-links">
-            <a href="#">Chính sách bảo mật</a>
-            <a href="#">Điều khoản &amp; điều kiện</a>
-          </div>
-        </div>
-      </footer>
-</body>
+        if (!email) { showFpErr(err, '⚠️ Vui lòng nhập email'); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFpErr(err, '⚠️ Email không hợp lệ'); return; }
+
+        var btn = document.querySelector('#stepEmail .fp-btn');
+        btn.disabled = true; btn.textContent = 'Đang gửi...';
+
+        try {
+          // POST /api/auth/forgot-password { email }
+          var res = await apiForgotPassword(email);
+          if (res && res.ok) {
+            FP_EMAIL = email;
+            document.getElementById('fpEmailShow').textContent = email;
+            showStep('stepSent');
+            setStep(2);
+            fpStartCountdown(60);
+          } else if (res) {
+            showFpErr(err, '❌ ' + (res.data?.message || 'Không thể gửi email'));
+          } else {
+            // Fallback: API chưa chạy, vẫn hiển thị màn hình đã gửi
+            FP_EMAIL = email;
+            document.getElementById('fpEmailShow').textContent = email;
+            showStep('stepSent');
+            setStep(2);
+            fpStartCountdown(60);
+          }
+        } catch (e) {
+          showFpErr(err, '⚠️ Không thể kết nối, thử lại sau');
+        } finally {
+          btn.disabled = false; btn.textContent = 'Gửi link đặt lại →';
+        }
+      }
+
+      // Gửi lại
+      async function fpResend() {
+        if (!FP_EMAIL) return;
+        try { await apiForgotPassword(FP_EMAIL); } catch (e) { }
+        fpStartCountdown(60);
+      }
+
+      // Countdown
+      function fpStartCountdown(sec) {
+        var btn = document.getElementById('fpResendBtn');
+        var cd = document.getElementById('fpCountdown');
+        if (btn) btn.disabled = true;
+        clearInterval(FP_TIMER);
+        FP_TIMER = setInterval(function () {
+          sec--;
+          if (cd) cd.textContent = '(' + sec + 's)';
+          if (sec <= 0) { clearInterval(FP_TIMER); if (btn) btn.disabled = false; if (cd) cd.textContent = ''; }
+        }, 1000);
+      }
+
+      // Verify token từ URL → POST /api/auth/verify-forgot-password
+      async function fpVerifyToken(token) {
+        try {
+          var res = await apiVerifyForgotPassword(token);
+          if (res && res.ok) {
+            // Token hợp lệ → cho đặt mật khẩu mới
+            showStep('stepReset');
+            setStep(3);
+          } else if (res && res.status === 410) {
+            // Token hết hạn
+            var err = document.getElementById('fpErr');
+            showStep('stepEmail');
+            showFpErr(err, '❌ Link đã hết hạn. Vui lòng gửi lại.');
+          } else {
+            // API chưa chạy → cho vào luôn
+            showStep('stepReset');
+            setStep(3);
+          }
+        } catch (e) {
+          showStep('stepReset');
+          setStep(3);
+        }
+      }
+
+      // Đặt mật khẩu mới → POST /api/auth/reset-password
+      async function fpResetPwd() {
+        var pwd = document.getElementById('fpNewPwd').value || '';
+        var conf = document.getElementById('fpConfPwd').value || '';
+        var err = document.getElementById('resetErr');
+        err.hidden = true;
+
+        if (pwd.length < 6) { showFpErr(err, '⚠️ Mật khẩu phải có ít nhất 6 ký tự'); return; }
+        if (pwd.length > 50) { showFpErr(err, '⚠️ Mật khẩu không được quá 50 ký tự'); return; }
+        if (pwd !== conf) { showFpErr(err, '⚠️ Mật khẩu xác nhận không khớp'); return; }
+
+        var btn = document.querySelector('#stepReset .fp-btn');
+        btn.disabled = true; btn.textContent = 'Đang cập nhật...';
+
+        try {
+          // POST /api/auth/reset-password { forgot_password_token, new_password, confirm_password }
+          var res = await apiResetPassword(FP_TOKEN, pwd, conf);
+          if (res && res.ok) {
+            showStep('stepDone');
+            setStep(4);
+            document.getElementById('fpSteps').hidden = true;
+          } else if (res && res.status === 401) {
+            showFpErr(err, '❌ Token đã hết hạn. Vui lòng gửi lại yêu cầu.');
+          } else if (res) {
+            showFpErr(err, '❌ ' + (res.data?.message || 'Không thể cập nhật'));
+          } else {
+            // Fallback local khi chưa có backend
+            var db = [];
+            try { db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]'); } catch (e2) { }
+            var email = new URLSearchParams(window.location.search).get('email') || FP_EMAIL;
+            var user = db.find(function (u) { return u.email === email; });
+            if (user) {
+              user.password = pwd;
+              try { localStorage.setItem('vt_userdb', JSON.stringify(db)); } catch (e2) { }
+              try { sessionStorage.setItem('vt_userdb', JSON.stringify(db)); } catch (e2) { }
+            }
+            showStep('stepDone');
+            setStep(4);
+            document.getElementById('fpSteps').hidden = true;
+          }
+        } catch (e) {
+          showFpErr(err, '⚠️ Không thể kết nối, thử lại sau');
+        } finally {
+          btn.disabled = false; btn.textContent = 'Cập nhật mật khẩu →';
+        }
+      }
+
+      // Password strength
+      function fpStrength(val) {
+        var fill = document.getElementById('fpStrFill');
+        var txt = document.getElementById('fpStrText');
+        if (!fill) return;
+        var s = 0;
+        if (val.length >= 8) s++;
+        if (/[A-Z]/.test(val)) s++;
+        if (/[0-9]/.test(val)) s++;
+        if (/[^A-Za-z0-9]/.test(val)) s++;
+        var lv = [{ w: '0%', c: '#eee', t: '' }, { w: '25%', c: '#e04444', t: 'Yếu' }, { w: '50%', c: '#f90', t: 'Trung bình' }, { w: '75%', c: '#3aaa62', t: 'Khá' }, { w: '100%', c: '#2d8a4e', t: 'Mạnh' }][s];
+        fill.style.width = lv.w; fill.style.background = lv.c;
+        txt.textContent = lv.t; txt.style.color = lv.c;
+      }
+
+      function fpToggle(id, btn) {
+        var inp = document.getElementById(id);
+        if (!inp || !btn) return;
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+
+        var svg = btn.querySelector('svg');
+        if (!svg) return;
+
+        var isHidden = inp.type === 'password';
+        svg.setAttribute('viewBox', '0 0 20 20');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('width', '16');
+        svg.setAttribute('height', '16');
+
+        if (isHidden) {
+          svg.innerHTML = '\n            <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />\n            <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />\n          ';
+          btn.setAttribute('aria-label', 'Hiện mật khẩu');
+        } else {
+          svg.innerHTML = '\n            <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />\n            <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />\n            <path d="M3 17L17 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />\n          ';
+          btn.setAttribute('aria-label', 'Ẩn mật khẩu');
+        }
+      }
+
+      function showFpErr(el, msg) { el.textContent = msg; el.hidden = false; }
+
+      function setStep(n) {
+        for (var i = 1; i <= 3; i++) {
+          var dot = document.getElementById('fpDot' + i);
+          var line = document.getElementById('fpLine' + i);
+          if (!dot) continue;
+          dot.classList.remove('active', 'done');
+          if (i < n) { dot.classList.add('done'); dot.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="#2d8a4e"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M320 576C178.6 576 64 461.4 64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576zM438 209.7C427.3 201.9 412.3 204.3 404.5 215L285.1 379.2L233 327.1C223.6 317.7 208.4 317.7 199.1 327.1C189.8 336.5 189.7 351.7 199.1 361L271.1 433C276.1 438 282.9 440.5 289.9 440C296.9 439.5 303.3 435.9 307.4 430.2L443.3 243.2C451.1 232.5 448.7 217.5 438 209.7z"/></svg><span class="fp-step-label">' + dot.querySelector('.fp-step-label')?.textContent + '</span>'; }
+          if (i === n) dot.classList.add('active');
+          if (line) line.classList.toggle('done', i < n);
+        }
+      }
+    </script>
+  </body>
+
 </html>
