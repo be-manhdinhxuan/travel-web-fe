@@ -454,6 +454,11 @@ async function apiCreateVnpayPayment(booking_id) {
 // COUPONS
 // ============================================================
 
+// GET /coupons/public-coupons
+async function apiGetPublicCoupons() {
+  return apiCall("GET", "/coupons/public-coupons");
+}
+
 // POST /coupons/validate
 async function apiValidateCoupon(code, order_value) {
   return apiCall("POST", "/coupons/validate", { code, order_value }, true);

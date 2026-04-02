@@ -205,6 +205,9 @@ async function doLogin() {
     localStorage.setItem('vt_refresh_token', refresh_token)
     localStorage.setItem('vt_user', JSON.stringify(user))
 
+    // Cờ để hiển thị toast sau khi redirect
+    localStorage.setItem('showLoginToast', 'true')
+
     if (user.role === 1 || user.role === 'admin') {
       window.location.href = 'admin.html'
     } else if (user.role === 2 || user.role === 'staff') {

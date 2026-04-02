@@ -1,7 +1,7 @@
 /* ===== TOUR LIST PAGE ===== */
 .tl-breadcrumb {
   padding: 14px 5%;
-  font-size: 0.78rem;
+  font-size: 1rem;
   color: var(--muted);
   display: flex;
   align-items: center;
@@ -20,7 +20,7 @@
   text-decoration: underline;
 }
 
-.tl-breadcrumb span {
+.tl-breadcrumb #tlBreadActive {
   color: #ccc;
 }
 

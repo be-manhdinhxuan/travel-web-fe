@@ -2,6 +2,16 @@
 // home.js — Trang chủ
 // ============================================================
 
+// Kiểm tra xem user vừa đăng nhập, nếu có thì hiển thị toast
+function checkLoginToast() {
+  if (localStorage.getItem('showLoginToast') === 'true') {
+    localStorage.removeItem('showLoginToast')
+    if (typeof showToast === 'function') {
+      showToast('Đăng nhập thành công')
+    }
+  }
+}
+
 let userWishlist = []
 async function loadMe() {
   try {
