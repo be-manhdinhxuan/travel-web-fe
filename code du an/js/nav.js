@@ -339,6 +339,7 @@
   const path = window.location.pathname.split('/').pop();
   const activePathMap = {
     'chi-tiet-tour.html': 'tour-du-lich.html',
+    'dat-tour.html': 'tour-du-lich.html',
   };
   const activePath = activePathMap[path] || path;
   document.querySelectorAll('.nav-links a').forEach((a) => {

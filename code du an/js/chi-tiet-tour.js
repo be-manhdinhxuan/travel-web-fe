@@ -16,12 +16,25 @@ const HIGHLIGHT_ICON = `
 
 // INIT
 window.addEventListener('DOMContentLoaded', async () => {
+
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('slug') || params.get('tour') || params.get('id');
 
   if (!slug) {
     showError();
     return;
+  }
+
+  // 🔥 nếu snapshot KHÁC tour → xóa
+  const snapshot = JSON.parse(sessionStorage.getItem('vt_checkout_tour') || 'null');
+
+  if (snapshot && snapshot.tourId !== slug) {
+    sessionStorage.removeItem('vt_checkout_tour');
+  }
+
+  const detailSnapshot = JSON.parse(sessionStorage.getItem('vt_detail_state') || 'null');
+  if (detailSnapshot && detailSnapshot.tourId && detailSnapshot.tourId !== slug) {
+    sessionStorage.removeItem('vt_detail_state');
   }
 
   await loadTour(slug);
@@ -43,6 +56,7 @@ async function loadTour(slug) {
 
     renderTour();
     renderSchedules();
+    restoreDetailState();
 
     document.getElementById('ctLoading').style.display = 'none';
     document.getElementById('ctMain').style.display = 'block';
@@ -219,12 +233,61 @@ function goToBooking() {
   }
 
   const params = new URLSearchParams({
-    tour: tourData?.slug || tourData?._id || '',
+    slug: tourData?.slug || '',
     schedule: selectedSchedule._id,
     adult: guests.adult,
     child: guests.child,
     baby: guests.baby,
   });
+
+  try {
+    const durationText = tourData?.duration_days
+      ? (tourData.duration_nights != null
+        ? `${tourData.duration_days} ngày ${tourData.duration_nights} đêm`
+        : `${tourData.duration_days} ngày`)
+      : '';
+
+    // 🔥 LƯU STATE ĐỂ QUAY LẠI
+    sessionStorage.setItem('vt_detail_state', JSON.stringify({
+      tourId: tourData?.slug || tourData?._id || '',
+      scheduleId: selectedSchedule._id,
+      guests: guests
+    }));
+
+    // 🔥 QUAN TRỌNG: xóa snapshot cũ trước
+    sessionStorage.removeItem('vt_checkout_tour');
+
+    sessionStorage.setItem('vt_checkout_tour', JSON.stringify({
+      tourId: (tourData?.slug || '').trim(),
+      name: tourData?.name || '',
+      image: tourData?.images?.[0] || '',
+
+      departure: tourData?.departure_city || '',
+      destination: tourData?.destination || '',
+      durationText: durationText,
+
+      // ✅ FIX CHUẨN
+      schedule: {
+        id: selectedSchedule._id,
+        departureDate: selectedSchedule.departure_date,
+        returnDate: selectedSchedule.return_date,
+        priceAdult: selectedSchedule.price_adult,
+        priceChild: selectedSchedule.price_child,
+        priceBaby: selectedSchedule.price_baby,
+        slots: selectedSchedule.available_slots
+      },
+
+      // ✅ FIX CHUẨN
+      guests: {
+        adult: guests.adult,
+        child: guests.child,
+        baby: guests.baby
+      }
+    }));
+  } catch (error) {
+    console.error(error);
+  }
+
   window.location.href = 'dat-tour.html?' + params.toString();
 }
 
@@ -305,4 +368,39 @@ function showError() {
   document.getElementById('ctLoading').style.display = 'none';
   document.getElementById('ctMain').style.display = 'none';
   document.getElementById('ctError').style.display = 'block';
+}
+
+function restoreDetailState() {
+  try {
+    const state = JSON.parse(sessionStorage.getItem('vt_detail_state') || 'null');
+    if (!state) return;
+
+    const currentTourId = tourData?.slug || tourData?._id || '';
+    if (state.tourId && state.tourId !== currentTourId) {
+      sessionStorage.removeItem('vt_detail_state');
+      return;
+    }
+
+    // ===== restore guests =====
+    guests = state.guests || guests;
+
+    document.getElementById('gAdult').textContent = guests.adult;
+    document.getElementById('gChild').textContent = guests.child;
+    document.getElementById('gBaby').textContent = guests.baby;
+
+    // ===== restore schedule =====
+    const idx = schedules.findIndex(s => s._id === state.scheduleId);
+    if (idx !== -1) {
+      const el = document.querySelectorAll('.ct-schedule-item')[idx];
+      selectSchedule(idx, el);
+    }
+
+    // 🔥 OPTIONAL: xóa sau khi dùng
+    sessionStorage.removeItem('vt_detail_state');
+
+
+
+  } catch (e) {
+    console.error(e);
+  }
 }

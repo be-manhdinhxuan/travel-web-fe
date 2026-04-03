@@ -37,7 +37,7 @@ async function recRender(gridId) {
     const badge = days ? `${days} ngày ${nights} đêm` : ''
 
     return `
-    <div class="tour-card" onclick="window.location.href='dat-tour.html?tour=${slug}'" style="cursor:pointer">
+    <div class="tour-card" onclick="window.location.href='dat-tour.html?slug=${slug}'" style="cursor:pointer">
       <div class="tour-img">
         <div class="tour-img-inner" style="background:url('${img}') center/cover no-repeat${!img ? ';background:linear-gradient(135deg,#2d8a4e,#3aaa62)' : ''}"></div>
         ${badge ? `<span class="tour-badge">${badge}</span>` : ''}
@@ -52,7 +52,7 @@ async function recRender(gridId) {
             <span style="font-size:0.7rem;color:var(--muted)">Từ / người</span>
             <strong>${price}</strong>
           </div>
-          <button class="btn-book" onclick="event.stopPropagation();window.location.href='dat-tour.html?tour=${slug}'">Đặt ngay</button>
+          <button class="btn-book" onclick="event.stopPropagation();window.location.href='dat-tour.html?slug=${slug}'">Đặt ngay</button>
         </div>
       </div>
     </div>`

@@ -1,55 +1,62 @@
-/* ===== PAGE HEADER ===== */
-.co-page-header {
-  margin-top: 82px;
-  background: linear-gradient(135deg, #1e4d2e 0%, #2d8a4e 100%);
-  padding: 36px 5% 32px;
-}
+/* ===== ĐẶT TOUR ===== */
 
-.co-page-header-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.tl-breadcrumb {
+/* BREADCRUMB */
+.ct-breadcrumb {
+  padding: 14px 5%;
+  font-size: 1rem;
+  color: var(--muted);
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.65);
-  margin-bottom: 14px;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  margin-top: 82px;
 }
 
-.tl-breadcrumb a {
-  color: rgba(255, 255, 255, 0.65);
-  text-decoration: none;
+.ct-breadcrumb a {
+  color: var(--green);
   cursor: pointer;
-  transition: color .2s;
+  text-decoration: none;
 }
 
-.tl-breadcrumb a:hover {
-  color: #fff;
+.ct-breadcrumb a:hover {
+  text-decoration: underline;
 }
 
-.tl-breadcrumb span {
-  color: rgba(255, 255, 255, 0.4);
+.ct-breadcrumb .ct-breadcrumb-end {
+  color: #ccc;
+  cursor: default;
+  text-decoration: none;
 }
 
-.tl-breadcrumb .bc-current {
-  color: #fff;
-  font-weight: 600;
+.ct-breadcrumb .ct-breadcrumb-end:hover {
+  text-decoration: none;
 }
 
-.co-page-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 2rem;
-  font-weight: 900;
-  color: #fff;
-  margin-bottom: 6px;
+/* LOADING & ERROR */
+.ct-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  color: var(--muted);
 }
 
-.co-page-sub {
-  font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.72);
+.ct-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e0e0e0;
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ===== BODY WRAP ===== */
@@ -73,6 +80,16 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.co-availability-notice {
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  color: #ad6800;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
 .co-title {
@@ -248,6 +265,14 @@
   text-align: center;
 }
 
+.co-readonly-val {
+  min-width: 92px;
+  text-align: right;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--green);
+}
+
 .co-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -281,43 +306,6 @@
   background: white;
 }
 
-.co-pay-methods {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.co-pay-opt {
-  flex: 1;
-  min-width: 90px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 6px;
-  padding: 14px 10px;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all .2s;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--muted);
-  text-align: center;
-}
-
-.co-pay-opt:hover {
-  border-color: var(--green);
-  color: var(--green);
-}
-
-.co-pay-opt.active {
-  border-color: var(--green);
-  color: var(--green);
-  background: #f0faf5;
-}
-
 .co-card-fields {
   animation: fadeUp .25s ease;
 }
@@ -342,8 +330,29 @@
   position: relative;
 }
 
+.co-tour-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.4));
+}
+
 .co-tour-badge-wrap {
   padding: 12px 16px 0;
+}
+
+.co-tour-badge {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 1;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--green);
+  font-weight: 700;
+  font-size: 0.78rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
 .co-summary-body {
@@ -352,7 +361,7 @@
 
 .co-summary-name {
   font-family: 'Inter', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.12rem;
   font-weight: 700;
   color: var(--dark);
   margin-bottom: 4px;
@@ -360,8 +369,8 @@
 }
 
 .co-summary-stars {
-  font-size: 0.8rem;
-  color: var(--gold);
+  font-size: 0.82rem;
+  color: var(--muted);
   margin-bottom: 14px;
 }
 
@@ -380,6 +389,53 @@
   gap: 8px;
   font-size: 0.8rem;
   color: var(--text);
+}
+
+.co-summary-pricing {
+  padding: 20px 20px 18px;
+  margin-top: 16px;
+}
+
+.co-coupon-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.co-coupon-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1.5px solid #e4e4e4;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  outline: none;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.co-coupon-row input:focus {
+  border-color: var(--green);
+}
+
+.co-coupon-row button {
+  background: var(--green);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.co-coupon-row button:hover {
+  background: var(--green-light);
+}
+
+.co-coupon-row button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .co-price-breakdown {
@@ -409,6 +465,11 @@
   font-size: 1.2rem;
 }
 
+.co-price-row strong {
+  color: var(--dark);
+  font-size: 0.9rem;
+}
+
 .co-confirm-btn {
   width: 100%;
   background: var(--green);
@@ -428,6 +489,12 @@
 .co-confirm-btn:hover {
   background: #24703f;
   transform: translateY(-1px);
+}
+
+.co-confirm-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
 }
 
 .co-trust {
@@ -458,7 +525,7 @@
 .co-pay-opt {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
   padding: 13px 16px;
   border: 1.5px solid #e8e8e8;
   border-radius: 10px;
@@ -486,6 +553,17 @@
   display: flex;
   gap: 12px;
   margin-bottom: 18px;
+}
+
+.payment-logo {
+  width: 32px;
+  height: 32px;
+}
+
+.payment-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .co-pay-info {
