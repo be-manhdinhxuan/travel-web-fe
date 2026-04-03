@@ -280,10 +280,6 @@
       return;
     }
 
-    if (!isVerifiedUser(user)) {
-      openVerifyModal();
-    }
-
     navGuest.style.display = 'none';
     navUser.style.display = 'flex';
 

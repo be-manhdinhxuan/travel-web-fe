@@ -1,10 +1,48 @@
 ﻿const API_BASE = "http://localhost:5000/api";
 
+function isVerifyCheckRequired(method, endpoint) {
+  const cleanEndpoint = String(endpoint || '').split('?')[0];
+  if (method === 'GET') return false;
+
+  // Cho phép thao tác auth cơ bản ngay cả khi chưa verify
+  if (cleanEndpoint === '/auths/logout') return false;
+  if (cleanEndpoint === '/auths/refresh-token') return false;
+  if (cleanEndpoint === '/auths/resend-verify-email') return false;
+
+  return true;
+}
+
+function ensureUserVerified(actionName) {
+  if (typeof checkUserVerifiedForAction === 'undefined') return true;
+  return checkUserVerifiedForAction(actionName || 'thực hiện thao tác này');
+}
+
+function getActionNameFromEndpoint(method, endpoint) {
+  const cleanEndpoint = String(endpoint || '').split('?')[0];
+
+  if (cleanEndpoint.includes('/bookings') || cleanEndpoint.includes('/payments')) return 'đặt tour/thanh toán';
+  if (cleanEndpoint.includes('/wishlist')) return 'thêm tour vào yêu thích';
+  if (cleanEndpoint.includes('/users/me/password')) return 'đổi mật khẩu';
+  if (cleanEndpoint.includes('/users/me/avatar')) return 'cập nhật avatar';
+  if (cleanEndpoint.includes('/users/me')) return 'cập nhật hồ sơ';
+  if (cleanEndpoint.includes('/coupons/validate')) return 'áp dụng mã giảm giá';
+  if (cleanEndpoint.includes('/categories') || cleanEndpoint.includes('/tours') || cleanEndpoint.includes('/schedules')) return 'quản lý dữ liệu tour';
+
+  return method === 'DELETE' ? 'xóa dữ liệu' : 'thực hiện thao tác này';
+}
+
 // ============================================================
 // CORE — wrapper chính
 // ============================================================
 
 async function apiCall(method, endpoint, body = null, requireAuth = false) {
+  if (requireAuth && isVerifyCheckRequired(method, endpoint)) {
+    const actionName = getActionNameFromEndpoint(method, endpoint);
+    if (!ensureUserVerified(actionName)) {
+      return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
+    }
+  }
+
   const headers = {
     "Content-Type": "application/json",
   };
@@ -260,6 +298,9 @@ async function apiGetCategory(id) {
 
 // Admin — POST /categories
 async function apiAdminCreateCategory(formData) {
+  if (!ensureUserVerified('quản lý danh mục')) {
+    return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
+  }
   try {
     const token = localStorage.getItem("vt_access_token");
     const res = await fetch(API_BASE + "/categories", {
@@ -277,6 +318,9 @@ async function apiAdminCreateCategory(formData) {
 
 // Admin — PUT /categories/:id
 async function apiAdminUpdateCategory(id, formData) {
+  if (!ensureUserVerified('quản lý danh mục')) {
+    return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
+  }
   try {
     const token = localStorage.getItem("vt_access_token");
     const res = await fetch(API_BASE + "/categories/" + id, {
@@ -323,6 +367,9 @@ async function apiGetRecommendedTours() {
 
 // Admin/Employee — POST /tours (multipart)
 async function apiAdminCreateTour(formData) {
+  if (!ensureUserVerified('quản lý tour')) {
+    return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
+  }
   try {
     const token = localStorage.getItem("vt_access_token");
     const res = await fetch(API_BASE + "/tours", {
@@ -340,6 +387,9 @@ async function apiAdminCreateTour(formData) {
 
 // Admin/Employee — PUT /tours/:id (multipart)
 async function apiAdminUpdateTour(id, formData) {
+  if (!ensureUserVerified('quản lý tour')) {
+    return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
+  }
   try {
     const token = localStorage.getItem("vt_access_token");
     const res = await fetch(API_BASE + "/tours/" + id, {

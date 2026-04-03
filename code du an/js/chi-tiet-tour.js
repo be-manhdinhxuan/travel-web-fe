@@ -200,6 +200,10 @@ function goToBooking() {
     return;
   }
 
+  if (typeof checkUserVerifiedForAction !== 'undefined' && !checkUserVerifiedForAction('đặt tour')) {
+    return;
+  }
+
   const slots = getAvailableSlots();
   const pax = totalGuests();
   if (slots > 0 && pax > slots) {
