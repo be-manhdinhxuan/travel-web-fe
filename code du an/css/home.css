@@ -42,7 +42,7 @@
 }
 
 .hero h1 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 3.4rem;
   font-weight: 900;
   line-height: 1.1;
@@ -144,7 +144,7 @@ section {
 }
 
 .section-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 2rem;
   font-weight: 700;
   color: var(--dark);
@@ -404,7 +404,7 @@ section {
 }
 
 .section-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 2.2rem;
   font-weight: 900;
   color: var(--dark);

@@ -3,7 +3,7 @@
 (function () {
   const STYLE_ID = 'vt-toast-style';
   const HOST_ID = 'toast';
-  const DURATION = 28000000;
+  const DURATION = 3000;
   const activeTimers = new WeakMap();
 
   function ensureStyles() {

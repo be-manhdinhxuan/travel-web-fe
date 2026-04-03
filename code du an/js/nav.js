@@ -341,8 +341,12 @@
   // ACTIVE MENU
   // ==========================
   const path = window.location.pathname.split('/').pop();
+  const activePathMap = {
+    'chi-tiet-tour.html': 'tour-du-lich.html',
+  };
+  const activePath = activePathMap[path] || path;
   document.querySelectorAll('.nav-links a').forEach((a) => {
-    if (a.getAttribute('href') === path) {
+    if (a.getAttribute('href') === activePath) {
       a.style.color = '#2d8a4e';
       a.style.fontWeight = '700';
     }

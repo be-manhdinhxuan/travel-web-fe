@@ -96,7 +96,7 @@
 }
 
 .ud-hero-content h1 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(2.4rem, 5vw, 4.2rem);
   font-weight: 800;
   line-height: 1.05;
@@ -224,7 +224,7 @@
 }
 
 .ud-section-header h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1.6rem;
   font-weight: 700;
   color: var(--dark);
@@ -323,7 +323,7 @@
 }
 
 .ud-metric-card strong {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1.55rem;
   color: var(--dark);
 }
@@ -412,7 +412,7 @@
   font-weight: 800;
   font-size: 1.1rem;
   color: #e53935;
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .ud-old-price {
@@ -528,7 +528,7 @@
 }
 
 .ud-coupon-amount {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1.7rem;
   font-weight: 800;
   color: var(--green);

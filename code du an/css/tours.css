@@ -209,7 +209,7 @@
 }
 
 .tl-page-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1.6rem;
   color: var(--dark);
   margin-bottom: 4px;
@@ -337,7 +337,7 @@
 }
 
 .tl-card-price strong {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1.05rem;
   color: var(--green);
 }
