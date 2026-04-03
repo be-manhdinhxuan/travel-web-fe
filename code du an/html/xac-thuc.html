@@ -108,7 +108,25 @@
         if (section) section.hidden = false;
       }
 
+      function markLocalUserVerified() {
+        try {
+          var userRaw = localStorage.getItem('vt_user');
+          if (!userRaw) return;
+          var user = JSON.parse(userRaw);
+          if (!user || typeof user !== 'object') return;
+          user.verify = 1;
+          localStorage.setItem('vt_user', JSON.stringify(user));
+        } catch (e) { }
+      }
+
       window.addEventListener('DOMContentLoaded', async function () {
+        // Kiểm tra nếu không có token trong localStorage -> redirect về đăng nhập
+        var hasLoginToken = localStorage.getItem('vt_access_token');
+        if (!hasLoginToken) {
+          window.location.href = 'dang-nhap.html';
+          return;
+        }
+
         var params = new URLSearchParams(window.location.search);
         var token = params.get('token') || params.get('email_verify_token');
 
@@ -121,6 +139,7 @@
           var res = await apiVerifyEmail(token);
 
           if (res && res.ok) {
+            markLocalUserVerified();
             showSection('xvSuccess');
             setTimeout(function () { window.location.href = 'trang-chu.html'; }, 5000);
           } else if (res && res.status === 410) {
@@ -132,10 +151,12 @@
             document.getElementById('xvErrSub').textContent = 'Link xác thực không đúng hoặc đã được sử dụng.';
             showSection('xvError');
           } else {
+            markLocalUserVerified();
             showSection('xvSuccess');
             setTimeout(function () { window.location.href = 'trang-chu.html'; }, 3000);
           }
         } catch (e) {
+          markLocalUserVerified();
           showSection('xvSuccess');
           setTimeout(function () { window.location.href = 'trang-chu.html'; }, 3000);
         }

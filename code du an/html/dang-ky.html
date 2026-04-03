@@ -167,7 +167,35 @@
     <script src="../js/api.js"></script>
     <script src="../js/toast.js"></script>
     <script src="../js/auth.js"></script>
+    <script>
+      // Kiểm tra nếu đã đăng nhập -> redirect (do không nên ở trang register)
+      window.addEventListener('DOMContentLoaded', function () {
+        try {
+          const token = localStorage.getItem('vt_access_token');
+          const userRaw = localStorage.getItem('vt_user');
 
+          if (token && userRaw) {
+            const user = JSON.parse(userRaw);
+
+            // Nếu đã xác thực (verify = 1), redirect theo role
+            if (user.verify === true || Number(user.verify) === 1) {
+              if (user.role === 1 || user.role === 'admin') {
+                window.location.href = 'admin.html';
+              } else if (user.role === 2 || user.role === 'staff') {
+                window.location.href = 'nhan-vien.html';
+              } else {
+                window.location.href = 'trang-chu.html';
+              }
+            } else {
+              // Nếu chưa xác thực (verify = 0), redirect tới trang chủ (nav.js sẽ show modal)
+              window.location.href = 'trang-chu.html';
+            }
+          }
+        } catch (e) {
+          // Ignore errors - người dùng mà chưa đăng nhập thì vẫn hiển thị form
+        }
+      });
+    </script>
   </body>
 
 </html>

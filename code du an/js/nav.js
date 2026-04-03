@@ -87,6 +87,183 @@
     }
   }
 
+  function isVerifiedUser(user) {
+    if (!user) return false;
+    const verifyValue = user.verify;
+    return verifyValue === true || Number(verifyValue) === 1;
+  }
+
+  function ensureVerifyModal() {
+    if (document.getElementById('vtVerifyModalStyle')) return;
+
+    const style = document.createElement('style');
+    style.id = 'vtVerifyModalStyle';
+    style.textContent = `
+      .vt-verify-modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 120000;
+        padding: 16px;
+      }
+
+      .vt-verify-modal.vt-verify-modal--open {
+        display: flex;
+      }
+
+      .vt-verify-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(9, 16, 13, 0.48);
+      }
+
+      .vt-verify-dialog {
+        position: relative;
+        width: min(460px, calc(100vw - 32px));
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 24px 50px rgba(6, 22, 15, 0.28);
+        border: 1px solid rgba(45, 138, 78, 0.16);
+        padding: 24px;
+      }
+
+      .vt-verify-title {
+        margin: 0 0 8px;
+        color: #133321;
+        font-size: 1.2rem;
+        font-weight: 800;
+      }
+
+      .vt-verify-desc {
+        margin: 0;
+        color: #4c6257;
+        font-size: 0.93rem;
+        line-height: 1.6;
+      }
+
+      .vt-verify-actions {
+        margin-top: 18px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .vt-verify-btn {
+        border: none;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        padding: 10px 14px;
+        cursor: pointer;
+      }
+
+      .vt-verify-btn--primary {
+        background: #2d8a4e;
+        color: #fff;
+      }
+
+      .vt-verify-btn--ghost {
+        background: #e8f5ee;
+        color: #1f5e35;
+      }
+
+      .vt-verify-btn--text {
+        background: transparent;
+        color: #5a6e63;
+      }
+    `;
+    document.head.appendChild(style);
+
+    const modal = document.createElement('div');
+    modal.id = 'vtVerifyModal';
+    modal.className = 'vt-verify-modal';
+    modal.innerHTML = `
+      <div class="vt-verify-backdrop"></div>
+      <div class="vt-verify-dialog" role="dialog" aria-modal="true" aria-labelledby="vtVerifyTitle">
+        <h3 class="vt-verify-title" id="vtVerifyTitle">Tài khoản chưa được xác thực</h3>
+        <p class="vt-verify-desc">Bạn cần xác thực email để sử dụng đầy đủ chức năng. Hãy kiểm tra hộp thư hoặc yêu cầu gửi lại email xác thực.</p>
+        <div class="vt-verify-actions">
+          <button type="button" class="vt-verify-btn vt-verify-btn--primary" id="vtVerifyNowBtn">Xác thực ngay</button>
+          <button type="button" class="vt-verify-btn vt-verify-btn--ghost" id="vtVerifyResendBtn">Gửi lại email</button>
+          <button type="button" class="vt-verify-btn vt-verify-btn--text" id="vtVerifyLaterBtn">Để sau</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const verifyNowBtn = document.getElementById('vtVerifyNowBtn');
+    const resendBtn = document.getElementById('vtVerifyResendBtn');
+    const laterBtn = document.getElementById('vtVerifyLaterBtn');
+
+    verifyNowBtn.addEventListener('click', function () {
+      window.location.href = 'xac-thuc.html';
+    });
+
+    resendBtn.addEventListener('click', async function () {
+      if (resendBtn.disabled) return;
+
+      const oldText = resendBtn.textContent;
+      resendBtn.disabled = true;
+      resendBtn.textContent = 'Đang gửi...';
+
+      try {
+        if (typeof apiResendVerifyEmail !== 'function') {
+          throw new Error('apiResendVerifyEmail không tồn tại');
+        }
+
+        const res = await apiResendVerifyEmail();
+        if (res && res.ok) {
+          if (typeof showToast === 'function') {
+            showToast('Đã gửi lại email xác thực. Vui lòng kiểm tra hộp thư.');
+          } else {
+            alert('Đã gửi lại email xác thực. Vui lòng kiểm tra hộp thư.');
+          }
+        } else {
+          const msg = res?.data?.message || 'Không thể gửi lại email xác thực';
+          if (typeof showToast === 'function') {
+            showToast(msg);
+          } else {
+            alert(msg);
+          }
+        }
+      } catch (error) {
+        if (typeof showToast === 'function') {
+          showToast('Không thể gửi lại email xác thực');
+        } else {
+          alert('Không thể gửi lại email xác thực');
+        }
+      } finally {
+        resendBtn.disabled = false;
+        resendBtn.textContent = oldText;
+      }
+    });
+
+    laterBtn.addEventListener('click', function () {
+      modal.classList.remove('vt-verify-modal--open');
+    });
+  }
+
+  function openVerifyModal() {
+    ensureVerifyModal();
+    const modal = document.getElementById('vtVerifyModal');
+    if (modal) modal.classList.add('vt-verify-modal--open');
+  }
+
+  window.checkUserVerifiedForAction = function checkUserVerifiedForAction(actionName) {
+    const user = getCurrentUser();
+    if (!isVerifiedUser(user)) {
+      if (typeof showToast === 'function') {
+        showToast('⚠️ Vui lòng xác thực email trước khi ' + (actionName || 'thực hiện hành động này'));
+      }
+      openVerifyModal();
+      return false;
+    }
+    return true;
+  };
+
   // ==========================
   // INIT NAV
   // ==========================
@@ -101,6 +278,10 @@
       navGuest.style.display = 'flex';
       navUser.style.display = 'none';
       return;
+    }
+
+    if (!isVerifiedUser(user)) {
+      openVerifyModal();
     }
 
     navGuest.style.display = 'none';

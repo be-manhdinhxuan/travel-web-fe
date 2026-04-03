@@ -150,6 +150,9 @@ async function apiUpdateMe(data) {
 
 // PATCH /users/me/avatar (multipart — không dùng apiCall)
 async function apiUpdateAvatar(file) {
+  if (typeof checkUserVerifiedForAction !== 'undefined' && !checkUserVerifiedForAction('cập nhật avatar')) {
+    return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
+  }
   try {
     const token = localStorage.getItem("vt_access_token");
     const form = new FormData();
@@ -188,6 +191,9 @@ async function apiUpdateAvatar(file) {
 
 // PATCH /users/me/password
 async function apiChangePassword(current_password, new_password, confirm_password) {
+  if (typeof checkUserVerifiedForAction !== 'undefined' && !checkUserVerifiedForAction('đổi mật khẩu')) {
+    return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
+  }
   return apiCall("PATCH", "/users/me/password", {
     current_password,
     new_password,
@@ -197,6 +203,9 @@ async function apiChangePassword(current_password, new_password, confirm_passwor
 
 // POST /users/me/wishlist/:tour_id (toggle)
 async function apiToggleWishlist(tour_id) {
+  if (typeof checkUserVerifiedForAction !== 'undefined' && !checkUserVerifiedForAction('thêm tour vào yêu thích')) {
+    return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
+  }
   return apiCall("POST", "/users/me/wishlist/" + tour_id, null, true);
 }
 
