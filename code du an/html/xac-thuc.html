@@ -50,8 +50,7 @@
         </div>
         <h1 class="xv-title">Xác thực thành công!</h1>
         <p class="xv-sub">Email của bạn đã được xác thực.<br>Tài khoản VietnamTravel đã sẵn sàng sử dụng.</p>
-        <a href="trang-chu.html" class="xv-btn">Bắt đầu khám phá →</a>
-        <a href="dang-nhap.html" class="xv-btn-ghost">Đăng nhập</a>
+        <a href="dang-nhap.html" class="xv-btn">Đăng nhập</a>
       </section>
 
       <!-- STATE 3: LỖI / HẾT HẠN -->
@@ -123,7 +122,7 @@
 
           if (res && res.ok) {
             showSection('xvSuccess');
-            setTimeout(function () { window.location.href = 'trang-chu.html'; }, 3000);
+            setTimeout(function () { window.location.href = 'trang-chu.html'; }, 5000);
           } else if (res && res.status === 410) {
             document.getElementById('xvErrTitle').textContent = 'Link đã hết hạn';
             document.getElementById('xvErrSub').textContent = 'Link xác thực chỉ có hiệu lực một lần và đã hết hạn. Vui lòng yêu cầu gửi lại.';
