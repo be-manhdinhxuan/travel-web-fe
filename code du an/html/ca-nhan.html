@@ -42,6 +42,14 @@
                 </svg>
                 Yêu thích
               </button>
+              <button class="cp-nav-item" onclick="switchTab('history', this)" id="cpNavHistory">
+                <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 3" />
+                </svg>
+                Lịch sử
+              </button>
               <button class="cp-nav-item" onclick="switchTab('password', this)" id="cpNavSettings">
                 <svg class="cp-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                   stroke-linecap="round" stroke-linejoin="round">
@@ -142,6 +150,25 @@
                   <p>Chưa có tour yêu thích nào</p>
                   <span>Nhấn ♡ trên các tour để thêm vào đây!</span>
                   <a href="diem-den.html" class="cp-explore-btn" style="margin-top:16px">Khám phá tour →</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="cp-tab" id="tab-history" style="display:none">
+              <div class="cp-card">
+                <div class="cp-card-header">
+                  <h2>Lịch sử đặt tour</h2>
+                  <p>Danh sách các tour bạn đã đặt trước đây.</p>
+                </div>
+                <div id="cpHistoryList"></div>
+                <div class="cp-empty" id="cpHistoryEmpty" style="display:none">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 3" />
+                  </svg>
+                  <p>Bạn chưa có lịch sử đặt tour nào</p>
+                  <a href="tour-du-lich.html" class="cp-explore-btn" style="margin-top:16px">Khám phá tour →</a>
                 </div>
               </div>
             </div>
