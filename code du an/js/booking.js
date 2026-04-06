@@ -85,59 +85,48 @@ async function doConfirmBooking() {
   const payment = document.querySelector('.pay-method.active input')?.value || 'bank';
   const note = document.getElementById('mNote')?.value || '';
 
-  const totalAmt = currentPrice * adults + Math.floor(currentPrice * 0.7) * kids;
-  const totalStr = totalAmt.toLocaleString('vi-VN') + 'đ';
-  const guestStr = adults + ' người lớn' + (kids > 0 ? ', ' + kids + ' trẻ em' : '');
-  const code = 'VNT-' + Math.floor(10000 + Math.random() * 90000);
-  const methodMap = { bank: 'Chuyển khoản', card: 'Thẻ tín dụng', momo: 'MoMo', vnpay: 'VNPay', cod: 'Tiền mặt' };
-
-  // Hiện mã booking
-  if (document.getElementById('bookingCode')) document.getElementById('bookingCode').textContent = code;
-  if (document.getElementById('confirmEmail')) document.getElementById('confirmEmail').textContent = email;
-
-  // Lưu booking vào localStorage (luôn làm để hiện lịch sử)
-  const u = loadUser();
-  if (u) {
-    const key = 'vt_bookings_' + u.email;
-    const bookings = JSON.parse(localStorage.getItem(key) || '[]');
-    bookings.unshift({
-      code, tourName: currentTour, date, guests: guestStr,
-      total: totalStr, payment: methodMap[payment] || payment,
-      status: 'upcoming', bg: 'linear-gradient(135deg,#2d8a4e,#3aaa62)',
-      createdAt: new Date().toISOString()
-    });
-    localStorage.setItem(key, JSON.stringify(bookings));
+  if (!currentTourId) {
+    showToast('⚠️ Không tìm thấy lịch khởi hành hợp lệ để tạo booking');
+    return;
   }
 
-  // Gọi API tạo booking (nếu có backend)
+  // Gọi API tạo booking và điều hướng sang trang thanh toán bằng booking_id
   try {
-    if (currentTourId) {
-      const payMethod = payment === 'momo' ? 1 : 2; // 1=momo, 2=vnpay
-      const res = await apiCreateBooking({
-        schedule_id: currentTourId,
-        passengers: { adults, children: kids, babies: 0 },
-        payment_method: payMethod,
-        contact_info: { full_name: name, phone, email },
-        note
-      });
-      if (res && res.ok && res.data.result) {
-        const { booking, payment_url } = res.data.result;
-        // Có payment_url → redirect thanh toán
-        if (payment_url) {
-          setTimeout(function () { window.location.href = payment_url; }, 1500);
-          return;
-        }
-      }
-    }
-  } catch (e) { /* tiếp tục với local flow */ }
+    const res = await apiCreateBooking({
+      schedule_id: currentTourId,
+      passengers: { adults: adults, children: kids, babies: 0 },
+      payment_method: payment === 'vnpay' ? 2 : 1,
+      contact_info: { full_name: name, phone, email },
+      note
+    });
 
-  // Redirect trang thành công sau 1.5s
-  setTimeout(function () {
+    if (!res || !res.ok) {
+      const apiMsg = res?.data?.message || '';
+      const errs = res?.data?.errors;
+      let firstErr = '';
+      if (Array.isArray(errs) && errs.length) {
+        firstErr = errs[0]?.msg || errs[0]?.message || '';
+      } else if (errs && typeof errs === 'object') {
+        const firstVal = Object.values(errs)[0];
+        firstErr = firstVal?.msg || firstVal?.message || String(firstVal || '');
+      }
+      showToast('❌ ' + (firstErr || apiMsg || 'Không thể tạo booking'));
+      return;
+    }
+
+    const result = res?.data?.result || {};
+    const booking = result?.booking || result;
+    const bookingId = booking?._id || booking?.id || result?.booking_id || result?.id;
+
+    if (!bookingId) {
+      showToast('❌ Không nhận được booking_id từ hệ thống');
+      return;
+    }
+
     closeBookingModal();
-    window.location.href = '1thanhcong.html?code=' + code +
-      '&tour=' + encodeURIComponent(currentTour) +
-      '&date=' + encodeURIComponent(date) +
-      '&guests=' + encodeURIComponent(guestStr) +
-      '&total=' + encodeURIComponent(totalStr);
-  }, 1500);
+    window.location.href = 'dat-tour.html?booking_id=' + encodeURIComponent(bookingId);
+  } catch (e) {
+    console.error(e);
+    showToast('❌ Không thể tạo booking');
+  }
 }

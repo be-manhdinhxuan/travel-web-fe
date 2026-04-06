@@ -509,6 +509,14 @@ async function apiCreateVnpayPayment(booking_id) {
   return apiCall("POST", "/payments/vnpay", { booking_id }, true);
 }
 
+// POST /payments (wrapper theo phương thức)
+async function apiCreatePayment(booking_id, method = "momo") {
+  const m = String(method || "momo").toLowerCase();
+  if (m === "vnpay") return apiCreateVnpayPayment(booking_id);
+  if (m === "momo") return apiCreateMomoPayment(booking_id);
+  return apiCall("POST", "/payments", { booking_id, payment_method: m }, true);
+}
+
 // ============================================================
 // COUPONS
 // ============================================================
@@ -521,6 +529,11 @@ async function apiGetPublicCoupons() {
 // POST /coupons/validate
 async function apiValidateCoupon(code, order_value) {
   return apiCall("POST", "/coupons/validate", { code, order_value }, true);
+}
+
+// PATCH /coupons/:id/coupon
+async function apiApplyBookingCoupon(id, data) {
+  return apiCall("PATCH", "/coupons/" + id + "/coupon", data, true);
 }
 
 // Admin — GET /coupons
@@ -631,9 +644,11 @@ window.apiAdminUpdateBookingStatus = apiAdminUpdateBookingStatus;
 // Payments
 window.apiCreateMomoPayment = apiCreateMomoPayment;
 window.apiCreateVnpayPayment = apiCreateVnpayPayment;
+window.apiCreatePayment = apiCreatePayment;
 
 // Coupons
 window.apiValidateCoupon = apiValidateCoupon;
+window.apiApplyBookingCoupon = apiApplyBookingCoupon;
 window.apiAdminGetCoupons = apiAdminGetCoupons;
 window.apiAdminCreateCoupon = apiAdminCreateCoupon;
 window.apiAdminUpdateCoupon = apiAdminUpdateCoupon;

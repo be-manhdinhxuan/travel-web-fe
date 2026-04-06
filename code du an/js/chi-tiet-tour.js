@@ -208,7 +208,7 @@ function updateSummary() {
 }
 
 // GO TO BOOKING
-function goToBooking() {
+async function goToBooking() {
   if (!selectedSchedule) {
     showToast('⚠️ Vui lòng chọn lịch khởi hành');
     return;
@@ -232,63 +232,112 @@ function goToBooking() {
     return;
   }
 
-  const params = new URLSearchParams({
-    slug: tourData?.slug || '',
-    schedule: selectedSchedule._id,
-    adult: guests.adult,
-    child: guests.child,
-    baby: guests.baby,
-  });
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('vt_user') || 'null');
+    } catch {
+      return null;
+    }
+  })();
 
-  try {
-    const durationText = tourData?.duration_days
-      ? (tourData.duration_nights != null
-        ? `${tourData.duration_days} ngày ${tourData.duration_nights} đêm`
-        : `${tourData.duration_days} ngày`)
-      : '';
-
-    // 🔥 LƯU STATE ĐỂ QUAY LẠI
-    sessionStorage.setItem('vt_detail_state', JSON.stringify({
-      tourId: tourData?.slug || tourData?._id || '',
-      scheduleId: selectedSchedule._id,
-      guests: guests
-    }));
-
-    // 🔥 QUAN TRỌNG: xóa snapshot cũ trước
-    sessionStorage.removeItem('vt_checkout_tour');
-
-    sessionStorage.setItem('vt_checkout_tour', JSON.stringify({
-      tourId: (tourData?.slug || '').trim(),
-      name: tourData?.name || '',
-      image: tourData?.images?.[0] || '',
-
-      departure: tourData?.departure_city || '',
-      destination: tourData?.destination || '',
-      durationText: durationText,
-
-      // ✅ FIX CHUẨN
-      schedule: {
-        id: selectedSchedule._id,
-        departureDate: selectedSchedule.departure_date,
-        returnDate: selectedSchedule.return_date,
-        priceAdult: selectedSchedule.price_adult,
-        priceChild: selectedSchedule.price_child,
-        priceBaby: selectedSchedule.price_baby,
-        slots: selectedSchedule.available_slots
-      },
-
-      // ✅ FIX CHUẨN
-      guests: {
-        adult: guests.adult,
-        child: guests.child,
-        baby: guests.baby
-      }
-    }));
-  } catch (error) {
-    console.error(error);
+  const btn = document.getElementById('ctBtnBook');
+  const oldText = btn ? btn.textContent : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Đang tạo booking...';
   }
 
-  window.location.href = 'dat-tour.html?' + params.toString();
+  let fullName = String(user?.full_name || user?.name || '').trim();
+  let email = String(user?.email || '').trim();
+  let phone = String(user?.phone || '').trim();
+
+  // Local profile có thể bị cũ; đồng bộ lại từ backend trước khi tạo booking.
+  if ((!fullName || !email || !phone) && typeof apiGetMe === 'function') {
+    try {
+      const meRes = await apiGetMe();
+      if (meRes?.ok) {
+        const me = meRes?.data?.result?.user || meRes?.data?.result || {};
+        fullName = String(me?.full_name || me?.name || fullName).trim();
+        email = String(me?.email || email).trim();
+        phone = String(me?.phone || phone).trim();
+
+        // Cache lại để các trang khác dùng đúng dữ liệu mới.
+        try {
+          const oldUser = JSON.parse(localStorage.getItem('vt_user') || 'null') || {};
+          const merged = {
+            ...oldUser,
+            full_name: me?.full_name || oldUser?.full_name || '',
+            name: me?.full_name || oldUser?.name || '',
+            email: me?.email || oldUser?.email || '',
+            phone: me?.phone || oldUser?.phone || '',
+          };
+          localStorage.setItem('vt_user', JSON.stringify(merged));
+        } catch (e) { }
+      }
+    } catch (e) { }
+  }
+
+  if (!fullName || !email || !phone) {
+    const missing = [];
+    if (!fullName) missing.push('họ tên');
+    if (!email) missing.push('email');
+    if (!phone) missing.push('số điện thoại');
+    showToast('⚠️ Thiếu ' + missing.join(', ') + '. Vui lòng cập nhật hồ sơ trước khi đặt tour');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = oldText || 'Đặt tour ngay';
+    }
+    return;
+  }
+
+  const body = {
+    schedule_id: selectedSchedule._id,
+    passengers: {
+      adults: guests.adult,
+      children: guests.child,
+      babies: guests.baby,
+    },
+    // Booking được tạo trước, chọn cổng thanh toán ở trang kế tiếp.
+    payment_method: 1,
+    contact_info: {
+      full_name: fullName,
+      email: email,
+      phone: phone,
+    },
+  };
+
+  try {
+    const res = await apiCreateBooking(body);
+    if (!res?.ok) {
+      const apiMsg = res?.data?.message || '';
+      const errs = res?.data?.errors;
+      let firstErr = '';
+      if (Array.isArray(errs) && errs.length) {
+        firstErr = errs[0]?.msg || errs[0]?.message || '';
+      } else if (errs && typeof errs === 'object') {
+        const firstVal = Object.values(errs)[0];
+        firstErr = firstVal?.msg || firstVal?.message || String(firstVal || '');
+      }
+      throw new Error(firstErr || apiMsg || 'Tạo booking thất bại');
+    }
+
+    const result = res?.data?.result || {};
+    const booking = result?.booking || result;
+    const bookingId = booking?._id || booking?.id || result?.booking_id || result?.id;
+
+    if (!bookingId) {
+      throw new Error('Không nhận được booking_id từ hệ thống');
+    }
+
+    window.location.href = 'dat-tour.html?booking_id=' + encodeURIComponent(bookingId);
+  } catch (error) {
+    console.error(error);
+    showToast('❌ ' + (error?.message || 'Không thể tạo booking'));
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = oldText || 'Đặt tour ngay';
+    }
+  }
 }
 
 function totalGuests(customGuests) {
