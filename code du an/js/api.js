@@ -172,6 +172,10 @@ function apiLogoutLocal() {
   localStorage.removeItem("vt_user");
 }
 
+function apiClearTokens() {
+  apiLogoutLocal();
+}
+
 // ============================================================
 // USERS
 // ============================================================
@@ -181,9 +185,9 @@ async function apiGetMe() {
   return apiCall("GET", "/users/me", null, true);
 }
 
-// PATCH /users/me
+// PUT /users/me
 async function apiUpdateMe(data) {
-  return apiCall("PATCH", "/users/me", data, true);
+  return apiCall("PUT", "/users/me", data, true);
 }
 
 // PATCH /users/me/avatar (multipart — không dùng apiCall)
