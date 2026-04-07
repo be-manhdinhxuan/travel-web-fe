@@ -2,7 +2,9 @@
 .hero {
   margin-top: 82px;
   position: relative;
-  height: 560px;
+  min-height: 560px;
+  height: auto;
+  padding: 36px 0;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -27,13 +29,13 @@
   z-index: 2;
   text-align: center;
   color: white;
-  max-width: 680px;
+  max-width: min(860px, 100%);
   padding: 0 20px;
 }
 
 .hero-badge {
   display: inline-block;
-  font-size: 0.7rem;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -42,12 +44,15 @@
 }
 
 .hero h1 {
-  font-family: 'Inter', sans-serif;
-  font-size: 3.4rem;
+  font-size: clamp(2rem, 6vw, 3.4rem);
   font-weight: 900;
-  line-height: 1.1;
+  line-height: 1.12;
+  max-width: none;
+  margin: 0 auto 16px;
+  text-wrap: pretty;
+  overflow-wrap: normal;
+  word-break: keep-all;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
-  margin-bottom: 16px;
 }
 
 .hero p {
@@ -135,19 +140,19 @@ section {
 }
 
 .section-tag {
-  font-size: 0.7rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--green);
+  color: var(--dark);
   margin-bottom: 8px;
 }
 
 .section-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  color: var(--dark);
+  color: var(--green);
+  letter-spacing: -0.5px;
 }
 
 .section-header {
@@ -270,38 +275,6 @@ section {
   background-position: center;
 }
 
-.d1 {
-  background: url('../images/halong.jpg') center/cover;
-}
-
-.d2 {
-  background: url('../images/hanoi.jpg') center/cover;
-}
-
-.d3 {
-  background: url('../images/danang.jpg') center/cover;
-}
-
-.d4 {
-  background: url('../images/lehoian.jpg') center/cover;
-}
-
-.d5 {
-  background: url('../images/sapa.png') center/cover;
-}
-
-.d6 {
-  background: url('../images/ninhbinh.jpg') center/cover;
-}
-
-.d7 {
-  background: url('../images/mientay.jpg') center/cover;
-}
-
-.d8 {
-  background: url('https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=200&q=80') center/cover;
-}
-
 .dest-label {
   font-size: 0.82rem;
   font-weight: 500;
@@ -401,14 +374,6 @@ section {
 
 .tour-title-green {
   color: var(--green) !important;
-}
-
-.section-title {
-  font-family: 'Inter', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: var(--dark);
-  letter-spacing: -0.5px;
 }
 
 .tour-wishlist {
@@ -602,6 +567,12 @@ footer {
   color: var(--green-light);
 }
 
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .footer-col h4 {
   font-size: 0.8rem;
   font-weight: 700;
@@ -613,10 +584,15 @@ footer {
 
 .footer-col ul {
   list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .footer-col ul li {
-  margin-bottom: 12px;
+  margin: 0;
 }
 
 .footer-col ul a {

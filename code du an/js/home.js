@@ -41,10 +41,21 @@ async function loadCategories() {
 function renderDestinations(categories) {
   const grid = document.getElementById('destGrid')
   if (!grid) return
+
+  const fallbackThumbs = [
+    'linear-gradient(135deg,#2d8a4e,#3aaa62)',
+    'linear-gradient(135deg,#1f6f8b,#2ca8c2)',
+    'linear-gradient(135deg,#c56a1f,#e6a23c)',
+    'linear-gradient(135deg,#6a4fb3,#8d6ee8)',
+    'linear-gradient(135deg,#b34747,#de6b6b)'
+  ]
+
   grid.innerHTML = categories.map(cat => `
     <div class="dest-card" onclick="goByCategory('${cat._id}')">
       <div class="dest-thumb">
-        <div class="dest-thumb-inner" style="background:url('${cat.thumbnail || ''}') center/cover no-repeat"></div>
+        <div class="dest-thumb-inner" style="${cat.thumbnail
+      ? `background:url('${cat.thumbnail}') center/cover no-repeat`
+      : `background:${fallbackThumbs[Math.floor(Math.random() * fallbackThumbs.length)]}`}"></div>
       </div>
       <div class="dest-label">${cat.name}</div>
     </div>
