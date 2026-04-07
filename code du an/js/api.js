@@ -232,14 +232,14 @@ async function apiUpdateAvatar(file) {
 }
 
 // PATCH /users/me/password
-async function apiChangePassword(current_password, new_password, confirm_password) {
+async function apiChangePassword(password, new_password, new_confirm_password) {
   if (typeof checkUserVerifiedForAction !== 'undefined' && !checkUserVerifiedForAction('đổi mật khẩu')) {
     return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
   }
   return apiCall("PATCH", "/users/me/password", {
-    current_password,
+    password,
     new_password,
-    confirm_password,
+    new_confirm_password,
   }, true);
 }
 

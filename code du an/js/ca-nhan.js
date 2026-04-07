@@ -1185,8 +1185,13 @@ async function changePassword() {
     return showPwdErr('Vui lòng điền đầy đủ tất cả các trường.', errEl);
   }
 
-  if (newPassword.length < 6) {
-    return showPwdErr('Mật khẩu mới phải có ít nhất 6 ký tự.', errEl);
+  var req = getPasswordRequirementStatus(newPassword);
+  if (!(req.length && req.lowercase && req.uppercase && req.symbol)) {
+    return showPwdErr('Mật khẩu mới chưa đủ mạnh (6-50 ký tự, gồm chữ thường, chữ hoa và ký tự đặc biệt).', errEl);
+  }
+
+  if (newPassword === currentPassword) {
+    return showPwdErr('Mật khẩu mới phải khác mật khẩu hiện tại.', errEl);
   }
 
   if (newPassword !== confirmPassword) {
@@ -1196,7 +1201,7 @@ async function changePassword() {
   try {
     var res = await apiChangePassword(currentPassword, newPassword, confirmPassword);
     if (!(res && res.ok)) {
-      return showPwdErr('Mật khẩu hiện tại không đúng hoặc không hợp lệ.', errEl);
+      return showPwdErr(extractChangePasswordErrorMessage(res), errEl);
     }
   } catch (_) {
     return showPwdErr('Không thể kết nối máy chủ.', errEl);
@@ -1206,6 +1211,7 @@ async function changePassword() {
     var input = document.getElementById(id);
     if (input) input.value = '';
   });
+  checkPwdStrength('');
 
   if (okEl) {
     okEl.style.display = 'inline-flex';
@@ -1226,38 +1232,81 @@ function showPwdErr(message, el) {
   err.style.display = 'block';
 }
 
-function checkPwdStrength(value) {
-  var fill = document.getElementById('pwdBarFill');
-  var txt = document.getElementById('pwdStrengthText');
-  if (!fill) return;
+function extractChangePasswordErrorMessage(res) {
+  if (!res) return 'Đổi mật khẩu thất bại.';
 
-  var score = 0;
-  if (value.length >= 8) score++;
-  if (/[A-Z]/.test(value)) score++;
-  if (/[0-9]/.test(value)) score++;
-  if (/[^A-Za-z0-9]/.test(value)) score++;
+  var status = Number(res.status || 0);
+  var message = String(res?.data?.message || '').trim();
+  var upperMessage = message.toUpperCase();
 
-  var levels = [
-    { w: '0%', c: '#eee', t: '' },
-    { w: '25%', c: '#e04444', t: 'Yếu' },
-    { w: '50%', c: '#f90', t: 'Trung bình' },
-    { w: '75%', c: '#3aaa62', t: 'Khá' },
-    { w: '100%', c: '#2d8a4e', t: 'Mạnh' },
-  ];
-
-  var level = levels[score];
-  fill.style.width = level.w;
-  fill.style.background = level.c;
-
-  if (txt) {
-    txt.textContent = level.t;
-    txt.style.color = level.c;
+  if (status === 401 || upperMessage.includes('PASSWORD_IS_INCORRECT')) {
+    return 'Mật khẩu hiện tại không đúng.';
   }
+
+  if (status === 404 || upperMessage.includes('USER_NOT_FOUND')) {
+    return 'Không tìm thấy tài khoản người dùng.';
+  }
+
+  if (status === 400 || upperMessage.includes('NEW_PASSWORD_MUST_BE_DIFFERENT')) {
+    return 'Mật khẩu mới phải khác mật khẩu hiện tại.';
+  }
+
+  if (message) return message;
+  return 'Đổi mật khẩu thất bại. Vui lòng thử lại.';
+}
+
+function getPasswordRequirementStatus(value) {
+  var v = String(value || '');
+  return {
+    length: v.length >= 6 && v.length <= 50,
+    lowercase: /[a-z]/.test(v),
+    uppercase: /[A-Z]/.test(v),
+    symbol: /[^A-Za-z0-9]/.test(v),
+  };
+}
+
+function checkPwdStrength(value) {
+  var status = getPasswordRequirementStatus(value);
+  var map = {
+    pwdRuleLength: status.length,
+    pwdRuleLower: status.lowercase,
+    pwdRuleUpper: status.uppercase,
+    pwdRuleSymbol: status.symbol,
+  };
+
+  Object.keys(map).forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('is-met', !!map[id]);
+  });
 }
 
 function togglePwd(id, btn) {
   var input = document.getElementById(id);
   if (!input) return;
+
   input.type = input.type === 'password' ? 'text' : 'password';
-  btn.textContent = input.type === 'password' ? '👁' : '🙈';
+
+  if (!btn) return;
+  var svg = btn.querySelector('svg');
+  if (!svg) return;
+
+  var isHidden = input.type === 'password';
+  svg.setAttribute('viewBox', '0 0 20 20');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('width', '16');
+  svg.setAttribute('height', '16');
+
+  if (isHidden) {
+    svg.innerHTML =
+      '<path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />' +
+      '<circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />';
+    btn.setAttribute('aria-label', 'Hiện mật khẩu');
+  } else {
+    svg.innerHTML =
+      '<path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />' +
+      '<circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />' +
+      '<path d="M3 17L17 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />';
+    btn.setAttribute('aria-label', 'Ẩn mật khẩu');
+  }
 }

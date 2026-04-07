@@ -184,7 +184,13 @@
                     <label for="pwdCurrent">Mật khẩu hiện tại</label>
                     <div class="cp-input-wrap">
                       <input id="pwdCurrent" type="password" placeholder="Nhập mật khẩu hiện tại">
-                      <button type="button" class="cp-eye" onclick="togglePwd('pwdCurrent', this)">👁</button>
+                      <button type="button" class="cp-eye" onclick="togglePwd('pwdCurrent', this)" tabindex="-1"
+                        aria-label="Hiện mật khẩu">
+                        <svg viewBox="0 0 20 20" fill="none" width="16" height="16">
+                          <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />
+                          <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                   <div class="cp-field">
@@ -192,20 +198,32 @@
                     <div class="cp-input-wrap">
                       <input id="pwdNew" type="password" placeholder="Nhập mật khẩu mới"
                         oninput="checkPwdStrength(this.value)">
-                      <button type="button" class="cp-eye" onclick="togglePwd('pwdNew', this)">👁</button>
+                      <button type="button" class="cp-eye" onclick="togglePwd('pwdNew', this)" tabindex="-1"
+                        aria-label="Hiện mật khẩu">
+                        <svg viewBox="0 0 20 20" fill="none" width="16" height="16">
+                          <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />
+                          <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />
+                        </svg>
+                      </button>
                     </div>
-                    <div class="cp-pwd-strength">
-                      <div class="cp-pwd-bar">
-                        <div class="cp-pwd-fill" id="pwdBarFill"></div>
-                      </div>
-                      <span id="pwdStrengthText"> </span>
-                    </div>
+                    <ul class="cp-pwd-rules" id="pwdRulesList">
+                      <li id="pwdRuleLength">6-50 ký tự</li>
+                      <li id="pwdRuleLower">Ít nhất 1 chữ thường (a-z)</li>
+                      <li id="pwdRuleUpper">Ít nhất 1 chữ in hoa (A-Z)</li>
+                      <li id="pwdRuleSymbol">Ít nhất 1 ký tự đặc biệt</li>
+                    </ul>
                   </div>
                   <div class="cp-field">
                     <label for="pwdConfirm">Xác nhận mật khẩu</label>
                     <div class="cp-input-wrap">
                       <input id="pwdConfirm" type="password" placeholder="Nhập lại mật khẩu mới">
-                      <button type="button" class="cp-eye" onclick="togglePwd('pwdConfirm', this)">👁</button>
+                      <button type="button" class="cp-eye" onclick="togglePwd('pwdConfirm', this)" tabindex="-1"
+                        aria-label="Hiện mật khẩu">
+                        <svg viewBox="0 0 20 20" fill="none" width="16" height="16">
+                          <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />
+                          <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 </div>

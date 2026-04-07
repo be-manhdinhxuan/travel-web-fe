@@ -328,9 +328,126 @@
   // ==========================
   // LOGOUT
   // ==========================
-  window.doLogout = function () {
+  function performLogout() {
     localStorage.clear();
     window.location.href = 'dang-nhap.html';
+  }
+
+  function ensureLogoutModal() {
+    if (document.getElementById('vtLogoutModalStyle')) return;
+
+    var style = document.createElement('style');
+    style.id = 'vtLogoutModalStyle';
+    style.textContent = `
+      .vt-logout-modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 120100;
+        padding: 16px;
+      }
+
+      .vt-logout-modal.vt-logout-modal--open {
+        display: flex;
+      }
+
+      .vt-logout-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(9, 16, 13, 0.48);
+      }
+
+      .vt-logout-dialog {
+        position: relative;
+        width: min(420px, calc(100vw - 32px));
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 24px 48px rgba(6, 22, 15, 0.26);
+        border: 1px solid rgba(45, 138, 78, 0.14);
+        padding: 22px;
+      }
+
+      .vt-logout-title {
+        margin: 0 0 8px;
+        color: #133321;
+        font-size: 1.1rem;
+        font-weight: 800;
+      }
+
+      .vt-logout-desc {
+        margin: 0;
+        color: #4c6257;
+        font-size: 0.92rem;
+        line-height: 1.55;
+      }
+
+      .vt-logout-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .vt-logout-btn {
+        border: none;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        padding: 9px 14px;
+        cursor: pointer;
+      }
+
+      .vt-logout-btn--cancel {
+        background: #eef3ef;
+        color: #2b5940;
+      }
+
+      .vt-logout-btn--confirm {
+        background: #e74c3c;
+        color: #fff;
+      }
+    `;
+    document.head.appendChild(style);
+
+    var modal = document.createElement('div');
+    modal.id = 'vtLogoutModal';
+    modal.className = 'vt-logout-modal';
+    modal.innerHTML = `
+      <div class="vt-logout-backdrop"></div>
+      <div class="vt-logout-dialog" role="dialog" aria-modal="true" aria-labelledby="vtLogoutTitle">
+        <h3 class="vt-logout-title" id="vtLogoutTitle">Xác nhận đăng xuất</h3>
+        <p class="vt-logout-desc">Bạn có chắc chắn muốn đăng xuất khỏi tài khoản này không?</p>
+        <div class="vt-logout-actions">
+          <button type="button" class="vt-logout-btn vt-logout-btn--cancel" id="vtLogoutCancelBtn">Hủy</button>
+          <button type="button" class="vt-logout-btn vt-logout-btn--confirm" id="vtLogoutConfirmBtn">Đăng xuất</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    var closeModal = function () {
+      modal.classList.remove('vt-logout-modal--open');
+    };
+
+    modal.querySelector('.vt-logout-backdrop').addEventListener('click', closeModal);
+    document.getElementById('vtLogoutCancelBtn').addEventListener('click', closeModal);
+    document.getElementById('vtLogoutConfirmBtn').addEventListener('click', function () {
+      closeModal();
+      performLogout();
+    });
+  }
+
+  function openLogoutModal() {
+    ensureLogoutModal();
+    var modal = document.getElementById('vtLogoutModal');
+    if (modal) modal.classList.add('vt-logout-modal--open');
+  }
+
+  window.doLogout = function () {
+    openLogoutModal();
   };
 
   // ==========================
