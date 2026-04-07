@@ -480,6 +480,13 @@ body {
   gap: 16px;
   padding: 16px 0;
   border-bottom: 1px solid #f0f2f5;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.2s;
+}
+
+.cp-booking-item:hover {
+  background: #f9fbfa;
 }
 
 .cp-booking-item:last-child {
@@ -541,6 +548,21 @@ body {
   white-space: nowrap;
 }
 
+.status-pending {
+  background: #fff4e0;
+  color: #c07000;
+}
+
+.status-confirmed {
+  background: #e8f7f2;
+  color: #198754;
+}
+
+.status-completed {
+  background: #e7f6ea;
+  color: #2d8a4e;
+}
+
 .status-done {
   background: #e8f7f2;
   color: var(--green);
@@ -590,6 +612,61 @@ body {
   background: var(--red);
   color: #fff;
   border-color: var(--red);
+}
+
+.cp-history-pagination {
+  margin-top: 16px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cp-page-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cp-page-nav,
+.cp-page-btn {
+  border: 1px solid #d9e3dd;
+  background: #fff;
+  color: #4b5a54;
+  border-radius: 8px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cp-page-btn {
+  min-width: 32px;
+  padding: 0 8px;
+}
+
+.cp-page-nav:hover:not(:disabled),
+.cp-page-btn:hover:not(:disabled) {
+  border-color: #b8d3c2;
+  color: var(--green);
+}
+
+.cp-page-btn.active {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+  opacity: 1 !important;
+}
+
+.cp-page-nav:disabled,
+.cp-page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .cp-support-item {
@@ -950,6 +1027,10 @@ body {
 
   .cp-booking-right {
     align-items: flex-start;
+  }
+
+  .cp-history-pagination {
+    justify-content: center;
   }
 }
 

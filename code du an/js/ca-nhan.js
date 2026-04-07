@@ -10,6 +10,13 @@ const UserVerifyStatus = {
 var pendingAvatarFile = null;
 var pendingAvatarPreview = '';
 var userWishlistIds = [];
+var bookingDetailsCache = {};
+var bookingHistoryItemMap = {};
+var bookingHistoryState = {
+  page: 1,
+  limit: 5,
+  totalPages: 1,
+};
 
 function loadUser() {
   try {
@@ -709,9 +716,20 @@ function extractBookingItems(payload) {
   if (Array.isArray(payload)) return payload;
   if (payload.result && Array.isArray(payload.result)) return payload.result;
   if (payload.result && Array.isArray(payload.result.bookings)) return payload.result.bookings;
+  if (payload.result && Array.isArray(payload.result.items)) return payload.result.items;
+  if (payload.result && payload.result.data && Array.isArray(payload.result.data)) return payload.result.data;
+  if (payload.result && payload.result.data && Array.isArray(payload.result.data.bookings)) return payload.result.data.bookings;
+  if (payload.data && Array.isArray(payload.data)) return payload.data;
+  if (payload.data && Array.isArray(payload.data.bookings)) return payload.data.bookings;
   if (Array.isArray(payload.bookings)) return payload.bookings;
 
   return [];
+}
+
+function formatVnd(value) {
+  var num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return '';
+  return num.toLocaleString('vi-VN') + 'đ';
 }
 
 function formatBookingDate(value) {
@@ -722,26 +740,59 @@ function formatBookingDate(value) {
 }
 
 function normalizeBookingStatus(statusValue) {
-  var raw = String(statusValue ?? '').toLowerCase();
   var asNumber = Number(statusValue);
+  var raw = String(statusValue ?? '').toLowerCase();
 
-  if (raw.includes('cancel') || asNumber === 0) {
+  if (asNumber === 0 || raw === 'pending') {
+    return { text: 'Chờ thanh toán', className: 'status-pending' };
+  }
+
+  if (asNumber === 1 || raw === 'confirmed' || raw === 'confirm') {
+    return { text: 'Đã xác nhận', className: 'status-confirmed' };
+  }
+
+  if (asNumber === 2 || raw === 'completed' || raw === 'complete') {
+    return { text: 'Hoàn thành', className: 'status-completed' };
+  }
+
+  if (asNumber === 3 || raw === 'cancelled' || raw === 'canceled' || raw.includes('cancel')) {
     return { text: 'Đã hủy', className: 'status-cancelled' };
   }
 
-  if (raw.includes('paid') || raw.includes('confirm') || raw.includes('done') || raw.includes('complete') || asNumber === 2) {
-    return { text: 'Đã xác nhận', className: 'status-done' };
+  return { text: 'Chờ thanh toán', className: 'status-pending' };
+}
+
+function getTotalGuests(passengers) {
+  if (!passengers) return 0;
+
+  if (Array.isArray(passengers)) {
+    return passengers.reduce(function (sum, p) {
+      return sum + Number(p?.adults || 0) + Number(p?.children || 0) + Number(p?.babies || 0);
+    }, 0);
   }
 
-  return { text: 'Đang xử lý', className: 'status-upcoming' };
+  if (typeof passengers === 'object') {
+    return Number(passengers.adults || 0) + Number(passengers.children || 0) + Number(passengers.babies || 0);
+  }
+
+  return 0;
 }
 
 function buildHistoryItem(booking) {
-  var tour = booking?.tour || booking?.schedule?.tour || {};
-  var title = tour?.name || booking?.tour_name || 'Tour du lịch';
-  var departureDate = booking?.schedule?.departure_date || booking?.departure_date || booking?.date;
-  var displayDate = formatBookingDate(departureDate);
+  var snapshot = booking?.tour_snapshot || {};
+  var bookingId = booking?._id ? String(booking._id) : '';
+  var title = snapshot?.tour_name || booking?.tour_name || booking?.tour?.name || 'Tour du lịch';
+  var departureDate = snapshot?.departure_date || booking?.departure_date || booking?.schedule?.departure_date;
+  var returnDate = snapshot?.return_date || booking?.return_date;
+  var displayDepartureDate = formatBookingDate(departureDate);
+  var displayReturnDate = formatBookingDate(returnDate);
+  var displayCreatedAt = formatBookingDate(booking?.created_at);
+  var durationDays = Number(snapshot?.duration_days || 0);
+  var durationNights = Number(snapshot?.duration_nights || 0);
+  var durationText = durationDays > 0 ? (durationDays + 'N' + durationNights + 'Đ') : '—';
+  var totalGuests = getTotalGuests(booking?.passengers);
   var total =
+    formatVnd(booking?.final_price) ||
     formatVnd(booking?.total_amount) ||
     formatVnd(booking?.total) ||
     formatVnd(booking?.price) ||
@@ -750,29 +801,276 @@ function buildHistoryItem(booking) {
   var status = normalizeBookingStatus(booking?.status);
 
   var image =
-    tour?.thumbnail_url ||
-    tour?.thumbnail ||
-    (Array.isArray(tour?.images) && tour.images.length ? tour.images[0] : '') ||
+    (Array.isArray(snapshot?.images) && snapshot.images.length ? snapshot.images[0] : '') ||
+    booking?.tour?.thumbnail_url ||
+    booking?.tour?.thumbnail ||
     '';
 
   var bgStyle = image
     ? 'background-image:url(' + image + ');background-size:cover;background-position:center;'
     : 'background:linear-gradient(135deg,#2d8a4e,#3aaa62);';
 
+  var clickableAttrs = bookingId
+    ? 'href="#" onclick="handleBookingItemClick(event,\'' + bookingId.replace(/'/g, "\\'") + '\')"'
+    : 'href="javascript:void(0)" aria-disabled="true"';
+
   return (
-    '<article class="cp-booking-item">' +
+    '<a class="cp-booking-item" ' + clickableAttrs + '>' +
     '<div class="cp-booking-img" style="' + bgStyle + '"></div>' +
     '<div class="cp-booking-info">' +
     '<h3 class="cp-booking-name">' + title + '</h3>' +
     '<p class="cp-booking-meta">Mã booking: ' + bookingCode + '</p>' +
-    '<p class="cp-booking-meta">Ngày đi: ' + displayDate + '</p>' +
+    '<p class="cp-booking-meta">Hành trình: ' + durationText + ' • ' + totalGuests + ' khách</p>' +
+    '<p class="cp-booking-meta">Khởi hành: ' + displayDepartureDate + ' • Về: ' + displayReturnDate + '</p>' +
+    '<p class="cp-booking-meta">Ngày đặt: ' + displayCreatedAt + '</p>' +
     '<p class="cp-booking-price">Tổng tiền: ' + total + '</p>' +
     '</div>' +
     '<div class="cp-booking-right">' +
     '<span class="cp-booking-status ' + status.className + '">' + status.text + '</span>' +
     '</div>' +
-    '</article>'
+    '</a>'
   );
+}
+
+function extractBookingDetail(payload) {
+  if (!payload) return null;
+  if (payload.result?.booking && typeof payload.result.booking === 'object') return payload.result.booking;
+  if (payload.result && typeof payload.result === 'object' && payload.result._id) return payload.result;
+  if (payload.data?.booking && typeof payload.data.booking === 'object') return payload.data.booking;
+  if (payload.data && typeof payload.data === 'object' && payload.data._id) return payload.data;
+  return null;
+}
+
+function normalizeTourSnapshot(source, fallbackSource) {
+  var raw = source?.tour_snapshot;
+
+  if (typeof raw === 'string') {
+    try {
+      raw = JSON.parse(raw);
+    } catch (_) {
+      raw = {};
+    }
+  }
+
+  if (!raw || typeof raw !== 'object') raw = {};
+
+  var fallbackRaw = fallbackSource?.tour_snapshot;
+  if (typeof fallbackRaw === 'string') {
+    try {
+      fallbackRaw = JSON.parse(fallbackRaw);
+    } catch (_) {
+      fallbackRaw = {};
+    }
+  }
+  if (!fallbackRaw || typeof fallbackRaw !== 'object') fallbackRaw = {};
+
+  return {
+    ...fallbackRaw,
+    ...raw,
+    destination:
+      raw.destination ||
+      raw.departure_location ||
+      source?.destination ||
+      fallbackRaw.destination ||
+      fallbackSource?.destination ||
+      '',
+    duration_days: Number(raw.duration_days ?? source?.duration_days ?? fallbackRaw.duration_days ?? fallbackSource?.duration_days ?? 0),
+    duration_nights: Number(raw.duration_nights ?? source?.duration_nights ?? fallbackRaw.duration_nights ?? fallbackSource?.duration_nights ?? 0),
+  };
+}
+
+function formatPaymentProvider(provider) {
+  var n = Number(provider);
+  if (n === 0) return 'VNPay';
+  if (n === 1) return 'MoMo';
+  if (n === 2) return 'Tiền mặt';
+  return provider === undefined || provider === null ? '—' : String(provider);
+}
+
+function formatPaymentStatus(status) {
+  var n = Number(status);
+  if (n === 0) return 'Chưa thanh toán';
+  if (n === 1) return 'Đã thanh toán';
+  if (n === 2) return 'Thanh toán thất bại';
+  return status === undefined || status === null ? '—' : String(status);
+}
+
+function closeBookingDetailModal() {
+  var existing = document.getElementById('cpBookingDetailOverlay');
+  if (existing) existing.remove();
+}
+
+function openBookingDetailModal(detail, fallbackBooking) {
+  closeBookingDetailModal();
+
+  var passengers = detail?.passengers || {};
+  var contact = detail?.contact_info || {};
+  var price = detail?.price_detail || {};
+  var payment = detail?.payment || {};
+  var snapshot = normalizeTourSnapshot(detail, fallbackBooking);
+
+  var durationDays = Number(snapshot?.duration_days || 0);
+  var durationNights = Number(snapshot?.duration_nights || 0);
+  var durationText = durationDays > 0 ? (durationDays + ' ngày ' + durationNights + ' đêm') : '—';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'cp-modal-overlay';
+  overlay.id = 'cpBookingDetailOverlay';
+  overlay.onclick = function (e) {
+    if (e.target === overlay) closeBookingDetailModal();
+  };
+
+  overlay.innerHTML =
+    '<div class="cp-modal" role="dialog" aria-modal="true" aria-label="Chi tiết booking">' +
+    '<div class="cp-modal-header">' +
+    '<h3>Chi tiết booking ' + (detail?.booking_code || '') + '</h3>' +
+    '<button type="button" class="cp-modal-close" onclick="closeBookingDetailModal()">✕</button>' +
+    '</div>' +
+    '<div class="cp-modal-body">' +
+    '<div class="cp-modal-row"><span>Tour</span><strong>' + (snapshot?.tour_name || '—') + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Điểm đến</span><strong>' + (snapshot?.destination || '—') + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Thời lượng</span><strong>' + durationText + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Khởi hành</span><strong>' + formatBookingDate(snapshot?.departure_date) + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Ngày về</span><strong>' + formatBookingDate(snapshot?.return_date) + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Người liên hệ</span><strong>' + (contact?.full_name || '—') + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Email</span><strong>' + (contact?.email || '—') + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Số điện thoại</span><strong>' + (contact?.phone || '—') + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Hành khách</span><strong>NL: ' + Number(passengers?.adults || 0) + ' • TE: ' + Number(passengers?.children || 0) + ' • EB: ' + Number(passengers?.babies || 0) + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Tạm tính</span><strong>' + (formatVnd(detail?.total_price) || '—') + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Giảm giá</span><strong>' + (formatVnd(price?.discount_amount) || '0đ') + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Tổng thanh toán</span><strong>' + (formatVnd(detail?.final_price) || '—') + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Phương thức</span><strong>' + formatPaymentProvider(payment?.provider ?? detail?.payment_method) + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Trạng thái thanh toán</span><strong>' + formatPaymentStatus(payment?.status) + '</strong></div>' +
+    '<div class="cp-modal-row"><span>Ngày đặt</span><strong>' + formatBookingDate(detail?.created_at) + '</strong></div>' +
+    '</div>' +
+    '<button type="button" class="cp-modal-close-btn" onclick="closeBookingDetailModal()">Đóng</button>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+}
+
+async function handleBookingItemClick(event, bookingId) {
+  if (event) event.preventDefault();
+  if (!bookingId) return;
+
+  var listItemBooking = bookingHistoryItemMap[bookingId] || null;
+
+  if (bookingDetailsCache[bookingId]) {
+    openBookingDetailModal(bookingDetailsCache[bookingId], listItemBooking);
+    return;
+  }
+
+  try {
+    var res = await apiGetMyBooking(bookingId);
+    if (!(res && res.ok)) {
+      showToast('❌ Không tải được chi tiết booking');
+      return;
+    }
+
+    var detail = extractBookingDetail(res.data);
+    if (!detail) {
+      showToast('⚠️ Không có dữ liệu chi tiết booking');
+      return;
+    }
+
+    bookingDetailsCache[bookingId] = detail;
+    openBookingDetailModal(detail, listItemBooking);
+  } catch (_) {
+    showToast('❌ Lỗi kết nối khi tải chi tiết booking');
+  }
+}
+
+function extractBookingPagination(payload, currentPage, limit, currentCount) {
+  var sources = [
+    payload?.result?.pagination,
+    payload?.result,
+    payload?.data?.pagination,
+    payload?.data,
+    payload,
+  ].filter(function (x) { return x && typeof x === 'object'; });
+
+  var page = currentPage;
+  var totalPages = 1;
+
+  for (var i = 0; i < sources.length; i++) {
+    var src = sources[i];
+    var p = Number(src.page ?? src.current_page ?? src.currentPage);
+    var tp = Number(src.total_pages ?? src.totalPages ?? src.last_page ?? src.pages);
+    var totalItems = Number(src.total ?? src.total_items ?? src.totalItems ?? src.count);
+
+    if (Number.isFinite(p) && p > 0) page = p;
+
+    if (Number.isFinite(tp) && tp > 0) {
+      totalPages = tp;
+      break;
+    }
+
+    if (Number.isFinite(totalItems) && totalItems >= 0 && limit > 0) {
+      totalPages = Math.max(1, Math.ceil(totalItems / limit));
+      break;
+    }
+  }
+
+  if ((!Number.isFinite(totalPages) || totalPages < 1) && currentCount < limit) {
+    totalPages = Math.max(1, page);
+  }
+
+  return {
+    page: Math.max(1, page),
+    totalPages: Math.max(1, Number(totalPages) || 1),
+  };
+}
+
+function ensureHistoryPaginationEl(list) {
+  var container = document.getElementById('cpHistoryPagination');
+  if (container || !list) return container;
+
+  container = document.createElement('div');
+  container.id = 'cpHistoryPagination';
+  container.className = 'cp-history-pagination';
+  list.insertAdjacentElement('afterend', container);
+  return container;
+}
+
+function renderHistoryPagination() {
+  var list = document.getElementById('cpHistoryList');
+  var container = ensureHistoryPaginationEl(list);
+  if (!container) return;
+
+  var page = bookingHistoryState.page;
+  var totalPages = bookingHistoryState.totalPages;
+
+  if (totalPages <= 1) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
+
+  container.style.display = 'flex';
+
+  var prevDisabled = page <= 1 ? 'disabled' : '';
+  var nextDisabled = page >= totalPages ? 'disabled' : '';
+
+  var pageButtons = '';
+  for (var p = 1; p <= totalPages; p++) {
+    var active = p === page ? 'active' : '';
+    pageButtons +=
+      '<button class="cp-page-btn ' + active + '" onclick="goBookingHistoryPage(' + p + ')" ' +
+      (p === page ? 'disabled' : '') + '>' + p + '</button>';
+  }
+
+  container.innerHTML =
+    '<button class="cp-page-nav" onclick="goBookingHistoryPage(' + (page - 1) + ')" ' + prevDisabled + '>← Trước</button>' +
+    '<div class="cp-page-list">' + pageButtons + '</div>' +
+    '<button class="cp-page-nav" onclick="goBookingHistoryPage(' + (page + 1) + ')" ' + nextDisabled + '>Sau →</button>';
+}
+
+async function goBookingHistoryPage(page) {
+  var next = Number(page);
+  if (!Number.isFinite(next)) return;
+  if (next < 1 || next > bookingHistoryState.totalPages) return;
+  bookingHistoryState.page = next;
+  await renderBookingHistory();
 }
 
 async function renderBookingHistory() {
@@ -783,20 +1081,36 @@ async function renderBookingHistory() {
   list.innerHTML = '<div class="cp-wish-loading">Đang tải lịch sử đặt tour...</div>';
 
   try {
-    var res = await apiGetMyBookings({ page: 1, limit: 50 });
+    var res = await apiGetMyBookings({ page: bookingHistoryState.page, limit: bookingHistoryState.limit });
     var bookings = res && res.ok ? extractBookingItems(res.data) : [];
+    bookingHistoryItemMap = {};
+    bookings.forEach(function (b) {
+      if (b && b._id) bookingHistoryItemMap[String(b._id)] = b;
+    });
+
+    if (res && res.ok) {
+      var pg = extractBookingPagination(res.data, bookingHistoryState.page, bookingHistoryState.limit, bookings.length);
+      bookingHistoryState.page = pg.page;
+      bookingHistoryState.totalPages = pg.totalPages;
+    } else {
+      bookingHistoryState.totalPages = 1;
+    }
 
     if (!bookings.length) {
       list.innerHTML = '';
       if (empty) empty.style.display = 'block';
+      renderHistoryPagination();
       return;
     }
 
     if (empty) empty.style.display = 'none';
     list.innerHTML = bookings.map(buildHistoryItem).join('');
+    renderHistoryPagination();
   } catch (_) {
     list.innerHTML = '';
     if (empty) empty.style.display = 'block';
+    bookingHistoryState.totalPages = 1;
+    renderHistoryPagination();
   }
 }
 
