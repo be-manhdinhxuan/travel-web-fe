@@ -452,6 +452,67 @@
   gap: 16px;
 }
 
+.ud-pagination {
+  margin-top: 22px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ud-page-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ud-page-btn,
+.ud-page-nav {
+  border: 1px solid #d9e9dd;
+  background: white;
+  color: var(--dark);
+  border-radius: 10px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+
+.ud-page-nav {
+  min-width: 74px;
+}
+
+.ud-page-btn:hover,
+.ud-page-nav:hover {
+  border-color: rgba(45, 138, 78, 0.45);
+  color: var(--green);
+  transform: translateY(-1px);
+}
+
+.ud-page-btn.is-active {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.ud-page-btn:disabled,
+.ud-page-nav:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ud-page-dots {
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 0 2px;
+}
+
 .ud-coupon-card {
   background: rgba(255, 255, 255, 0.92);
   border-radius: 22px;
@@ -932,6 +993,17 @@ footer {
 
   .ud-coupon-grid {
     grid-template-columns: 1fr;
+  }
+
+  .ud-pagination {
+    justify-content: flex-start;
+  }
+
+  .ud-page-btn,
+  .ud-page-nav {
+    height: 38px;
+    min-width: 36px;
+    padding: 0 10px;
   }
 
   .footer-grid {

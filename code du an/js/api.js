@@ -526,8 +526,13 @@ async function apiCreatePayment(booking_id, method = "momo") {
 // ============================================================
 
 // GET /coupons/public-coupons
-async function apiGetPublicCoupons() {
-  return apiCall("GET", "/coupons/public-coupons");
+async function apiGetPublicCoupons(params = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") query.append(key, value);
+  });
+  const qs = query.toString() ? "?" + query.toString() : "";
+  return apiCall("GET", "/coupons/public-coupons" + qs);
 }
 
 // POST /coupons/validate
