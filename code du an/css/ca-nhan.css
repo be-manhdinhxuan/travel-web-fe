@@ -698,6 +698,40 @@ body {
   background: var(--green-lt);
 }
 
+#tab-promotions .cp-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+}
+
+#tab-promotions #cpWishlistGrid {
+  min-height: 0;
+}
+
+#tab-promotions #cpWishlistEmpty {
+  flex: 1;
+  margin-top: 4px;
+  border: 1px dashed #d7e7dd;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f8fcfa 0%, #ffffff 100%);
+  padding: 36px 22px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+#tab-promotions #cpWishlistEmpty p {
+  margin: 2px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5f6b76;
+}
+
+#tab-promotions #cpWishlistEmpty span {
+  max-width: 360px;
+}
+
 .cp-fav-grid .cp-fav-card {
   border-radius: 12px;
   overflow: hidden;
@@ -900,6 +934,14 @@ body {
   .cp-profile-main {
     padding: 16px;
     gap: 12px;
+  }
+
+  #tab-promotions .cp-card {
+    min-height: 360px;
+  }
+
+  #tab-promotions #cpWishlistEmpty {
+    padding: 28px 16px;
   }
 
   .cp-booking-item {

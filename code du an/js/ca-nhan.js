@@ -9,6 +9,7 @@ const UserVerifyStatus = {
 
 var pendingAvatarFile = null;
 var pendingAvatarPreview = '';
+var userWishlistIds = [];
 
 function loadUser() {
   try {
@@ -543,45 +544,163 @@ function extractWishlistItems(payload) {
   return [];
 }
 
-function formatVnd(priceValue) {
-  var n = Number(priceValue);
-  if (!Number.isFinite(n)) return null;
-  return n.toLocaleString('vi-VN') + 'đ';
+function extractWishlistIds(payload, fallbackItems) {
+  var raw = [];
+
+  if (payload && payload.result && Array.isArray(payload.result.wishlist)) {
+    raw = payload.result.wishlist;
+  } else if (payload && Array.isArray(payload.wishlist)) {
+    raw = payload.wishlist;
+  } else if (Array.isArray(fallbackItems)) {
+    raw = fallbackItems;
+  }
+
+  return raw
+    .map(function (entry) {
+      if (typeof entry === 'string' || typeof entry === 'number') return String(entry);
+      if (!entry || typeof entry !== 'object') return '';
+      if (entry.tour && entry.tour._id) return String(entry.tour._id);
+      if (entry.tour_id) return String(entry.tour_id);
+      if (entry._id && !entry.name && !entry.slug) return String(entry._id);
+      return '';
+    })
+    .filter(Boolean);
 }
 
-function buildWishlistCard(item) {
-  var tour = item?.tour || item;
-  var title = tour?.name || tour?.title || 'Tour du lịch';
-  var location = tour?.departure_location || tour?.location || tour?.destination || 'Việt Nam';
-  var price =
-    formatVnd(tour?.price_adult) ||
-    formatVnd(tour?.price) ||
-    formatVnd(tour?.base_price) ||
-    'Liên hệ';
+function extractTourFromGetTourResponse(data) {
+  if (!data) return null;
+  if (data.result && data.result.tour) return data.result.tour;
+  if (data.result && typeof data.result === 'object' && !Array.isArray(data.result)) return data.result;
+  if (data.data && typeof data.data === 'object') return data.data;
+  return null;
+}
 
-  var image =
-    tour?.thumbnail_url ||
-    tour?.thumbnail ||
-    (Array.isArray(tour?.images) && tour.images.length ? tour.images[0] : '') ||
-    '';
+async function hydrateWishlistToursByIds(ids) {
+  if (!Array.isArray(ids) || !ids.length || typeof apiGetTours !== 'function') return [];
 
-  var slug = tour?.slug || '';
-  var detailHref = slug ? 'chi-tiet-tour.html?slug=' + encodeURIComponent(slug) : 'tour-du-lich.html';
+  // Backend hiện tại không ổn định với /tours/:id và một số query params,
+  // nên lấy list mặc định rồi lọc theo ID wishlist để tránh 404/422.
+  try {
+    var listRes = await apiGetTours();
+    var listTours = listRes && listRes.ok ? (listRes.data?.result?.tours || []) : [];
+    var idSet = new Set(ids.map(String));
+    return listTours.filter(function (t) {
+      if (!t) return false;
+      if (t._id && idSet.has(String(t._id))) return true;
+      if (t.id && idSet.has(String(t.id))) return true;
+      return false;
+    });
+  } catch (_) {
+    return [];
+  }
+}
 
-  var bgStyle = image
-    ? 'background-image:url(' + image + ');background-size:cover;background-position:center;'
-    : 'background:linear-gradient(135deg,#2d8a4e,#3aaa62);';
+function normalizeWishlistTours(items) {
+  if (!Array.isArray(items)) return [];
 
-  return (
-    '<article class="cp-wish-card" onclick="window.location.href=\'' + detailHref + '\'">' +
-    '<div class="cp-wish-thumb" style="' + bgStyle + '"></div>' +
-    '<div class="cp-wish-body">' +
-    '<h3 class="cp-wish-title">' + title + '</h3>' +
-    '<p class="cp-wish-meta">📍 ' + location + '</p>' +
-    '<p class="cp-wish-price">Từ <strong>' + price + '</strong>/người</p>' +
-    '</div>' +
-    '</article>'
-  );
+  return items
+    .map(function (item) {
+      if (!item) return null;
+      if (item.tour && typeof item.tour === 'object') return item.tour;
+      if (typeof item === 'object' && (item.name || item.slug || item.min_price || item.price_adult || item.base_price || item.price || item.current_price)) {
+        return item;
+      }
+      return null;
+    })
+    .filter(Boolean);
+}
+
+function renderWishlistTours(tours) {
+  var grid = document.getElementById('cpWishlistGrid');
+  var empty = document.getElementById('cpWishlistEmpty');
+  if (!grid) return;
+
+  if (!tours || !tours.length) {
+    grid.innerHTML = '';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  function formatTourPrice(tour) {
+    if (!tour) return '—';
+
+    var rawPrice =
+      tour.min_price ??
+      tour.price_adult ??
+      tour.base_price ??
+      tour.price ??
+      tour.current_price;
+
+    if (rawPrice === undefined || rawPrice === null || rawPrice === '') return '—';
+
+    var numeric = Number(String(rawPrice).replace(/[^\d.-]/g, ''));
+    if (!Number.isFinite(numeric) || numeric <= 0) return '—';
+
+    return numeric.toLocaleString('vi-VN') + 'đ';
+  }
+
+  grid.innerHTML = tours.map(item => {
+    var tour = item?.tour_snapshot || item?.tour || item;
+    const img = tour?.images?.[0] || tour?.thumbnail || tour?.thumbnail_url || '';
+    const name = tour?.name || '—';
+    const location = tour?.destination || tour?.departure_location || '—';
+    const days = tour?.duration_days || 0;
+    const nights = tour?.duration_nights || 0;
+    const price = formatTourPrice({
+      min_price: tour?.min_price,
+      price_adult: tour?.price_adult ?? tour?.schedules?.[0]?.price_adult,
+      base_price: tour?.base_price,
+      price: tour?.price,
+      current_price: tour?.current_price,
+    });
+    const slug = tour?.slug || tour?._id || '';
+    const badge = days ? `${days} ngày ${nights} đêm` : '';
+    const slots = tour?.available_slots;
+    const urgency = slots != null && slots <= 5
+      ? `<div class="tour-urgency">Còn ${slots} chỗ cuối cùng</div>` : '';
+
+    return `
+    <div class="tour-card" onclick="window.location.href='chi-tiet-tour.html?tour=${slug}'" style="cursor:pointer">
+      <div class="tour-img">
+        <div class="tour-img-inner" style="background:url('${img}') center/cover no-repeat;${!img ? 'background:linear-gradient(135deg,#2d8a4e,#3aaa62)' : ''}"></div>
+        ${badge ? `<span class="tour-badge">${badge}</span>` : ''}
+        <button class="tour-wishlist liked"
+          onclick="event.stopPropagation();handleWishlistRemove(this,'${tour?._id || ''}')"
+          title="Xóa khỏi yêu thích">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path d="M12 21s-6.7-4.35-10-9C-1 7 2 2 7 2c2.5 0 4 1.5 5 3 1-1.5 2.5-3 5-3 5 0 8 5 5 10-3.3 4.65-10 9-10 9z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="tour-body">
+        <div class="tour-title">${name}</div>
+        <div class="tour-location">📍 ${location}</div>
+        ${urgency}
+        <div class="tour-footer">
+          <div class="tour-price">
+            <span style="font-size:0.7rem;color:var(--muted)">Giá từ / người</span>
+            <strong>${price}</strong>
+          </div>
+          <button class="btn-book" onclick="event.stopPropagation();window.location.href='chi-tiet-tour.html?tour=${slug}'">Xem chi tiết</button>
+        </div>
+      </div>
+    </div>`
+  }).join('')
+}
+
+async function handleWishlistRemove(btn, tourId) {
+  try {
+    const res = await apiToggleWishlist(tourId);
+    if (res.ok) {
+      // Remove from local state
+      userWishlistIds = userWishlistIds.filter(id => id !== tourId.toString());
+      // Re-render wishlist
+      await renderWishlist();
+    }
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 function extractBookingItems(payload) {
@@ -689,23 +808,49 @@ async function renderWishlist() {
   grid.innerHTML = '<div class="cp-wish-loading">Đang tải danh sách yêu thích...</div>';
 
   try {
-    var res = await apiGetWishlist();
-    var items = res && res.ok ? extractWishlistItems(res.data) : [];
+    // Ưu tiên endpoint wishlist riêng, fallback về /me nếu cần.
+    var ids = [];
 
-    if (!items.length) {
+    if (typeof apiGetWishlist === 'function') {
+      var wishRes = await apiGetWishlist();
+      if (wishRes && wishRes.ok) {
+        var wishItems = extractWishlistItems(wishRes.data);
+        ids = extractWishlistIds(wishRes.data, wishItems);
+
+        // Một số backend trả sẵn object tour, không cần hydrate theo id.
+        var normalizedFromWishlist = normalizeWishlistTours(wishItems);
+        if (!ids.length && normalizedFromWishlist.length) {
+          ids = normalizedFromWishlist
+            .map(function (tour) { return tour && tour._id ? String(tour._id) : ''; })
+            .filter(Boolean);
+        }
+
+        if (normalizedFromWishlist.length && !ids.length) {
+          userWishlistIds = [];
+          renderWishlistTours(normalizedFromWishlist);
+          return;
+        }
+      }
+    }
+
+    if (!ids.length) {
+      var meRes = await apiGetMe();
+      var meUser = meRes?.data?.result?.user || meRes?.data?.result || {};
+      ids = (meUser.wishlist || []).map(function (id) { return String(id); });
+    }
+
+    if (!ids.length) {
       grid.innerHTML = '';
       if (empty) empty.style.display = 'flex';
       return;
     }
 
-    if (empty) empty.style.display = 'none';
-    grid.innerHTML = items.map(buildWishlistCard).join('');
-  } catch (_) {
-    if (typeof cpRenderWishlist === 'function') {
-      cpRenderWishlist();
-      return;
-    }
+    var tours = await hydrateWishlistToursByIds(ids);
 
+    userWishlistIds = ids;
+    renderWishlistTours(tours);
+  } catch (error) {
+    console.error(error);
     grid.innerHTML = '';
     if (empty) empty.style.display = 'flex';
   }
