@@ -318,23 +318,19 @@ async function apiGetCategories(params = {}) {
   return apiCall("GET", "/categories" + qs);
 }
 
+// Admin — GET /categories (có auth để BE nhận role)
+async function apiAdminGetCategories(params = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") query.append(key, value);
+  });
+  const qs = query.toString() ? "?" + query.toString() : "";
+  return apiCall("GET", "/categories" + qs, null, true);
+}
+
 // GET /categories/:id
 async function apiGetCategory(id) {
   return apiCall("GET", "/categories/" + id);
-}
-
-function normalizeCategoryFormData(payload) {
-  if (payload instanceof FormData) return payload;
-
-  const form = new FormData();
-  const data = payload && typeof payload === 'object' ? payload : {};
-
-  if (data.name !== undefined && data.name !== null && data.name !== '') form.append('name', data.name);
-  if (data.description !== undefined && data.description !== null && data.description !== '') form.append('description', data.description);
-  if (data.thumbnail instanceof File) form.append('thumbnail', data.thumbnail);
-  if (data.is_active !== undefined && data.is_active !== null) form.append('is_active', String(data.is_active));
-
-  return form;
 }
 
 // Admin — POST /categories
@@ -342,20 +338,7 @@ async function apiAdminCreateCategory(payload) {
   if (!ensureUserVerified('quản lý danh mục')) {
     return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
   }
-  try {
-    const formData = normalizeCategoryFormData(payload);
-    const token = localStorage.getItem("vt_access_token");
-    const res = await fetch(API_BASE + "/categories", {
-      method: "POST",
-      headers: token ? { Authorization: "Bearer " + token } : {},
-      body: formData, // FormData — multipart
-    });
-    let data = null;
-    try { data = await res.json(); } catch { data = {}; }
-    return { ok: res.ok, status: res.status, data };
-  } catch (err) {
-    return { ok: false, status: 0, data: { message: "Cannot connect to server" } };
-  }
+  return apiCall("POST", "/categories", payload, true);
 }
 
 // Admin — PUT /categories/:id
@@ -363,20 +346,15 @@ async function apiAdminUpdateCategory(id, payload) {
   if (!ensureUserVerified('quản lý danh mục')) {
     return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
   }
-  try {
-    const formData = normalizeCategoryFormData(payload);
-    const token = localStorage.getItem("vt_access_token");
-    const res = await fetch(API_BASE + "/categories/" + id, {
-      method: "PUT",
-      headers: token ? { Authorization: "Bearer " + token } : {},
-      body: formData, // FormData — multipart
-    });
-    let data = null;
-    try { data = await res.json(); } catch { data = {}; }
-    return { ok: res.ok, status: res.status, data };
-  } catch (err) {
-    return { ok: false, status: 0, data: { message: "Cannot connect to server" } };
+  return apiCall("PUT", "/categories/" + id, payload, true);
+}
+
+// Admin — PATCH /categories/:id (toggle status)
+async function apiAdminToggleCategory(id, is_active) {
+  if (!ensureUserVerified('quản lý danh mục')) {
+    return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
   }
+  return apiCall("PATCH", "/categories/" + id, { is_active: !!is_active }, true);
 }
 
 // Admin — POST /categories/:id/image
@@ -700,9 +678,11 @@ window.apiAdminSetUserStatus = apiAdminSetUserStatus;
 
 // Categories
 window.apiGetCategories = apiGetCategories;
+window.apiAdminGetCategories = apiAdminGetCategories;
 window.apiGetCategory = apiGetCategory;
 window.apiAdminCreateCategory = apiAdminCreateCategory;
 window.apiAdminUpdateCategory = apiAdminUpdateCategory;
+window.apiAdminToggleCategory = apiAdminToggleCategory;
 window.apiAdminUpdateCategoryImage = apiAdminUpdateCategoryImage;
 window.apiAdminDeleteCategory = apiAdminDeleteCategory;
 

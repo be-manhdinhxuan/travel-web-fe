@@ -1066,6 +1066,8 @@ var CAT_KEY = 'vt_admin_categories';
 var CAT_PAGE = 1;
 var CAT_API_CACHE = [];
 var CAT_PER = 10;
+var CAT_SAVING = false;
+var CAT_TOGGLE_CONFIRM_RESOLVE = null;
 
 var DEFAULT_CATS = [
   { id: 'c1', name: 'Du lịch biển', desc: 'Các tour tham quan, nghỉ dưỡng tại biển', active: true },
@@ -1100,10 +1102,61 @@ function catShowForm(id) {
     document.getElementById('catDesc').value = '';
   }
 }
-function catHideForm() { document.getElementById('catFormCard').style.display = 'none'; }
+function catSetSaving(isSaving, phaseText) {
+  CAT_SAVING = !!isSaving;
+  var card = document.getElementById('catFormCard');
+  if (!card) return;
+
+  card.querySelectorAll('input, textarea, button').forEach(function (el) {
+    el.disabled = CAT_SAVING;
+  });
+
+  var saveBtn = document.getElementById('catSaveBtn');
+  if (saveBtn) {
+    if (!saveBtn.dataset.defaultText) saveBtn.dataset.defaultText = saveBtn.textContent;
+    saveBtn.textContent = CAT_SAVING ? 'Đang lưu...' : saveBtn.dataset.defaultText;
+  }
+
+  var loading = document.getElementById('catSaveLoading');
+  if (loading) {
+    loading.style.display = CAT_SAVING ? 'block' : 'none';
+    if (phaseText) loading.textContent = phaseText;
+  }
+}
+
+function catHideForm(force) {
+  if (CAT_SAVING && !force) return;
+  document.getElementById('catFormCard').style.display = 'none';
+}
+
+function catToggleConfirmOpen(text) {
+  var modal = document.getElementById('catToggleConfirmModal');
+  var textEl = document.getElementById('catToggleConfirmText');
+  if (!modal) return Promise.resolve(false);
+  if (textEl) textEl.textContent = text || 'Bạn có chắc muốn thay đổi trạng thái danh mục này?';
+  modal.style.display = 'flex';
+  return new Promise(function (resolve) {
+    CAT_TOGGLE_CONFIRM_RESOLVE = resolve;
+  });
+}
+
+function catToggleConfirmClose(accepted) {
+  var modal = document.getElementById('catToggleConfirmModal');
+  if (modal) modal.style.display = 'none';
+  if (CAT_TOGGLE_CONFIRM_RESOLVE) {
+    var resolve = CAT_TOGGLE_CONFIRM_RESOLVE;
+    CAT_TOGGLE_CONFIRM_RESOLVE = null;
+    resolve(!!accepted);
+  }
+}
 
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
+    var toggleModal = document.getElementById('catToggleConfirmModal');
+    if (toggleModal && toggleModal.style.display !== 'none') {
+      catToggleConfirmClose(false);
+      return;
+    }
     var card = document.getElementById('catFormCard');
     if (card && card.style.display !== 'none') catHideForm();
   }
@@ -1111,6 +1164,7 @@ document.addEventListener('keydown', function (e) {
 
 // Save – POST /api/categories hoặc PUT /api/categories/:id
 async function catSave() {
+  if (CAT_SAVING) return;
   var name = (document.getElementById('catName').value || '').trim();
   var desc = (document.getElementById('catDesc').value || '').trim();
   var id = document.getElementById('catEditId').value;
@@ -1118,16 +1172,18 @@ async function catSave() {
 
   if (!name) { showToast('⚠️ Vui lòng nhập tên danh mục'); return; }
 
-  // Gọi API với multipart/form-data đúng contract BE
+  catSetSaving(true, '⏳ Đang lưu thông tin danh mục...');
+
+  // Update text bằng JSON, ảnh gọi route riêng /categories/:id/image
   try {
-    var formData = new FormData();
-    formData.append('name', name);
-    if (desc) formData.append('description', desc);
+    var payload = { name: name };
+    if (desc) payload.description = desc;
 
     var res;
     if (id) {
-      res = await apiAdminUpdateCategory(id, formData);
+      res = await apiAdminUpdateCategory(id, payload);
       if (res && res.ok && file) {
+        catSetSaving(true, '⏳ Đang tải ảnh thumbnail...');
         var imageRes = await apiAdminUpdateCategoryImage(id, file);
         if (!imageRes || !imageRes.ok) {
           var imageMsg = (imageRes && imageRes.data && (imageRes.data.message || imageRes.data.error))
@@ -1138,12 +1194,27 @@ async function catSave() {
         }
       }
     } else {
-      if (file) formData.append('thumbnail', file);
-      res = await apiAdminCreateCategory(formData);
+      res = await apiAdminCreateCategory(payload);
+      if (res && res.ok && file) {
+        catSetSaving(true, '⏳ Đang tải ảnh thumbnail...');
+        var created = (res.data && res.data.result) ? res.data.result : {};
+        var createdCat = created.category || created;
+        var createdId = createdCat._id || createdCat.id;
+        if (createdId) {
+          var createdImageRes = await apiAdminUpdateCategoryImage(createdId, file);
+          if (!createdImageRes || !createdImageRes.ok) {
+            var createdImageMsg = (createdImageRes && createdImageRes.data && (createdImageRes.data.message || createdImageRes.data.error))
+              ? (createdImageRes.data.message || createdImageRes.data.error)
+              : 'Cập nhật ảnh danh mục thất bại';
+            showToast('❌ ' + createdImageMsg);
+            return;
+          }
+        }
+      }
     }
     if (res && res.ok) {
       showToast('✅ Đã lưu danh mục!');
-      catHideForm();
+      catHideForm(true);
       catRender();
       return;
     }
@@ -1156,6 +1227,8 @@ async function catSave() {
   } catch (e) {
     showToast('❌ Không thể kết nối server');
     return;
+  } finally {
+    catSetSaving(false);
   }
 }
 
@@ -1176,18 +1249,49 @@ async function catDelete(id) {
 }
 
 // Toggle active
-async function catToggle(id) {
+async function catToggle(id, inputEl) {
   var cats = catGetAll();
-  var cat = cats.find(function (c) { return c.id === id; });
-  if (!cat) return;
-  cat.active = !cat.active;
+  var apiCat = CAT_API_CACHE.find(function (c) { return (c._id || c.id) === id; });
+  var localIdx = cats.findIndex(function (c) { return (c._id || c.id) === id || c.id === id; });
+
+  var currentActive = false;
+  if (apiCat) {
+    currentActive = typeof apiCat.is_active === 'boolean' ? apiCat.is_active : (apiCat.active !== false);
+  } else if (localIdx >= 0) {
+    var localCat = cats[localIdx];
+    currentActive = typeof localCat.is_active === 'boolean' ? localCat.is_active : (localCat.active !== false);
+  }
+
+  var nextActive = !currentActive;
+
+  var confirmText = nextActive
+    ? 'Bạn có chắc muốn BẬT trạng thái danh mục này?'
+    : 'Bạn có chắc muốn TẮT trạng thái danh mục này?';
+  var confirmed = await catToggleConfirmOpen(confirmText);
+  if (!confirmed) {
+    if (inputEl) inputEl.checked = currentActive;
+    return;
+  }
+
   try {
-    var fd = new FormData();
-    fd.append('is_active', String(cat.active));
-    await apiAdminUpdateCategory(id, fd);
+    var res = await apiAdminToggleCategory(id, nextActive);
+    if (res && res.ok) {
+      catRender();
+      return;
+    }
+
+    if (inputEl) inputEl.checked = currentActive;
+    var errMsg = (res && res.data && (res.data.message || res.data.error)) ? (res.data.message || res.data.error) : '';
+    if (res && res.status === 400 && errMsg === 'Category has active tours, cannot be disabled') {
+      showToast('❌ Không thể ẩn danh mục đang có tour hoạt động');
+    } else {
+      showToast('❌ ' + (errMsg || 'Không thể cập nhật trạng thái danh mục'));
+    }
+    return;
   } catch (e) { }
-  catSaveAll(cats);
-  catRender();
+
+  if (inputEl) inputEl.checked = currentActive;
+  showToast('❌ Không thể cập nhật trạng thái danh mục');
 }
 
 // Render
@@ -1200,7 +1304,7 @@ async function catRender() {
 
   // Thử API
   try {
-    var res = await apiGetCategories();
+    var res = await apiAdminGetCategories();
     if (res && res.ok && res.data.result) {
       cats = res.data.result.categories || res.data.result || [];
       CAT_API_CACHE = cats;
@@ -1234,11 +1338,16 @@ async function catRender() {
       '<td><strong style="font-size:0.83rem">' + (c.name || '—') + '</strong></td>' +
       '<td><img src="' + thumb + '" alt="thumbnail" style="width:72px;height:48px;object-fit:cover;border-radius:8px;border:1px solid #eee" onerror="this.onerror=null;this.src=\'../images/vietnam.png\'" /></td>' +
       '<td style="font-size:0.78rem;color:#888;max-width:280px">' + (c.description || c.desc || '—') + '</td>' +
-      '<td>' + (active ? '<span class="admin-badge-active">Đang hoạt động</span>' : '<span class="admin-badge-inactive">Ngừng hoạt động</span>') + '</td>' +
+      '<td><div style="display:flex;align-items:center;gap:8px">' +
+      '<label class="afp-toggle" style="transform:scale(.88);transform-origin:left center">' +
+      '<input type="checkbox" ' + (active ? 'checked' : '') + ' onchange="catToggle(\'' + id + '\', this)">' +
+      '<span class="afp-toggle-slider"></span>' +
+      '</label>' +
+      '<span style="font-size:0.78rem;font-weight:600;color:' + (active ? '#2d8a4e' : '#888') + '">' + (active ? 'Đang hoạt động' : 'Ngừng hoạt động') + '</span>' +
+      '</div></td>' +
       '<td><div style="display:flex;gap:6px">' +
-      '<button class="admin-act-btn" data-id="' + id + '" onclick="catShowForm(this.dataset.id)">✏️ Sửa</button>' +
-      '<button class="admin-act-btn' + (active ? ' admin-act-btn-red' : ' admin-act-btn-green') + '" data-id="' + id + '" onclick="catToggle(this.dataset.id)">' + (active ? 'Ẩn' : 'Hiện') + '</button>' +
-      '<button class="admin-act-btn admin-act-btn-red" data-id="' + id + '" onclick="catDelete(this.dataset.id)">🗑️</button>' +
+      '<button class="admin-act-btn" data-id="' + id + '" onclick="catShowForm(this.dataset.id)">Sửa</button>' +
+      '<button class="admin-act-btn admin-act-btn-red" data-id="' + id + '" onclick="catDelete(this.dataset.id)">Xóa</button>' +
       '</div></td>' +
       '</tr>';
   }).join('');

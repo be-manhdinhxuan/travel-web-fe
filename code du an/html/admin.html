@@ -593,8 +593,30 @@
                   </div>
                 </div>
                 <div style="display:flex;gap:10px">
-                  <button class="admin-btn-ghost" onclick="catHideForm()">Hủy</button>
-                  <button class="admin-btn-primary" onclick="catSave()">💾 Lưu danh mục</button>
+                  <button class="admin-btn-ghost" id="catCancelBtn" onclick="catHideForm()">Hủy</button>
+                  <button class="admin-btn-primary" id="catSaveBtn" onclick="catSave()">💾 Lưu danh mục</button>
+                </div>
+                <div id="catSaveLoading"
+                  style="display:none;margin-top:10px;font-size:0.78rem;color:#2d8a4e;font-weight:600">
+                  ⏳ Đang lưu, vui lòng chờ...
+                </div>
+              </div>
+            </div>
+
+            <!-- MODAL XÁC NHẬN TOGGLE TRẠNG THÁI DANH MỤC -->
+            <div id="catToggleConfirmModal"
+              style="display:none;position:fixed;inset:0;background:rgba(8,12,20,.45);z-index:1300;align-items:center;justify-content:center;padding:20px"
+              onclick="if(event.target===this) catToggleConfirmClose(false)">
+              <div class="admin-section" style="width:min(460px,100%);margin:0">
+                <div class="admin-section-head" style="margin-bottom:8px">
+                  <div class="admin-section-title">Xác nhận thay đổi trạng thái</div>
+                </div>
+                <p id="catToggleConfirmText" style="font-size:0.86rem;color:#4b5563;line-height:1.5;margin:8px 0 16px">
+                  Bạn có chắc muốn thay đổi trạng thái danh mục này?
+                </p>
+                <div style="display:flex;justify-content:flex-end;gap:10px">
+                  <button class="admin-btn-ghost" onclick="catToggleConfirmClose(false)">Hủy</button>
+                  <button class="admin-btn-primary" onclick="catToggleConfirmClose(true)">Xác nhận</button>
                 </div>
               </div>
             </div>
