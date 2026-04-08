@@ -24,7 +24,8 @@
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 <polyline points="9 22 9 12 15 12 15 22" />
-              </svg></div>
+              </svg>
+            </div>
             <div>
               <div class="admin-brand-name"><span style="color:#3aaa62">Vietnam</span>Travel</div>
               <div class="admin-brand-role">Trang Quản Trị</div>
@@ -33,7 +34,7 @@
         </div>
 
         <nav class="admin-nav">
-          <a class="admin-nav-item" onclick="switchTab('dashboard')" id="aNav-dashboard">
+          <a class="admin-nav-item active" onclick="switchTab('dashboard')" id="aNav-dashboard">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="7" height="7" />
@@ -43,7 +44,7 @@
             </svg>
             Dashboard
           </a>
-          <a class="admin-nav-item active" onclick="switchTab('tours')" id="aNav-tours">
+          <a class="admin-nav-item" onclick="switchTab('tours')" id="aNav-tours">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10" />
@@ -60,7 +61,7 @@
               <rect x="14" y="14" width="7" height="7" />
               <rect x="3" y="14" width="7" height="7" />
             </svg>
-            Danh mục
+            Quản lý Danh mục
           </a>
           <a class="admin-nav-item" onclick="switchTab('promotions')" id="aNav-promotions">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -68,7 +69,7 @@
               <path
                 d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
-            Quản lý Ưu đãi
+            Quản lý Mã giảm giá
           </a>
           <a class="admin-nav-item" onclick="switchTab('users')" id="aNav-users">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -78,7 +79,7 @@
               <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
-            Quản lý Nhân viên
+            Quản lý Người dùng
           </a>
           <a class="admin-nav-item" onclick="switchTab('bookings')" id="aNav-bookings">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -88,7 +89,7 @@
               <line x1="16" y1="13" x2="8" y2="13" />
               <line x1="16" y1="17" x2="8" y2="17" />
             </svg>
-            Đơn hàng
+            Quản lý Đơn hàng
           </a>
           <a class="admin-nav-item" onclick="switchTab('stats')" id="aNav-stats">
             <svg class="anav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -131,7 +132,7 @@
       <div class="admin-main">
 
         <!-- ===== TOURS TAB (default) ===== -->
-        <div class="admin-tab active" id="tab-tours">
+        <div class="admin-tab" id="tab-tours" style="display:none">
           <!-- TOPBAR -->
           <div class="admin-topbar">
             <h1 class="admin-page-title" style="flex-shrink:0">Hệ thống Quản lý Tour & Nội dung</h1>
@@ -418,72 +419,138 @@
         </div>
 
         <!-- ===== DASHBOARD ===== -->
-        <div class="admin-tab" id="tab-dashboard" style="display:none">
+        <div class="admin-tab active" id="tab-dashboard">
           <div class="admin-topbar">
-            <h1 class="admin-page-title">Dashboard</h1>
+            <div>
+              <h1 class="admin-page-title">Dashboard</h1>
+            </div>
+            <div class="dash-period-switch" id="dashPeriodSwitch">
+              <button class="stats-period active" type="button" data-period="today"
+                onclick="dashSetPeriod('today', this)">Ngày</button>
+              <button class="stats-period" type="button" data-period="week"
+                onclick="dashSetPeriod('week', this)">Tuần</button>
+              <button class="stats-period" type="button" data-period="month"
+                onclick="dashSetPeriod('month', this)">Tháng</button>
+              <button class="stats-period" type="button" data-period="year"
+                onclick="dashSetPeriod('year', this)">Năm</button>
+            </div>
           </div>
           <div class="admin-content">
-            <div class="admin-stats-grid">
-              <div class="admin-stat-card">
-                <div class="admin-stat-icon" style="background:linear-gradient(135deg,#2d8a4e,#3aaa62)"><svg width="22"
-                    height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                  </svg></div>
-                <div>
-                  <div class="admin-stat-val" id="statUsers">0</div>
-                  <div class="admin-stat-label">Người dùng</div>
+            <div class="stats-kpi-grid">
+              <div class="stats-kpi-card">
+                <div class="stats-kpi-top">
+                  <div class="stats-kpi-icon" style="background:#fff0e8;color:#e67e00">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="1" x2="12" y2="23" />
+                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                  </div>
+                  <span class="stats-kpi-change neutral" id="dashKpiPeriod">Hôm nay</span>
+                </div>
+                <div class="stats-kpi-label">Doanh thu</div>
+                <div class="stats-kpi-val" id="dashKpiRevenue">0đ</div>
+              </div>
+              <div class="stats-kpi-card">
+                <div class="stats-kpi-top">
+                  <div class="stats-kpi-icon" style="background:#e8f5ee;color:#2d8a4e">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                  </div>
+                  <span class="stats-kpi-change neutral" id="dashKpiBookingsTrend">—</span>
+                </div>
+                <div class="stats-kpi-label">Lượt đặt tour</div>
+                <div class="stats-kpi-val" id="dashKpiBookings">0</div>
+              </div>
+              <div class="stats-kpi-card">
+                <div class="stats-kpi-top">
+                  <div class="stats-kpi-icon" style="background:#e8f0ff;color:#3a7abf">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                    </svg>
+                  </div>
+                  <span class="stats-kpi-change neutral" id="dashKpiUsersTrend">—</span>
+                </div>
+                <div class="stats-kpi-label">Người dùng mới</div>
+                <div class="stats-kpi-val" id="dashKpiUsers">0</div>
+              </div>
+              <div class="stats-kpi-card">
+                <div class="stats-kpi-top">
+                  <div class="stats-kpi-icon" style="background:#f0e8ff;color:#7b1fa2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                      <polyline points="17 6 23 6 23 12" />
+                    </svg>
+                  </div>
+                  <span class="stats-kpi-change neutral" id="dashKpiCancelRateTrend">—</span>
+                </div>
+                <div class="stats-kpi-label">Tỷ lệ hủy</div>
+                <div class="stats-kpi-val" id="dashKpiCancelRate">0%</div>
+                <div class="admin-section-sub" style="margin-top:6px">Đơn đã hủy: <span
+                    id="dashKpiCancelledBookings">0</span></div>
+              </div>
+            </div>
+
+            <div class="stats-chart-card" id="dashRevenueChartCard">
+              <div class="stats-chart-header">
+                <span class="stats-card-title">Doanh thu theo thời gian</span>
+                <span class="admin-section-sub" id="dashRevenueChartMeta">Đang tải dữ liệu...</span>
+              </div>
+              <div class="chart-container">
+                <canvas id="dashRevenueLineChart"></canvas>
+              </div>
+            </div>
+
+            <div class="stats-chart-card" id="dashTodayInsightsCard" style="display:none">
+              <div class="stats-chart-header">
+                <span class="stats-card-title" id="dashTodayTitle">Tổng quan hôm nay</span>
+                <span class="admin-section-sub"></span>
+              </div>
+              <div class="today-summary" id="dashTodaySummaryBody"></div>
+            </div>
+
+            <div class="dash-row2" id="dashRow2">
+              <div class="stats-chart-card" id="dashBookingChartCard">
+                <div class="stats-chart-header">
+                  <span class="stats-card-title">Booking vs Huỷ</span>
+                  <span class="admin-section-sub" id="dashBookingCancelMeta">Đang tải dữ liệu...</span>
+                </div>
+                <div class="chart-container">
+                  <canvas id="dashBookingCancelChart"></canvas>
                 </div>
               </div>
-              <div class="admin-stat-card">
-                <div class="admin-stat-icon" style="background:linear-gradient(135deg,#c9963a,#e8b86d)"><svg width="22"
-                    height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="2" y1="12" x2="22" y2="12" />
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10z" />
-                  </svg></div>
-                <div>
-                  <div class="admin-stat-val" id="statTours">0</div>
-                  <div class="admin-stat-label">Tour hoạt động</div>
+
+              <div class="stats-chart-card" id="dashTopToursCard">
+                <div class="stats-chart-header">
+                  <span class="stats-card-title">Top tour được đặt nhiều nhất</span>
+                  <span class="admin-section-sub" id="dashTopToursMeta">Theo kỳ đã chọn</span>
                 </div>
-              </div>
-              <div class="admin-stat-card">
-                <div class="admin-stat-icon" style="background:linear-gradient(135deg,#2d5a8a,#3a7abf)"><svg width="22"
-                    height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                  </svg></div>
-                <div>
-                  <div class="admin-stat-val" id="statBookings">0</div>
-                  <div class="admin-stat-label">Đơn đặt tour</div>
-                </div>
-              </div>
-              <div class="admin-stat-card">
-                <div class="admin-stat-icon" style="background:linear-gradient(135deg,#8a2d5a,#bf3a7a)"><svg width="22"
-                    height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <polygon
-                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg></div>
-                <div>
-                  <div class="admin-stat-val">4.9★</div>
-                  <div class="admin-stat-label">Điểm đánh giá</div>
+                <div class="admin-table-wrap" style="box-shadow:none;border-radius:0">
+                  <table class="admin-table">
+                    <thead>
+                      <tr>
+                        <th>STT</th>
+                        <th>Tên tour</th>
+                        <th>Lượt đặt</th>
+                        <th>Doanh thu</th>
+                      </tr>
+                    </thead>
+                    <tbody id="dashTopToursBody">
+                      <tr>
+                        <td colspan="4" style="text-align:center;color:#aaa;padding:24px">Đang tải dữ liệu...</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
-            <div class="admin-section">
-              <h3 class="admin-section-title">🕐 Hoạt động gần đây</h3>
-              <div id="adminActivity">
-                <div class="activity-item">
-                  <div class="activity-dot" style="background:#2d8a4e"></div>
-                  <div class="activity-text">Hệ thống khởi động – Chào mừng Admin!</div>
-                  <div class="activity-time">Vừa xong</div>
-                </div>
-              </div>
-            </div>
+
           </div>
         </div>
 
@@ -895,28 +962,30 @@
             </div>
           </div>
         </div>
-
-        <div class="admin-footer">© 2024 VIETNAMTRAVEL. HỆ THỐNG QUẢN TRỊ NỘI BỘ. BẢN QUYỀN ĐÃ ĐƯỢC BẢO LƯU.</div>
       </div>
     </div>
 
     <div class="toast" id="toast"></div>
+
+    <script src="../js/config.js"></script>
     <script src="../js/api.js"></script>
-    <script src="../js/data.js"></script>
     <script src="../js/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../js/admin.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        var u = loadUser();
-        if (!u || u.role !== 'admin') { window.location.href = '1dangnhap-admin.html'; return; }
+        var u = null;
+        try {
+          u = JSON.parse(localStorage.getItem('vt_user') || sessionStorage.getItem('vt_user') || 'null');
+        } catch (e) { u = null; }
+        if (!u || (u.role !== 'admin' && u.role !== 1)) { window.location.href = '1dangnhap-admin.html'; return; }
         var n = u.name || 'Admin';
         document.getElementById('sideUserName').textContent = n;
         document.getElementById('sideUserAvatar').textContent = n[0].toUpperCase();
         renderUsersTable();
         adminRenderTours();
-        adminUpdateDashStats();
         adminRenderPromoPreview();
-        switchTab('tours');
+        switchTab('dashboard');
       });
     </script>
   </body>

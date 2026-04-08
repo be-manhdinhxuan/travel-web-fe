@@ -4,11 +4,11 @@
 
 // ===== SWITCH TAB =====
 function switchTab(name) {
-  document.querySelectorAll('.admin-tab').forEach(function(t){ t.classList.remove('active'); t.style.display='none'; });
-  document.querySelectorAll('.admin-nav-item').forEach(function(a){ a.classList.remove('active'); });
+  document.querySelectorAll('.admin-tab').forEach(function (t) { t.classList.remove('active'); t.style.display = 'none'; });
+  document.querySelectorAll('.admin-nav-item').forEach(function (a) { a.classList.remove('active'); });
   var tab = document.getElementById('tab-' + name);
   var nav = document.getElementById('aNav-' + name);
-  if (tab) { tab.classList.add('active'); tab.style.display='flex'; }
+  if (tab) { tab.classList.add('active'); tab.style.display = 'flex'; }
   if (nav) nav.classList.add('active');
   if (name === 'tours') adminRenderTours();
   if (name === 'users') renderUsersTable();
@@ -17,33 +17,17 @@ function switchTab(name) {
 
 // ===== DASHBOARD STATS =====
 function adminUpdateDashStats() {
-  var db = [];
-  try { db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]'); } catch(e) {}
-  var tours = adminGetTours();
-  var statU = document.getElementById('statUsers');
-  var statT = document.getElementById('statTours');
-  if (statU) statU.textContent = db.length;
-  if (statT) statT.textContent = tours.filter(function(t){ return t.active; }).length;
-  // Bookings
-  var total = 0;
-  db.forEach(function(u){
-    try {
-      var b = JSON.parse(localStorage.getItem('vt_bookings_' + u.email) || '[]');
-      total += b.length;
-    } catch(e) {}
-  });
-  var statB = document.getElementById('statBookings');
-  if (statB) statB.textContent = total;
+  dashLoadDashboard();
 }
 
 // ===== USERS TABLE =====
 // ===== USERS MANAGEMENT =====
 var ADMIN_USER_PAGE = 1;
-var ADMIN_USER_PER  = 10;
+var ADMIN_USER_PER = 10;
 var ADMIN_USER_SEARCH = '';
 
 async function renderUsersTable() {
-  var tbody  = document.getElementById('usersTableBody');
+  var tbody = document.getElementById('usersTableBody');
   var footer = document.getElementById('usersTableFooter');
   if (!tbody) return;
 
@@ -54,8 +38,8 @@ async function renderUsersTable() {
   // Thử API trước
   try {
     var res = await apiAdminGetUsers({
-      page:    ADMIN_USER_PAGE,
-      limit:   ADMIN_USER_PER,
+      page: ADMIN_USER_PAGE,
+      limit: ADMIN_USER_PER,
       keyword: ADMIN_USER_SEARCH
     });
     if (res && res.ok && res.data.result) {
@@ -64,7 +48,7 @@ async function renderUsersTable() {
       var pagination = res.data.result.pagination;
       if (pagination && footer) renderUsersPagination(pagination.total, footer);
     }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback localStorage
   if (!users.length) {
@@ -73,13 +57,13 @@ async function renderUsersTable() {
       // Lọc theo search
       if (ADMIN_USER_SEARCH) {
         var q = ADMIN_USER_SEARCH.toLowerCase();
-        raw = raw.filter(function(u){ return (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q); });
+        raw = raw.filter(function (u) { return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q); });
       }
       var total = raw.length;
       var start = (ADMIN_USER_PAGE - 1) * ADMIN_USER_PER;
       users = raw.slice(start, start + ADMIN_USER_PER);
       if (footer) renderUsersPagination(total, footer);
-    } catch(e) {}
+    } catch (e) { }
   }
 
   if (!users.length) {
@@ -87,17 +71,17 @@ async function renderUsersTable() {
     return;
   }
 
-  tbody.innerHTML = users.map(function(u, i) {
-    var id      = u._id || u.id || i;
-    var name    = u.full_name || u.name  || '—';
-    var email   = u.email  || '—';
-    var phone   = u.phone  || '—';
-    var role    = u.role;
-    var status  = u.status; // 1=active, 2=banned (API) hoặc locked (local)
+  tbody.innerHTML = users.map(function (u, i) {
+    var id = u._id || u.id || i;
+    var name = u.full_name || u.name || '—';
+    var email = u.email || '—';
+    var phone = u.phone || '—';
+    var role = u.role;
+    var status = u.status; // 1=active, 2=banned (API) hoặc locked (local)
     var isAdmin = role === 'admin' || role === 1;
     var isBanned = status === 2 || u.locked === true;
 
-    var roleBadge   = isAdmin
+    var roleBadge = isAdmin
       ? '<span class="admin-badge-active">👑 Admin</span>'
       : '<span class="admin-badge-inactive" style="background:#f0f0f0;color:#888">👤 User</span>';
     var statusBadge = isBanned
@@ -112,14 +96,14 @@ async function renderUsersTable() {
       : '<button class="admin-act-btn admin-act-btn-red"   data-id="' + id + '" data-status="2" onclick="adminSetStatusBtn(this)">🔒 Khóa</button>';
 
     return '<tr>' +
-      '<td style="color:#aaa;font-size:0.75rem">' + ((ADMIN_USER_PAGE-1)*ADMIN_USER_PER + i + 1) + '</td>' +
+      '<td style="color:#aaa;font-size:0.75rem">' + ((ADMIN_USER_PAGE - 1) * ADMIN_USER_PER + i + 1) + '</td>' +
       '<td><div style="font-weight:700;font-size:0.82rem">' + name + '</div></td>' +
       '<td style="font-size:0.78rem;color:#555">' + email + '</td>' +
       '<td style="font-size:0.78rem;color:#555">' + phone + '</td>' +
       '<td>' + roleBadge + '</td>' +
       '<td>' + statusBadge + '</td>' +
       '<td><div style="display:flex;gap:6px">' + roleBtn + statusBtn + '</div></td>' +
-    '</tr>';
+      '</tr>';
   }).join('');
 }
 
@@ -127,14 +111,14 @@ function renderUsersPagination(total, footer) {
   var totalPages = Math.max(1, Math.ceil(total / ADMIN_USER_PER));
   var pages = '';
   for (var p = 1; p <= Math.min(totalPages, 5); p++) {
-    pages += '<button class="admin-page-btn' + (p===ADMIN_USER_PAGE?' active':'') + '" onclick="adminGoUserPage(' + p + ')">' + p + '</button>';
+    pages += '<button class="admin-page-btn' + (p === ADMIN_USER_PAGE ? ' active' : '') + '" onclick="adminGoUserPage(' + p + ')">' + p + '</button>';
   }
   footer.innerHTML =
     '<span style="font-size:0.75rem;color:#aaa">Tổng ' + total + ' người dùng</span>' +
     '<div class="admin-pagination">' +
-      '<button class="admin-page-btn text" onclick="adminGoUserPage(' + Math.max(1,ADMIN_USER_PAGE-1) + ')">Trước</button>' +
-      pages +
-      '<button class="admin-page-btn text" onclick="adminGoUserPage(' + Math.min(totalPages,ADMIN_USER_PAGE+1) + ')">Sau</button>' +
+    '<button class="admin-page-btn text" onclick="adminGoUserPage(' + Math.max(1, ADMIN_USER_PAGE - 1) + ')">Trước</button>' +
+    pages +
+    '<button class="admin-page-btn text" onclick="adminGoUserPage(' + Math.min(totalPages, ADMIN_USER_PAGE + 1) + ')">Sau</button>' +
     '</div>';
 }
 
@@ -142,11 +126,11 @@ function adminGoUserPage(p) { ADMIN_USER_PAGE = p; renderUsersTable(); }
 
 function adminSearchUsers() {
   ADMIN_USER_SEARCH = (document.getElementById('adminUserSearch')?.value || '').trim();
-  ADMIN_USER_PAGE   = 1;
+  ADMIN_USER_PAGE = 1;
   renderUsersTable();
 }
 
-function adminSetRoleBtn(btn)   { adminSetRole(btn.dataset.id,   parseInt(btn.dataset.role),   btn); }
+function adminSetRoleBtn(btn) { adminSetRole(btn.dataset.id, parseInt(btn.dataset.role), btn); }
 function adminSetStatusBtn(btn) { adminSetStatus(btn.dataset.id, parseInt(btn.dataset.status), btn); }
 
 // PATCH /api/users/:id/role
@@ -160,19 +144,19 @@ async function adminSetRole(id, role, btn) {
     if (res && res.ok) {
       showToast('✅ Đã đổi quyền thành ' + label);
     } else { showToast('⚠️ Không thể đổi quyền qua API, đang cập nhật local...'); }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback: cập nhật localStorage
   try {
     var db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]');
-    var u  = db.find(function(x){ return x.id == id || x._id == id || x.email == id; });
+    var u = db.find(function (x) { return x.id == id || x._id == id || x.email == id; });
     if (u) {
       u.role = role === 1 ? 'admin' : 'customer';
       localStorage.setItem('vt_userdb', JSON.stringify(db));
       sessionStorage.setItem('vt_userdb', JSON.stringify(db));
       showToast('✅ Đã đổi quyền thành ' + label);
     }
-  } catch(e) {}
+  } catch (e) { }
 
   renderUsersTable();
 }
@@ -188,12 +172,12 @@ async function adminSetStatus(id, status, btn) {
     if (res && res.ok) {
       showToast('✅ Đã ' + label + ' tài khoản');
     }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback: cập nhật localStorage
   try {
     var db2 = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]');
-    var u2  = db2.find(function(x){ return x.id == id || x._id == id || x.email == id; });
+    var u2 = db2.find(function (x) { return x.id == id || x._id == id || x.email == id; });
     if (u2) {
       u2.locked = (status === 2);
       u2.status = status;
@@ -201,7 +185,7 @@ async function adminSetStatus(id, status, btn) {
       sessionStorage.setItem('vt_userdb', JSON.stringify(db2));
       showToast('✅ Đã ' + label + ' tài khoản');
     }
-  } catch(e) {}
+  } catch (e) { }
 
   renderUsersTable();
 }
@@ -209,31 +193,31 @@ async function adminSetStatus(id, status, btn) {
 // ===== TOURS DATA =====
 var ADMIN_TOURS_KEY = 'vt_admin_tours';
 var DEFAULT_TOURS = [
-  {id:1,name:'Du Thuyền Hạ Long Sang Trọng',location:'Vịnh Hạ Long, Quảng Ninh',price:'6.990.000đ',duration:'3',desc:'Trải nghiệm du thuyền 5 sao trên vịnh Hạ Long huyền thoại.',active:true,schedules:[{date:'2026-04-10',slots:20},{date:'2026-04-24',slots:15}],days:[]},
-  {id:2,name:'Tour Phố Cổ Hội An & Ẩm Thực',location:'Phố Cổ Hội An, Quảng Nam',price:'1.250.000đ',duration:'2',desc:'Khám phá phố cổ Hội An về đêm và trải nghiệm ẩm thực địa phương.',active:true,schedules:[{date:'2026-04-05',slots:25}],days:[]},
-  {id:3,name:'Trekking & Homestay Sapa',location:'Sapa, Lào Cai',price:'2.800.000đ',duration:'3',desc:'Trekking qua các bản làng và lưu trú homestay bản địa.',active:true,schedules:[{date:'2026-04-15',slots:12}],days:[]},
-  {id:4,name:'Khám Phá Hà Nội Cổ Kính',location:'Hà Nội',price:'850.000đ',duration:'1',desc:'Tour city khám phá 36 phố phường và ẩm thực đường phố.',active:true,schedules:[],days:[]},
-  {id:5,name:'Đà Nẵng – Bà Nà Hills',location:'Đà Nẵng',price:'1.900.000đ',duration:'2',desc:'Cầu Vàng, Bà Nà Hills và bãi biển Mỹ Khê tuyệt đẹp.',active:true,schedules:[{date:'2026-04-20',slots:30}],days:[]},
-  {id:6,name:'Tràng An – Tam Cốc Ninh Bình',location:'Ninh Bình',price:'1.100.000đ',duration:'1',desc:'Chèo thuyền qua hang động Tràng An di sản thế giới UNESCO.',active:false,schedules:[],days:[]},
-  {id:7,name:'Sông Nước Miền Tây',location:'Cần Thơ',price:'1.650.000đ',duration:'2',desc:'Khám phá chợ nổi Cái Răng và vườn trái cây đặc sản.',active:true,schedules:[{date:'2026-04-08',slots:18}],days:[]},
+  { id: 1, name: 'Du Thuyền Hạ Long Sang Trọng', location: 'Vịnh Hạ Long, Quảng Ninh', price: '6.990.000đ', duration: '3', desc: 'Trải nghiệm du thuyền 5 sao trên vịnh Hạ Long huyền thoại.', active: true, schedules: [{ date: '2026-04-10', slots: 20 }, { date: '2026-04-24', slots: 15 }], days: [] },
+  { id: 2, name: 'Tour Phố Cổ Hội An & Ẩm Thực', location: 'Phố Cổ Hội An, Quảng Nam', price: '1.250.000đ', duration: '2', desc: 'Khám phá phố cổ Hội An về đêm và trải nghiệm ẩm thực địa phương.', active: true, schedules: [{ date: '2026-04-05', slots: 25 }], days: [] },
+  { id: 3, name: 'Trekking & Homestay Sapa', location: 'Sapa, Lào Cai', price: '2.800.000đ', duration: '3', desc: 'Trekking qua các bản làng và lưu trú homestay bản địa.', active: true, schedules: [{ date: '2026-04-15', slots: 12 }], days: [] },
+  { id: 4, name: 'Khám Phá Hà Nội Cổ Kính', location: 'Hà Nội', price: '850.000đ', duration: '1', desc: 'Tour city khám phá 36 phố phường và ẩm thực đường phố.', active: true, schedules: [], days: [] },
+  { id: 5, name: 'Đà Nẵng – Bà Nà Hills', location: 'Đà Nẵng', price: '1.900.000đ', duration: '2', desc: 'Cầu Vàng, Bà Nà Hills và bãi biển Mỹ Khê tuyệt đẹp.', active: true, schedules: [{ date: '2026-04-20', slots: 30 }], days: [] },
+  { id: 6, name: 'Tràng An – Tam Cốc Ninh Bình', location: 'Ninh Bình', price: '1.100.000đ', duration: '1', desc: 'Chèo thuyền qua hang động Tràng An di sản thế giới UNESCO.', active: false, schedules: [], days: [] },
+  { id: 7, name: 'Sông Nước Miền Tây', location: 'Cần Thơ', price: '1.650.000đ', duration: '2', desc: 'Khám phá chợ nổi Cái Răng và vườn trái cây đặc sản.', active: true, schedules: [{ date: '2026-04-08', slots: 18 }], days: [] },
 ];
 
 function adminGetTours() {
-  try { var r = localStorage.getItem(ADMIN_TOURS_KEY); return r ? JSON.parse(r) : DEFAULT_TOURS; } catch(e) { return DEFAULT_TOURS; }
+  try { var r = localStorage.getItem(ADMIN_TOURS_KEY); return r ? JSON.parse(r) : DEFAULT_TOURS; } catch (e) { return DEFAULT_TOURS; }
 }
 function adminSaveTours(tours) { localStorage.setItem(ADMIN_TOURS_KEY, JSON.stringify(tours)); }
 
 // ===== TOURS LIST =====
 var ADMIN_TOUR_PAGE = 1;
-var ADMIN_TOUR_PER  = 8;
+var ADMIN_TOUR_PER = 8;
 
 function adminRenderTours() {
-  var tbody  = document.getElementById('adminToursBody');
+  var tbody = document.getElementById('adminToursBody');
   var footer = document.getElementById('adminToursFooter');
   if (!tbody) return;
 
   var search = (document.getElementById('adminTourSearch')?.value || '').toLowerCase();
-  var tours  = adminGetTours().filter(function(t){
+  var tours = adminGetTours().filter(function (t) {
     return !search || t.name.toLowerCase().includes(search) || t.location.toLowerCase().includes(search);
   });
 
@@ -243,14 +227,14 @@ function adminRenderTours() {
 
   // Update KPIs
   var allTours = adminGetTours();
-  var el = function(id){ return document.getElementById(id); };
-  if(el('kpiTotal'))  el('kpiTotal').textContent  = allTours.length;
-  if(el('kpiActive')) el('kpiActive').textContent = allTours.filter(function(t){ return t.active; }).length;
-  if(el('kpiDraft'))  el('kpiDraft').textContent  = allTours.filter(function(t){ return !t.active; }).length;
+  var el = function (id) { return document.getElementById(id); };
+  if (el('kpiTotal')) el('kpiTotal').textContent = allTours.length;
+  if (el('kpiActive')) el('kpiActive').textContent = allTours.filter(function (t) { return t.active; }).length;
+  if (el('kpiDraft')) el('kpiDraft').textContent = allTours.filter(function (t) { return !t.active; }).length;
   try {
     var promos = JSON.parse(localStorage.getItem('vt_admin_promos') || '[]');
-    if(el('kpiPromo')) el('kpiPromo').textContent = promos.filter(function(p){ return p.status==='active'; }).length;
-  } catch(e){}
+    if (el('kpiPromo')) el('kpiPromo').textContent = promos.filter(function (p) { return p.status === 'active'; }).length;
+  } catch (e) { }
 
   if (!paged.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;padding:40px;font-size:0.85rem">Chưa có tour nào</td></tr>';
@@ -258,45 +242,45 @@ function adminRenderTours() {
     return;
   }
 
-  tbody.innerHTML = paged.map(function(t, i) {
+  tbody.innerHTML = paged.map(function (t, i) {
     var realIdx = adminGetTours().indexOf(t);
-    var imgBg   = 'linear-gradient(135deg,#2d8a4e,#3aaa62)';
-    var pct     = t.active ? 100 : (t.desc ? 70 : 40);
-    var barCls  = pct >= 80 ? 'content-fill-green' : 'content-fill-orange';
-    var barTxt  = pct >= 80 ? '<span class="content-status-text content-ok">Đầy đủ thông tin</span>'
-                             : '<span class="content-status-text content-warn">Thiếu ' + (t.schedules&&t.schedules.length?'':'lịch trình') + '</span>';
+    var imgBg = 'linear-gradient(135deg,#2d8a4e,#3aaa62)';
+    var pct = t.active ? 100 : (t.desc ? 70 : 40);
+    var barCls = pct >= 80 ? 'content-fill-green' : 'content-fill-orange';
+    var barTxt = pct >= 80 ? '<span class="content-status-text content-ok">Đầy đủ thông tin</span>'
+      : '<span class="content-status-text content-warn">Thiếu ' + (t.schedules && t.schedules.length ? '' : 'lịch trình') + '</span>';
     var statusBadge = t.active
       ? '<span class="badge-published">ĐANG HIỂN THỊ</span>'
       : '<span class="badge-draft">BẢN NHÁP</span>';
     var actionBtns = t.active
-      ? '<button class="act-btn-content" onclick="adminEditTour(' + realIdx + ')">📄 Nội dung</button><button class="act-btn-delete" onclick="adminToggleTour(' + realIdx + ')">Gỡ bỏ</button><button class="admin-act-btn admin-act-btn-red" data-id="' + (t._id||t.id||'') + '" data-idx="' + realIdx + '" onclick="adminDeleteTour(this)" style="font-size:0.72rem;padding:4px 10px">🗑️ Xóa</button>'
-      : '<button class="act-btn-content" onclick="adminEditTour(' + realIdx + ')">📄 Nội dung</button><button class="act-btn-publish" onclick="adminToggleTour(' + realIdx + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Xuất bản</button><button class="admin-act-btn admin-act-btn-red" data-id="' + (t._id||t.id||'') + '" data-idx="' + realIdx + '" onclick="adminDeleteTour(this)" style="font-size:0.72rem;padding:4px 10px">🗑️ Xóa</button>';
+      ? '<button class="act-btn-content" onclick="adminEditTour(' + realIdx + ')">📄 Nội dung</button><button class="act-btn-delete" onclick="adminToggleTour(' + realIdx + ')">Gỡ bỏ</button><button class="admin-act-btn admin-act-btn-red" data-id="' + (t._id || t.id || '') + '" data-idx="' + realIdx + '" onclick="adminDeleteTour(this)" style="font-size:0.72rem;padding:4px 10px">🗑️ Xóa</button>'
+      : '<button class="act-btn-content" onclick="adminEditTour(' + realIdx + ')">📄 Nội dung</button><button class="act-btn-publish" onclick="adminToggleTour(' + realIdx + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Xuất bản</button><button class="admin-act-btn admin-act-btn-red" data-id="' + (t._id || t.id || '') + '" data-idx="' + realIdx + '" onclick="adminDeleteTour(this)" style="font-size:0.72rem;padding:4px 10px">🗑️ Xóa</button>';
 
     return '<tr>' +
       '<td><div style="display:flex;align-items:center;gap:10px">' +
-        '<div class="tour-img-thumb" style="background:' + imgBg + '">🗺️</div>' +
-        '<div><div style="font-weight:700;font-size:0.82rem;color:#1a1a1a">' + t.name + '</div>' +
-        '<div class="tour-id-badge">ID: TOUR-' + String(t.id||realIdx+1).padStart(5,'0') + ' · Cập nhật: ' + (t.updatedAt||'—') + '</div></div>' +
+      '<div class="tour-img-thumb" style="background:' + imgBg + '">🗺️</div>' +
+      '<div><div style="font-weight:700;font-size:0.82rem;color:#1a1a1a">' + t.name + '</div>' +
+      '<div class="tour-id-badge">ID: TOUR-' + String(t.id || realIdx + 1).padStart(5, '0') + ' · Cập nhật: ' + (t.updatedAt || '—') + '</div></div>' +
       '</div></td>' +
       '<td><div class="content-bar"><div class="' + barCls + '" style="width:' + pct + '%"></div></div>' + barTxt + '</td>' +
-      '<td><div class="price-main">' + t.price + '</div>' + (!t.active?'<div class="price-promo">Không ưu đãi</div>':'') + '</td>' +
+      '<td><div class="price-main">' + t.price + '</div>' + (!t.active ? '<div class="price-promo">Không ưu đãi</div>' : '') + '</td>' +
       '<td>' + statusBadge + '</td>' +
       '<td><div class="act-btns">' + actionBtns + '</div></td>' +
-    '</tr>';
+      '</tr>';
   }).join('');
 
   // Footer pagination
   var totalPages = Math.max(1, Math.ceil(total / ADMIN_TOUR_PER));
-  var pageLinks  = '';
+  var pageLinks = '';
   for (var p = 1; p <= totalPages; p++) {
-    pageLinks += '<button class="admin-page-btn' + (p===ADMIN_TOUR_PAGE?' active':'') + '" onclick="adminGoTourPage(' + p + ')">' + p + '</button>';
+    pageLinks += '<button class="admin-page-btn' + (p === ADMIN_TOUR_PAGE ? ' active' : '') + '" onclick="adminGoTourPage(' + p + ')">' + p + '</button>';
   }
   if (footer) footer.innerHTML =
-    '<span>Hiện thị ' + Math.min(start+1,total) + ' - ' + Math.min(start+ADMIN_TOUR_PER,total) + ' của ' + total + ' tours</span>' +
+    '<span>Hiện thị ' + Math.min(start + 1, total) + ' - ' + Math.min(start + ADMIN_TOUR_PER, total) + ' của ' + total + ' tours</span>' +
     '<div class="admin-pagination">' +
-      '<button class="admin-page-btn text" onclick="adminGoTourPage(' + Math.max(1,ADMIN_TOUR_PAGE-1) + ')">Trước</button>' +
-      pageLinks +
-      '<button class="admin-page-btn text" onclick="adminGoTourPage(' + Math.min(totalPages,ADMIN_TOUR_PAGE+1) + ')">Sau</button>' +
+    '<button class="admin-page-btn text" onclick="adminGoTourPage(' + Math.max(1, ADMIN_TOUR_PAGE - 1) + ')">Trước</button>' +
+    pageLinks +
+    '<button class="admin-page-btn text" onclick="adminGoTourPage(' + Math.min(totalPages, ADMIN_TOUR_PAGE + 1) + ')">Sau</button>' +
     '</div>';
 }
 
@@ -328,20 +312,20 @@ function adminShowCreateTour(idx) {
   if (idx !== undefined) {
     var t = adminGetTours()[idx];
     if (!t) return;
-    document.getElementById('atfName').value     = t.name || '';
+    document.getElementById('atfName').value = t.name || '';
     document.getElementById('atfLocation').value = t.location || '';
-    document.getElementById('atfPrice').value    = t.price || '';
+    document.getElementById('atfPrice').value = t.price || '';
     document.getElementById('atfDuration').value = t.duration || '';
     document.getElementById('atfDesc').innerText = t.desc || '';
     // Days
     var dl = document.getElementById('atfDaysList');
     dl.innerHTML = '';
-    (t.days || []).forEach(function(d){ atfAddDay(d.title, d.desc); });
+    (t.days || []).forEach(function (d) { atfAddDay(d.title, d.desc); });
     if (!dl.children.length) { atfAddDay(); atfAddDay(); }
     // Schedules
     var sl = document.getElementById('atfScheduleList');
     sl.innerHTML = '';
-    (t.schedules || []).forEach(function(s){ atfAddScheduleRow(s.date, s.slots); });
+    (t.schedules || []).forEach(function (s) { atfAddScheduleRow(s.date, s.slots); });
   } else {
     document.getElementById('atfName').value = '';
     document.getElementById('atfLocation').value = '';
@@ -361,19 +345,19 @@ function adminPublishTour() { adminDoSaveTour(true); }
 function adminSaveTourDraft() { adminDoSaveTour(false); }
 
 function adminDoSaveTour(publish) {
-  var name     = (document.getElementById('atfName').value || '').trim();
+  var name = (document.getElementById('atfName').value || '').trim();
   var location = (document.getElementById('atfLocation').value || '').trim();
-  var price    = (document.getElementById('atfPrice').value || '').trim();
+  var price = (document.getElementById('atfPrice').value || '').trim();
   var duration = (document.getElementById('atfDuration').value || '').trim();
-  var desc     = (document.getElementById('atfDesc').innerText || '').trim();
-  var idxStr   = document.getElementById('atfName').dataset.idx;
+  var desc = (document.getElementById('atfDesc').innerText || '').trim();
+  var idxStr = document.getElementById('atfName').dataset.idx;
 
-  if (!name)    { showToast('⚠️ Vui lòng nhập tên tour'); return; }
-  if (!location){ showToast('⚠️ Vui lòng chọn địa điểm'); return; }
+  if (!name) { showToast('⚠️ Vui lòng nhập tên tour'); return; }
+  if (!location) { showToast('⚠️ Vui lòng chọn địa điểm'); return; }
 
   // Thu thập days
   var days = [];
-  document.querySelectorAll('.atf-day-item').forEach(function(row){
+  document.querySelectorAll('.atf-day-item').forEach(function (row) {
     var t = row.querySelector('.day-title-inp');
     var d = row.querySelector('.day-desc-inp');
     days.push({ title: t ? t.value : '', desc: d ? d.value : '' });
@@ -381,14 +365,14 @@ function adminDoSaveTour(publish) {
 
   // Thu thập schedules
   var schedules = [];
-  document.querySelectorAll('.atf-schedule-row').forEach(function(row){
+  document.querySelectorAll('.atf-schedule-row').forEach(function (row) {
     var d = row.querySelector('.sched-date-inp');
     var s = row.querySelector('.slot-inp');
     if (d && d.value) schedules.push({ date: d.value, slots: parseInt(s ? s.value : 0) || 0 });
   });
 
   var tours = adminGetTours();
-  var tour = { name:name, location:location, price: price ? price+'đ' : '—', duration:duration, desc:desc, active: publish, schedules:schedules, days:days };
+  var tour = { name: name, location: location, price: price ? price + 'đ' : '—', duration: duration, desc: desc, active: publish, schedules: schedules, days: days };
 
   if (idxStr !== '') {
     var idx = parseInt(idxStr);
@@ -396,7 +380,7 @@ function adminDoSaveTour(publish) {
     tours[idx] = tour;
     showToast('✅ Đã cập nhật tour: ' + name);
   } else {
-    tour.id = tours.reduce(function(m,t){ return Math.max(m,t.id||0); }, 0) + 1;
+    tour.id = tours.reduce(function (m, t) { return Math.max(m, t.id || 0); }, 0) + 1;
     tours.push(tour);
     showToast(publish ? '✅ Đã xuất bản tour: ' + name : '📝 Đã lưu bản nháp: ' + name);
   }
@@ -415,12 +399,12 @@ function atfAddDay(title, desc) {
   div.className = 'atf-day-item';
   div.innerHTML =
     '<div class="atf-day-header">' +
-      '<span class="atf-day-badge">Ngày ' + dayCount + '</span>' +
-      '<button class="atf-day-del" onclick="atfRemoveDay(this)" title="Xóa ngày">✕</button>' +
+    '<span class="atf-day-badge">Ngày ' + dayCount + '</span>' +
+    '<button class="atf-day-del" onclick="atfRemoveDay(this)" title="Xóa ngày">✕</button>' +
     '</div>' +
     '<div class="atf-day-body">' +
-      '<input class="day-title-inp" type="text" placeholder="Tiêu đề: Tham quan đảo & Chèo thuyền Kayak" value="' + (title||'') + '">' +
-      '<textarea class="day-desc-inp" placeholder="Mô tả hoạt động trong ngày...">' + (desc||'') + '</textarea>' +
+    '<input class="day-title-inp" type="text" placeholder="Tiêu đề: Tham quan đảo & Chèo thuyền Kayak" value="' + (title || '') + '">' +
+    '<textarea class="day-desc-inp" placeholder="Mô tả hoạt động trong ngày...">' + (desc || '') + '</textarea>' +
     '</div>';
   list.appendChild(div);
 }
@@ -429,7 +413,7 @@ function atfRemoveDay(btn) {
   btn.closest('.atf-day-item').remove();
   // Re-number
   dayCount = 0;
-  document.querySelectorAll('.atf-day-item').forEach(function(item){
+  document.querySelectorAll('.atf-day-item').forEach(function (item) {
     dayCount++;
     var badge = item.querySelector('.atf-day-badge');
     if (badge) badge.textContent = 'Ngày ' + dayCount;
@@ -446,8 +430,8 @@ function atfAddScheduleRow(date, slots) {
   var row = document.createElement('div');
   row.className = 'atf-schedule-row';
   row.innerHTML =
-    '<input class="sched-date-inp" type="date" value="' + (date||'') + '">' +
-    '<input class="slot-inp" type="number" placeholder="Slots" value="' + (slots||20) + '" min="1">' +
+    '<input class="sched-date-inp" type="date" value="' + (date || '') + '">' +
+    '<input class="slot-inp" type="number" placeholder="Slots" value="' + (slots || 20) + '" min="1">' +
     '<button class="atf-sched-del" onclick="this.parentElement.remove()" title="Xóa">✕</button>';
   list.appendChild(row);
 }
@@ -456,9 +440,9 @@ function atfAddScheduleRow(date, slots) {
 function atfAddImages(input) {
   if (!input.files) return;
   var grid = document.getElementById('atfImgGrid');
-  Array.from(input.files).slice(0, 6).forEach(function(file){
+  Array.from(input.files).slice(0, 6).forEach(function (file) {
     var reader = new FileReader();
-    reader.onload = function(e){
+    reader.onload = function (e) {
       var div = document.createElement('div');
       div.className = 'atf-img-preview';
       div.style.backgroundImage = 'url(' + e.target.result + ')';
@@ -478,19 +462,19 @@ function atfFormat(cmd) { document.execCommand(cmd, false, null); }
 var PROMO_KEY = 'vt_admin_promos';
 
 var DEFAULT_PROMOS = [
-  {id:1, name:'Giải Chào Mừng 1%', type:'percent', value:15, start:'2026-01-01', end:'2026-12-31', maxUse:1000, perUser:1, used:880, status:'active'},
-  {id:2, name:'Đặc biệt Cuối tuần',  type:'percent', value:20, start:'2026-03-01', end:'2026-03-31', maxUse:500,  perUser:1, used:200, status:'active'},
-  {id:3, name:'Summer Flash Sale',    type:'fixed',   value:50, start:'2026-06-01', end:'2026-08-31', maxUse:2000, perUser:2, used:0,   status:'draft'},
+  { id: 1, name: 'Giải Chào Mừng 1%', type: 'percent', value: 15, start: '2026-01-01', end: '2026-12-31', maxUse: 1000, perUser: 1, used: 880, status: 'active' },
+  { id: 2, name: 'Đặc biệt Cuối tuần', type: 'percent', value: 20, start: '2026-03-01', end: '2026-03-31', maxUse: 500, perUser: 1, used: 200, status: 'active' },
+  { id: 3, name: 'Summer Flash Sale', type: 'fixed', value: 50, start: '2026-06-01', end: '2026-08-31', maxUse: 2000, perUser: 2, used: 0, status: 'draft' },
 ];
 
 function promoGetAll() {
-  try { var r = localStorage.getItem(PROMO_KEY); return r ? JSON.parse(r) : DEFAULT_PROMOS; } catch(e) { return DEFAULT_PROMOS; }
+  try { var r = localStorage.getItem(PROMO_KEY); return r ? JSON.parse(r) : DEFAULT_PROMOS; } catch (e) { return DEFAULT_PROMOS; }
 }
 function promoSaveAll(p) { localStorage.setItem(PROMO_KEY, JSON.stringify(p)); }
 
 // Switch sub-tab
 function promoSwitchTab(type, btn) {
-  document.querySelectorAll('.promo-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.promo-tab').forEach(function (b) { b.classList.remove('active'); });
   btn.classList.add('active');
   promoRenderList(type);
 }
@@ -504,19 +488,19 @@ function promoShowCreate(idx) {
   if (idx !== undefined) {
     var p = promoGetAll()[idx];
     if (!p) return;
-    document.getElementById('promoName').value    = p.name    || '';
-    document.getElementById('promoType').value    = p.type    || 'fixed';
-    document.getElementById('promoValue').value   = p.value   || '';
-    document.getElementById('promoStart').value   = p.start   || '';
-    document.getElementById('promoEnd').value     = p.end     || '';
-    document.getElementById('promoMaxUse').value  = p.maxUse  || '';
+    document.getElementById('promoName').value = p.name || '';
+    document.getElementById('promoType').value = p.type || 'fixed';
+    document.getElementById('promoValue').value = p.value || '';
+    document.getElementById('promoStart').value = p.start || '';
+    document.getElementById('promoEnd').value = p.end || '';
+    document.getElementById('promoMaxUse').value = p.maxUse || '';
     document.getElementById('promoPerUser').value = p.perUser || 1;
     promoUpdatePreview(p.name, p.type, p.value);
   } else {
-    ['promoName','promoType','promoValue','promoStart','promoEnd','promoMaxUse'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+    ['promoName', 'promoType', 'promoValue', 'promoStart', 'promoEnd', 'promoMaxUse'].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('promoPerUser').value = 1;
   }
-  card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function promoHideCreate() {
@@ -525,30 +509,30 @@ function promoHideCreate() {
 
 // Save
 function promoSave() {
-  var name    = (document.getElementById('promoName').value    || '').trim();
-  var type    = document.getElementById('promoType').value    || 'fixed';
-  var value   = parseFloat(document.getElementById('promoValue').value) || 0;
-  var start   = document.getElementById('promoStart').value   || '';
-  var end     = document.getElementById('promoEnd').value     || '';
-  var maxUse  = parseInt(document.getElementById('promoMaxUse').value)  || 1000;
+  var name = (document.getElementById('promoName').value || '').trim();
+  var type = document.getElementById('promoType').value || 'fixed';
+  var value = parseFloat(document.getElementById('promoValue').value) || 0;
+  var start = document.getElementById('promoStart').value || '';
+  var end = document.getElementById('promoEnd').value || '';
+  var maxUse = parseInt(document.getElementById('promoMaxUse').value) || 1000;
   var perUser = parseInt(document.getElementById('promoPerUser').value) || 1;
-  var idxStr  = document.getElementById('promoEditIdx').value;
+  var idxStr = document.getElementById('promoEditIdx').value;
 
-  if (!name)  { showToast('⚠️ Vui lòng nhập tên chương trình'); return; }
-  if (!value) { showToast('⚠️ Vui lòng nhập giá trị giảm');     return; }
+  if (!name) { showToast('⚠️ Vui lòng nhập tên chương trình'); return; }
+  if (!value) { showToast('⚠️ Vui lòng nhập giá trị giảm'); return; }
   if (!start || !end) { showToast('⚠️ Vui lòng chọn thời gian'); return; }
 
   var promos = promoGetAll();
-  var promo  = { name:name, type:type, value:value, start:start, end:end, maxUse:maxUse, perUser:perUser, used:0, status:'active' };
-  var idx    = parseInt(idxStr);
+  var promo = { name: name, type: type, value: value, start: start, end: end, maxUse: maxUse, perUser: perUser, used: 0, status: 'active' };
+  var idx = parseInt(idxStr);
 
   if (idx >= 0) {
-    promo.id   = promos[idx].id;
+    promo.id = promos[idx].id;
     promo.used = promos[idx].used || 0;
     promos[idx] = promo;
     showToast('✅ Đã cập nhật ưu đãi: ' + name);
   } else {
-    promo.id = promos.reduce(function(m,p){ return Math.max(m,p.id||0); },0) + 1;
+    promo.id = promos.reduce(function (m, p) { return Math.max(m, p.id || 0); }, 0) + 1;
     promos.push(promo);
     showToast('✅ Đã tạo ưu đãi: ' + name);
   }
@@ -562,17 +546,17 @@ function promoSave() {
 
 // Render list
 function promoRenderList(filterStatus) {
-  var body   = document.getElementById('promoListBody');
+  var body = document.getElementById('promoListBody');
   if (!body) return;
   var search = (document.getElementById('promoSearchInput')?.value || '').toLowerCase();
-  var fType  = document.getElementById('promoFilterType')?.value  || '';
-  var today  = new Date().toISOString().slice(0,10);
-  var promos = promoGetAll().filter(function(p) {
+  var fType = document.getElementById('promoFilterType')?.value || '';
+  var today = new Date().toISOString().slice(0, 10);
+  var promos = promoGetAll().filter(function (p) {
     if (search && !p.name.toLowerCase().includes(search)) return false;
     if (fType && p.type !== fType) return false;
-    if (filterStatus === 'active'  && p.status !== 'active')  return false;
-    if (filterStatus === 'paused'  && p.status !== 'paused')  return false;
-    if (filterStatus === 'draft'   && p.status !== 'draft')   return false;
+    if (filterStatus === 'active' && p.status !== 'active') return false;
+    if (filterStatus === 'paused' && p.status !== 'paused') return false;
+    if (filterStatus === 'draft' && p.status !== 'draft') return false;
     return true;
   });
 
@@ -580,11 +564,11 @@ function promoRenderList(filterStatus) {
     body.innerHTML = '<div class="promo-empty">Không có ưu đãi nào</div>'; return;
   }
 
-  body.innerHTML = promos.map(function(p, i) {
-    var realIdx = promoGetAll().indexOf(promoGetAll().find(function(x){ return x.id === p.id; }));
-    var pct   = p.maxUse > 0 ? Math.round((p.used / p.maxUse) * 100) : 0;
+  body.innerHTML = promos.map(function (p, i) {
+    var realIdx = promoGetAll().indexOf(promoGetAll().find(function (x) { return x.id === p.id; }));
+    var pct = p.maxUse > 0 ? Math.round((p.used / p.maxUse) * 100) : 0;
     var fillCls = pct >= 80 ? 'warn' : '';
-    var remain  = promoDaysLeft(p.end);
+    var remain = promoDaysLeft(p.end);
     var discStr = p.type === 'percent' ? p.value + '%' : p.value.toLocaleString() + 'đ';
     var statusBadge = p.status === 'active'
       ? '<span class="promo-status-active">HOẠT ĐỘNG</span>'
@@ -592,20 +576,20 @@ function promoRenderList(filterStatus) {
         ? '<span class="promo-status-paused">TẠM DỪNG</span>'
         : '<span class="promo-status-draft">BẢN NHÁP</span>';
     return '<div class="promo-list-row">' +
-      '<div><div class="promo-item-name">' + p.name + '</div><div class="promo-item-type">Giảm ' + (p.type==='percent'?'phần trăm':'cố định') + '</div></div>' +
+      '<div><div class="promo-item-name">' + p.name + '</div><div class="promo-item-type">Giảm ' + (p.type === 'percent' ? 'phần trăm' : 'cố định') + '</div></div>' +
       '<div class="promo-item-discount">' + discStr + '</div>' +
       '<div class="promo-item-expire">' + remain + '</div>' +
       '<div><div style="font-size:0.75rem;color:#666">' + p.used + '/' + p.maxUse + '</div><div class="promo-usage-bar"><div class="promo-usage-fill ' + fillCls + '" style="width:' + pct + '%"></div></div></div>' +
       '<div>' + statusBadge + '</div>' +
       '<div><button class="promo-action-btn" onclick="promoMenu(' + realIdx + ',event)">⋮</button></div>' +
-    '</div>';
+      '</div>';
   }).join('');
 }
 
 function promoDaysLeft(endDate) {
   if (!endDate) return '—';
   var diff = Math.ceil((new Date(endDate) - new Date()) / 86400000);
-  if (diff < 0)  return 'Đã hết hạn';
+  if (diff < 0) return 'Đã hết hạn';
   if (diff === 0) return 'Hôm nay';
   return diff + ' ngày';
 }
@@ -619,7 +603,7 @@ function promoMenu(idx, e) {
   if (act) { promoShowCreate(idx); }
   else {
     if (confirm('Xóa ưu đãi "' + p.name + '"?')) {
-      promos.splice(idx,1);
+      promos.splice(idx, 1);
       promoSaveAll(promos);
       promoRenderList();
       promoUpdateCountBadge();
@@ -629,23 +613,23 @@ function promoMenu(idx, e) {
 }
 
 function promoUpdateCountBadge() {
-  var active = promoGetAll().filter(function(p){ return p.status==='active'; }).length;
+  var active = promoGetAll().filter(function (p) { return p.status === 'active'; }).length;
   var el = document.getElementById('promoCountActive');
   if (el) el.textContent = active;
 }
 
 function promoUpdatePreview(name, type, value) {
   var nameEl = document.getElementById('promoPreviewName');
-  var valEl  = document.getElementById('promoPreviewVal');
-  var useEl  = document.getElementById('promoStatUse');
+  var valEl = document.getElementById('promoPreviewVal');
+  var useEl = document.getElementById('promoStatUse');
   if (nameEl) nameEl.textContent = name || 'Summer Flash Sale 2024';
-  if (valEl)  valEl.textContent  = type === 'percent' ? '-' + (value||0) + '%' : (value||0).toLocaleString() + 'đ';
-  if (useEl)  useEl.textContent  = Math.floor(Math.random()*20 + 10) + '.4k';
+  if (valEl) valEl.textContent = type === 'percent' ? '-' + (value || 0) + '%' : (value || 0).toLocaleString() + 'đ';
+  if (useEl) useEl.textContent = Math.floor(Math.random() * 20 + 10) + '.4k';
 }
 
 // Init promotions when tab opens
 var _origSwitchTab = switchTab;
-switchTab = function(name) {
+switchTab = function (name) {
   _origSwitchTab(name);
   if (name === 'promotions') {
     promoRenderList();
@@ -654,7 +638,7 @@ switchTab = function(name) {
 };
 
 // Sync prefix ₫ / %
-document.addEventListener('change', function(e) {
+document.addEventListener('change', function (e) {
   if (e.target.id === 'promoType') {
     var prefix = document.getElementById('promoValPrefix');
     if (prefix) prefix.textContent = e.target.value === 'percent' ? '%' : '₫';
@@ -665,7 +649,7 @@ document.addEventListener('change', function(e) {
 // THỐNG KÊ
 // ============================================================
 function statsPeriod(btn, days) {
-  document.querySelectorAll('.stats-period').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.stats-period').forEach(function (b) { b.classList.remove('active'); });
   btn.classList.add('active');
   statsLoadData();
 }
@@ -673,17 +657,17 @@ function statsPeriod(btn, days) {
 function statsLoadData() {
   // Đọc dữ liệu thật từ localStorage
   var db = [];
-  try { db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]'); } catch(e) {}
+  try { db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]'); } catch (e) { }
 
   var totalBookings = 0;
-  var totalRevenue  = 0;
-  var tourBookings  = {};
+  var totalRevenue = 0;
+  var tourBookings = {};
 
-  db.forEach(function(u) {
+  db.forEach(function (u) {
     try {
       var bs = JSON.parse(localStorage.getItem('vt_bookings_' + u.email) || '[]');
       totalBookings += bs.length;
-      bs.forEach(function(b) {
+      bs.forEach(function (b) {
         // Parse số tiền
         var raw = (b.total || b.price || '0').replace(/[^\d]/g, '');
         totalRevenue += parseInt(raw) || 0;
@@ -691,23 +675,23 @@ function statsLoadData() {
         var tname = b.tourName || b.tour || '—';
         tourBookings[tname] = (tourBookings[tname] || 0) + 1;
       });
-    } catch(e) {}
+    } catch (e) { }
   });
 
   // KPI
-  var fmtMoney = function(n) {
-    if (n >= 1000000) return (n/1000000).toFixed(1) + 'M đ';
-    if (n >= 1000)    return (n/1000).toFixed(0) + 'K đ';
+  var fmtMoney = function (n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M đ';
+    if (n >= 1000) return (n / 1000).toFixed(0) + 'K đ';
     return n + 'đ';
   };
-  var el = function(id){ return document.getElementById(id); };
+  var el = function (id) { return document.getElementById(id); };
 
-  if (el('statRevenue'))       el('statRevenue').textContent       = totalRevenue  ? fmtMoney(totalRevenue) : '0đ';
+  if (el('statRevenue')) el('statRevenue').textContent = totalRevenue ? fmtMoney(totalRevenue) : '0đ';
   if (el('statTotalBookings')) el('statTotalBookings').textContent = totalBookings || 0;
-  if (el('statVisitors'))      el('statVisitors').textContent      = db.length     || 0;
+  if (el('statVisitors')) el('statVisitors').textContent = db.length || 0;
 
   // Rating
-  if (el('statRating'))     el('statRating').textContent     = '— / 5.0';
+  if (el('statRating')) el('statRating').textContent = '— / 5.0';
   if (el('statsRatingBig')) el('statsRatingBig').textContent = '—';
 
   // Donut
@@ -716,18 +700,18 @@ function statsLoadData() {
   // Tour list
   var tourList = el('statsToursList');
   if (tourList) {
-    var entries = Object.entries(tourBookings).sort(function(a,b){ return b[1]-a[1]; }).slice(0,5);
+    var entries = Object.entries(tourBookings).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 5);
     if (!entries.length) {
       tourList.innerHTML = '<div class="stats-tours-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10z"/></svg><p>Chưa có dữ liệu đặt tour</p></div>';
     } else {
-      tourList.innerHTML = entries.map(function(e) {
-        var conv = totalBookings > 0 ? Math.round(e[1]/totalBookings*100) : 0;
+      tourList.innerHTML = entries.map(function (e) {
+        var conv = totalBookings > 0 ? Math.round(e[1] / totalBookings * 100) : 0;
         return '<div class="stats-tour-row">' +
           '<div class="stats-tour-name-wrap"><div class="stats-tour-img"></div><span class="stats-tour-name">' + e[0] + '</span></div>' +
           '<div style="font-weight:700">' + e[1] + '</div>' +
           '<div style="color:#888">—</div>' +
           '<div><div class="stats-conv-bar"><div class="stats-conv-fill" style="width:' + conv + '%"></div></div>' + conv + '%</div>' +
-        '</div>';
+          '</div>';
       }).join('');
     }
   }
@@ -735,7 +719,7 @@ function statsLoadData() {
 
 // Gọi khi switch sang stats
 var _origSwitch2 = switchTab;
-switchTab = function(name) {
+switchTab = function (name) {
   _origSwitch2(name);
   if (name === 'stats') statsLoadData();
 };
@@ -746,59 +730,342 @@ function adminRenderPromoPreview() {
   var grid = document.getElementById('adminPromoPreview');
   if (!grid) return;
   var promos = [];
-  try { promos = JSON.parse(localStorage.getItem('vt_admin_promos') || '[]'); } catch(e) {}
-  var active = promos.filter(function(p){ return p.status === 'active'; }).slice(0,2);
-  var html = active.map(function(p) {
+  try { promos = JSON.parse(localStorage.getItem('vt_admin_promos') || '[]'); } catch (e) { }
+  var active = promos.filter(function (p) { return p.status === 'active'; }).slice(0, 2);
+  var html = active.map(function (p) {
     var disc = p.type === 'percent' ? p.value + '%' : p.value.toLocaleString() + 'đ';
     return '<div class="admin-promo-card">' +
       '<div style="display:flex;align-items:flex-start;justify-content:space-between">' +
-        '<div class="promo-icon">' + (p.type==='percent'?'%':'💰') + '</div>' +
-        '<span class="admin-promo-running">ĐANG CHẠY</span>' +
+      '<div class="promo-icon">' + (p.type === 'percent' ? '%' : '💰') + '</div>' +
+      '<span class="admin-promo-running">ĐANG CHẠY</span>' +
       '</div>' +
       '<div class="admin-promo-name">' + p.name + '</div>' +
-      '<div class="admin-promo-desc">Giảm ' + disc + ' · Hết hạn: ' + (p.end||'—') + '</div>' +
-      '<div class="admin-promo-footer"><span>Hết hạn: ' + (p.end||'—') + '</span><button class="admin-promo-edit" onclick="switchTab(\"promotions\")">Chỉnh sửa</button></div>' +
-    '</div>';
+      '<div class="admin-promo-desc">Giảm ' + disc + ' · Hết hạn: ' + (p.end || '—') + '</div>' +
+      '<div class="admin-promo-footer"><span>Hết hạn: ' + (p.end || '—') + '</span><button class="admin-promo-edit" onclick="switchTab(\"promotions\")">Chỉnh sửa</button></div>' +
+      '</div>';
   }).join('');
   html += '<div class="admin-promo-card admin-promo-card-add" onclick="switchTab(\"promotions\")">' +
     '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
     '<strong>Thêm Ưu đãi Mới</strong>' +
     '<span>Tạo mã giảm giá hoặc chương trình quà tặng mới</span>' +
-  '</div>';
+    '</div>';
   grid.innerHTML = html;
 }
 
+var DASH_PERIOD = 'today';
+var DASH_TOP_LIMIT = 10;
+var DASH_LOADING = false;
+
+function dashNumber(v, fallback) {
+  var n = Number(v);
+  return isFinite(n) ? n : (fallback || 0);
+}
+
+function dashFormatMoney(v) {
+  var n = dashNumber(v, 0);
+  try {
+    return n.toLocaleString('vi-VN') + 'đ';
+  } catch (e) {
+    return n + 'đ';
+  }
+}
+
+function dashFormatPercent(v) {
+  var n = dashNumber(v, 0);
+  var sign = n > 0 ? '+' : '';
+  return sign + n.toFixed(1) + '%';
+}
+
+function dashFormatShortDateLabel(label) {
+  if (typeof label !== 'string') return label;
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(label);
+  if (!m) return label;
+  return parseInt(m[3], 10) + '/' + parseInt(m[2], 10);
+}
+
+function dashSetTrendBadge(elId, value) {
+  var badge = document.getElementById(elId);
+  if (!badge) return;
+  var n = dashNumber(value, 0);
+  badge.textContent = dashFormatPercent(n);
+  badge.className = 'stats-kpi-change ' + (n > 0 ? 'up' : (n < 0 ? 'down' : 'neutral'));
+}
+
+function dashGetResult(res) {
+  if (!res || !res.ok) return null;
+  var d = res.data || {};
+  return d.result !== undefined ? d.result : null;
+}
+
+function dashNormalizeTopTours(topToursResult) {
+  if (!topToursResult || !Array.isArray(topToursResult.tours)) return [];
+  return topToursResult.tours.slice(0, DASH_TOP_LIMIT).map(function (item, idx) {
+    return {
+      rank: idx + 1,
+      name: item.name || item.tour_name || item.tour_id || ('Tour #' + (idx + 1)),
+      bookings: dashNumber(item.booking_count, 0),
+      revenue: dashNumber(item.revenue, 0)
+    };
+  });
+}
+
+function dashNormalizeRevenueSeries(revenueResult) {
+  if (!revenueResult || !Array.isArray(revenueResult.chart_result)) return [];
+  return revenueResult.chart_result.map(function (item, idx) {
+    var label = item.date || item.period || ('Mốc ' + (idx + 1));
+    if (typeof label === 'string' && label.length >= 10 && label.indexOf('-') > -1) {
+      label = label.slice(5, 10);
+    }
+    return {
+      label: label,
+      revenue: dashNumber(item.revenue, 0)
+    };
+  });
+}
+
+
+function dashRenderBookingCancelChart(container, bookings, cancelled) {
+  if (!container) return;
+  var b = Math.max(0, dashNumber(bookings, 0));
+  var c = Math.max(0, dashNumber(cancelled, 0));
+  var maxV = Math.max(b, c, 1);
+  var hb = Math.max(6, Math.round((b / maxV) * 180));
+  var hc = Math.max(6, Math.round((c / maxV) * 180));
+
+  container.innerHTML =
+    '<div class="dash-bc-item">' +
+    '<div class="dash-bc-track"><div class="dash-bc-fill booking" style="height:' + hb + 'px"></div></div>' +
+    '<div class="dash-bc-label">Bookings</div>' +
+    '<div class="dash-bc-value">' + b.toLocaleString('vi-VN') + '</div>' +
+    '</div>' +
+    '<div class="dash-bc-item">' +
+    '<div class="dash-bc-track"><div class="dash-bc-fill cancel" style="height:' + hc + 'px"></div></div>' +
+    '<div class="dash-bc-label">Đã huỷ</div>' +
+    '<div class="dash-bc-value">' + c.toLocaleString('vi-VN') + '</div>' +
+    '</div>';
+}
+
+function dashUpdatePeriodButtons() {
+  document.querySelectorAll('#dashPeriodSwitch .stats-period').forEach(function (btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-period') === DASH_PERIOD);
+  });
+}
+
+function dashSetPeriod(period, btn) {
+  DASH_PERIOD = period;
+  if (btn) {
+    document.querySelectorAll('#dashPeriodSwitch .stats-period').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  } else {
+    dashUpdatePeriodButtons();
+  }
+  dashLoadDashboard();
+}
+
+function dashTodayDateLabel(chartLabels) {
+  if (Array.isArray(chartLabels) && chartLabels.length) {
+    var raw = chartLabels[chartLabels.length - 1];
+    return dashFormatShortDateLabel(raw);
+  }
+  var now = new Date();
+  return now.getDate() + '/' + (now.getMonth() + 1);
+}
+
+function dashRenderTodaySummary(overview, label) {
+  var box = document.getElementById('dashTodaySummaryBody');
+  var title = document.getElementById('dashTodayTitle');
+  if (!box) return;
+
+  var revenue = dashNumber(overview.total_revenue, 0);
+  var bookings = dashNumber(overview.total_bookings, 0);
+  var cancelled = dashNumber(overview.cancelled_bookings, 0);
+  var cancelRate = dashNumber(overview.cancellation_rate, 0);
+  var cmp = overview.comparison_with_previous || {};
+  var revenueGrowth = dashNumber(cmp.revenue_growth, 0);
+  var bookingsGrowth = dashNumber(cmp.bookings_growth, 0);
+  var cancelGrowth = dashNumber(cmp.cancellation_rate_growth, 0);
+
+  if (title) title.textContent = 'Hôm nay (' + label + ')';
+  box.innerHTML =
+    '<ul>' +
+    '<li>Doanh thu: <b>' + dashFormatMoney(revenue) + '</b></li>' +
+    '<li>Tổng booking: <b>' + bookings.toLocaleString('vi-VN') + '</b></li>' +
+    '<li>Đã huỷ: <b>' + cancelled.toLocaleString('vi-VN') + ' (' + cancelRate.toLocaleString('vi-VN') + '%)</b></li>' +
+    '<li>So với hôm qua - Doanh thu: <b>' + dashFormatPercent(revenueGrowth) + '</b></li>' +
+    '<li>So với hôm qua - Booking: <b>' + dashFormatPercent(bookingsGrowth) + '</b></li>' +
+    '<li>So với hôm qua - Đã huỷ: <b>' + dashFormatPercent(cancelGrowth) + '</b></li>' +
+    '</ul>';
+}
+
+async function dashLoadDashboard() {
+  var topBody = document.getElementById('dashTopToursBody');
+  var revenueChartEl = document.getElementById('dashRevenueLineChart');
+  var bookingCancelEl = document.getElementById('dashBookingCancelChart');
+  var revenueChartCard = document.getElementById('dashRevenueChartCard');
+  var bookingChartCard = document.getElementById('dashBookingChartCard');
+  var todayCard = document.getElementById('dashTodayInsightsCard');
+  var row2 = document.getElementById('dashRow2');
+  if (!topBody || !revenueChartEl || !bookingCancelEl || !revenueChartCard || !bookingChartCard || !todayCard || !row2) return;
+
+  dashUpdatePeriodButtons();
+
+  if (DASH_LOADING) return;
+  DASH_LOADING = true;
+
+  var kpiPeriod = document.getElementById('dashKpiPeriod');
+  var periodLabel = { today: 'Hôm nay', week: 'Tuần này', month: 'Tháng này', year: 'Năm nay' }[DASH_PERIOD] || 'Hôm nay';
+  if (kpiPeriod) kpiPeriod.textContent = periodLabel;
+  var isToday = DASH_PERIOD === 'today';
+
+  var topMetaDescEl = document.getElementById('dashRevenueMeta');
+  var revenueMetaEl = document.getElementById('dashRevenueChartMeta');
+  var bookingCancelMetaEl = document.getElementById('dashBookingCancelMeta');
+  if (isToday) {
+    revenueChartCard.style.display = 'none';
+    bookingChartCard.style.display = 'none';
+    todayCard.style.display = 'block';
+    row2.classList.add('single');
+    if (revenueChart) { revenueChart.destroy(); revenueChart = null; }
+    if (bookingChart) { bookingChart.destroy(); bookingChart = null; }
+  } else {
+    revenueChartCard.style.display = 'block';
+    bookingChartCard.style.display = 'block';
+    todayCard.style.display = 'none';
+    row2.classList.remove('single');
+  }
+
+  if (topMetaDescEl) topMetaDescEl.textContent = 'Đang tải dữ liệu...';
+  if (!isToday && revenueMetaEl) revenueMetaEl.textContent = 'Đang tải dữ liệu biểu đồ...';
+  if (!isToday && bookingCancelMetaEl) bookingCancelMetaEl.textContent = 'Đang tải dữ liệu...';
+  topBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:24px">Đang tải dữ liệu...</td></tr>';
+
+  try {
+    var topPeriod = DASH_PERIOD === 'today' ? 'week' : DASH_PERIOD;
+    var responses = await Promise.all([
+      apiGetStatsOverview(DASH_PERIOD),
+      apiGetTopTours(topPeriod, DASH_TOP_LIMIT)
+    ]);
+
+    var overview = dashGetResult(responses[0]) || {};
+    var topTours = dashNormalizeTopTours(dashGetResult(responses[1]));
+
+    const chartRaw = overview.chart || {
+      labels: [],
+      revenues: [],
+      bookings: [],
+      cancelled: []
+    };
+
+    const chart = dashNormalizeChart(chartRaw);
+
+    var totalRevenue = dashNumber(overview.total_revenue, 0);
+    var totalBookings = dashNumber(overview.total_bookings, 0);
+    var cancelledBookings = dashNumber(overview.cancelled_bookings, 0);
+    var cancellationRate = dashNumber(overview.cancellation_rate, 0);
+    var newUsers = dashNumber(overview.new_users, 0);
+    var cmp = overview.comparison_with_previous || {};
+    var bookingsGrowth = dashNumber(cmp.bookings_growth, 0);
+    var usersGrowth = dashNumber(cmp.users_growth, 0);
+    var cancellationRateGrowth = dashNumber(cmp.cancellation_rate_growth, 0);
+
+    var el = function (id) { return document.getElementById(id); };
+    if (el('dashKpiRevenue')) el('dashKpiRevenue').textContent = dashFormatMoney(totalRevenue);
+    if (el('dashKpiBookings')) el('dashKpiBookings').textContent = totalBookings.toLocaleString('vi-VN');
+    if (el('dashKpiUsers')) el('dashKpiUsers').textContent = newUsers.toLocaleString('vi-VN');
+    if (el('dashKpiCancelRate')) {
+      var cancelEl = el('dashKpiCancelRate');
+      cancelEl.textContent = cancellationRate.toLocaleString('vi-VN') + '%';
+      var cancelCard = cancelEl.closest('.stats-kpi-card');
+      if (cancellationRate >= 30) {
+        cancelEl.style.color = '#dc2626';
+        if (cancelCard) cancelCard.style.boxShadow = '0 0 0 2px rgba(220,38,38,.2), 0 1px 8px rgba(0,0,0,.05)';
+      } else if (cancellationRate < 10) {
+        cancelEl.style.color = '#2d8a4e';
+        if (cancelCard) cancelCard.style.boxShadow = '0 0 0 2px rgba(45,138,78,.18), 0 1px 8px rgba(0,0,0,.05)';
+      } else {
+        cancelEl.style.color = '#d97706';
+        if (cancelCard) cancelCard.style.boxShadow = '0 0 0 2px rgba(217,119,6,.18), 0 1px 8px rgba(0,0,0,.05)';
+      }
+    }
+    if (el('dashKpiCancelledBookings')) el('dashKpiCancelledBookings').textContent = cancelledBookings.toLocaleString('vi-VN');
+    dashSetTrendBadge('dashKpiBookingsTrend', bookingsGrowth);
+    dashSetTrendBadge('dashKpiUsersTrend', usersGrowth);
+    dashSetTrendBadge('dashKpiCancelRateTrend', cancellationRateGrowth);
+
+    if (isToday) {
+      dashRenderTodaySummary(overview, dashTodayDateLabel(chart.labels));
+    } else {
+      renderRevenueChart(chart.labels, chart.revenues);
+      renderBookingChart(chart.labels, chart.bookings, chart.cancelled);
+      if (revenueMetaEl) revenueMetaEl.textContent = 'Chu kỳ biểu đồ: ' + periodLabel;
+      if (bookingCancelMetaEl) {
+        bookingCancelMetaEl.textContent = cancellationRate >= 30
+          ? 'Cảnh báo: Tỷ lệ huỷ ' + cancellationRate.toLocaleString('vi-VN') + '%'
+          : 'Tỷ lệ huỷ: ' + cancellationRate.toLocaleString('vi-VN') + '%';
+      }
+    }
+
+    if (topMetaDescEl) {
+      topMetaDescEl.textContent = DASH_PERIOD === 'today'
+        ? 'Chu kỳ hiển thị KPI: ' + periodLabel + ' | Top tour: tuần này'
+        : 'Chu kỳ hiển thị: ' + periodLabel;
+    }
+
+    if (!topTours.length) {
+      topBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:24px">Chưa có dữ liệu đặt tour.</td></tr>';
+    } else {
+      topBody.innerHTML = topTours.map(function (t) {
+        return '<tr>' +
+          '<td style="color:#888;font-size:0.76rem">' + t.rank + '</td>' +
+          '<td><div style="font-size:0.82rem;font-weight:700;color:#1a1a1a">' + t.name + '</div></td>' +
+          '<td><span class="badge-published">' + t.bookings.toLocaleString('vi-VN') + '</span></td>' +
+          '<td style="font-weight:700;color:#2d8a4e">' + dashFormatMoney(t.revenue) + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    var topMeta = document.getElementById('dashTopToursMeta');
+    if (topMeta) topMeta.textContent = 'Top ' + DASH_TOP_LIMIT + ' - ' + (DASH_PERIOD === 'today' ? 'tuần này' : periodLabel.toLowerCase());
+  } catch (e) {
+    if (topMetaDescEl) topMetaDescEl.textContent = 'Không tải được dữ liệu từ API overview.';
+    if (!isToday && revenueMetaEl) revenueMetaEl.textContent = 'Không tải được biểu đồ doanh thu.';
+    if (!isToday && bookingCancelMetaEl) bookingCancelMetaEl.textContent = 'Không tải được dữ liệu booking/huỷ.';
+    if (isToday) {
+      dashRenderTodaySummary({
+        total_revenue: 0,
+        total_bookings: 0,
+        cancelled_bookings: 0,
+        cancellation_rate: 0,
+        comparison_with_previous: { revenue_growth: 0, bookings_growth: 0, cancellation_rate_growth: 0 }
+      }, dashTodayDateLabel([]));
+    }
+    topBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#c00;padding:24px">Không tải được dữ liệu top tour.</td></tr>';
+  } finally {
+    DASH_LOADING = false;
+  }
+}
+
 function adminUpdateDashStats() {
-  var db = [];
-  try { db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]'); } catch(e) {}
-  var total = 0;
-  db.forEach(function(u){ try { total += JSON.parse(localStorage.getItem('vt_bookings_' + u.email)||'[]').length; } catch(e){} });
-  var el = function(id){ return document.getElementById(id); };
-  if(el('statUsers'))    el('statUsers').textContent    = db.length;
-  if(el('statTours'))    el('statTours').textContent    = adminGetTours().filter(function(t){ return t.active; }).length;
-  if(el('statBookings')) el('statBookings').textContent = total;
-  if(el('statsDonutVal')) el('statsDonutVal').textContent = total;
-  if(el('statTotalBookings')) el('statTotalBookings').textContent = total;
-  if(el('statVisitors'))  el('statVisitors').textContent = db.length;
+  dashLoadDashboard();
 }
 
 // ============================================================
 // CATEGORIES – Quản lý Danh mục
 // ============================================================
-var CAT_KEY  = 'vt_admin_categories';
+var CAT_KEY = 'vt_admin_categories';
 var CAT_PAGE = 1;
-var CAT_PER  = 10;
+var CAT_PER = 10;
 
 var DEFAULT_CATS = [
-  {id:'c1', name:'Du lịch biển',    desc:'Các tour tham quan, nghỉ dưỡng tại biển', active:true},
-  {id:'c2', name:'Trekking & Núi',  desc:'Leo núi, trekking rừng và núi cao',         active:true},
-  {id:'c3', name:'Văn hóa & Lịch sử', desc:'Khám phá di tích, văn hóa bản địa',       active:true},
-  {id:'c4', name:'Ẩm thực',         desc:'Tour trải nghiệm ẩm thực địa phương',        active:true},
-  {id:'c5', name:'Nghỉ dưỡng',      desc:'Resort, spa và thư giãn cao cấp',            active:true},
+  { id: 'c1', name: 'Du lịch biển', desc: 'Các tour tham quan, nghỉ dưỡng tại biển', active: true },
+  { id: 'c2', name: 'Trekking & Núi', desc: 'Leo núi, trekking rừng và núi cao', active: true },
+  { id: 'c3', name: 'Văn hóa & Lịch sử', desc: 'Khám phá di tích, văn hóa bản địa', active: true },
+  { id: 'c4', name: 'Ẩm thực', desc: 'Tour trải nghiệm ẩm thực địa phương', active: true },
+  { id: 'c5', name: 'Nghỉ dưỡng', desc: 'Resort, spa và thư giãn cao cấp', active: true },
 ];
 
 function catGetAll() {
-  try { var r = localStorage.getItem(CAT_KEY); return r ? JSON.parse(r) : DEFAULT_CATS; } catch(e) { return DEFAULT_CATS; }
+  try { var r = localStorage.getItem(CAT_KEY); return r ? JSON.parse(r) : DEFAULT_CATS; } catch (e) { return DEFAULT_CATS; }
 }
 function catSaveAll(cats) { localStorage.setItem(CAT_KEY, JSON.stringify(cats)); }
 
@@ -809,7 +1076,7 @@ function catShowForm(id) {
   document.getElementById('catEditId').value = id || '';
   document.getElementById('catFormTitle').textContent = id ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới';
   if (id) {
-    var cat = catGetAll().find(function(c){ return c.id === id; });
+    var cat = catGetAll().find(function (c) { return c.id === id; });
     if (cat) {
       document.getElementById('catName').value = cat.name || '';
       document.getElementById('catDesc').value = cat.desc || '';
@@ -818,7 +1085,7 @@ function catShowForm(id) {
     document.getElementById('catName').value = '';
     document.getElementById('catDesc').value = '';
   }
-  card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 function catHideForm() { document.getElementById('catFormCard').style.display = 'none'; }
 
@@ -826,7 +1093,7 @@ function catHideForm() { document.getElementById('catFormCard').style.display = 
 async function catSave() {
   var name = (document.getElementById('catName').value || '').trim();
   var desc = (document.getElementById('catDesc').value || '').trim();
-  var id   = document.getElementById('catEditId').value;
+  var id = document.getElementById('catEditId').value;
   var file = document.getElementById('catThumbnail').files[0];
 
   if (!name) { showToast('⚠️ Vui lòng nhập tên danh mục'); return; }
@@ -840,12 +1107,12 @@ async function catSave() {
       res = await apiAdminCreateCategory({ name, description: desc });
     }
     if (res && res.ok) { showToast('✅ Đã lưu danh mục!'); catHideForm(); catRender(); return; }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback local
   var cats = catGetAll();
   if (id) {
-    var idx = cats.findIndex(function(c){ return c.id === id; });
+    var idx = cats.findIndex(function (c) { return c.id === id; });
     if (idx >= 0) { cats[idx].name = name; cats[idx].desc = desc; }
   } else {
     cats.unshift({ id: 'c' + Date.now(), name, desc, active: true });
@@ -858,15 +1125,15 @@ async function catSave() {
 
 // Delete – DELETE /api/categories/:id
 async function catDelete(id) {
-  var cat = catGetAll().find(function(c){ return c.id === id; });
+  var cat = catGetAll().find(function (c) { return c.id === id; });
   if (!confirm('Xóa danh mục "' + (cat ? cat.name : id) + '"?\nKhông thể xóa nếu còn tour đang dùng.')) return;
   try {
     var res = await apiAdminDeleteCategory(id);
     if (res && res.ok) { showToast('🗑️ Đã xóa danh mục'); catRender(); return; }
     if (res && res.status === 400) { showToast('❌ ' + (res.data?.message || 'Còn tour đang dùng danh mục này')); return; }
-  } catch(e) {}
+  } catch (e) { }
   // Fallback
-  var cats = catGetAll().filter(function(c){ return c.id !== id; });
+  var cats = catGetAll().filter(function (c) { return c.id !== id; });
   catSaveAll(cats);
   showToast('🗑️ Đã xóa danh mục');
   catRender();
@@ -875,17 +1142,17 @@ async function catDelete(id) {
 // Toggle active
 async function catToggle(id) {
   var cats = catGetAll();
-  var cat  = cats.find(function(c){ return c.id === id; });
+  var cat = cats.find(function (c) { return c.id === id; });
   if (!cat) return;
   cat.active = !cat.active;
-  try { await apiAdminUpdateCategory(id, { is_active: cat.active }); } catch(e) {}
+  try { await apiAdminUpdateCategory(id, { is_active: cat.active }); } catch (e) { }
   catSaveAll(cats);
   catRender();
 }
 
 // Render
 async function catRender() {
-  var tbody  = document.getElementById('catTableBody');
+  var tbody = document.getElementById('catTableBody');
   var footer = document.getElementById('catTableFooter');
   if (!tbody) return;
 
@@ -897,13 +1164,13 @@ async function catRender() {
     if (res && res.ok && res.data.result) {
       cats = res.data.result.categories || res.data.result || [];
     }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback local
   if (!cats.length) cats = catGetAll();
 
   var q = (document.getElementById('catSearch')?.value || '').toLowerCase();
-  if (q) cats = cats.filter(function(c){ return c.name.toLowerCase().includes(q); });
+  if (q) cats = cats.filter(function (c) { return c.name.toLowerCase().includes(q); });
 
   var total = cats.length;
   var start = (CAT_PAGE - 1) * CAT_PER;
@@ -915,40 +1182,40 @@ async function catRender() {
     return;
   }
 
-  tbody.innerHTML = paged.map(function(c, i) {
-    var id     = c._id || c.id;
+  tbody.innerHTML = paged.map(function (c, i) {
+    var id = c._id || c.id;
     var active = c.is_active !== false && c.active !== false;
     return '<tr>' +
-      '<td style="color:#aaa;font-size:0.75rem">' + (start+i+1) + '</td>' +
-      '<td><strong style="font-size:0.83rem">' + (c.name||'—') + '</strong></td>' +
-      '<td style="font-size:0.78rem;color:#888;max-width:280px">' + (c.description||c.desc||'—') + '</td>' +
+      '<td style="color:#aaa;font-size:0.75rem">' + (start + i + 1) + '</td>' +
+      '<td><strong style="font-size:0.83rem">' + (c.name || '—') + '</strong></td>' +
+      '<td style="font-size:0.78rem;color:#888;max-width:280px">' + (c.description || c.desc || '—') + '</td>' +
       '<td>' + (active ? '<span class="admin-badge-active">Hiển thị</span>' : '<span class="admin-badge-inactive">Ẩn</span>') + '</td>' +
       '<td><div style="display:flex;gap:6px">' +
-        '<button class="admin-act-btn" data-id="' + id + '" onclick="catShowForm(this.dataset.id)">✏️ Sửa</button>' +
-        '<button class="admin-act-btn' + (active?' admin-act-btn-red':' admin-act-btn-green') + '" data-id="' + id + '" onclick="catToggle(this.dataset.id)">' + (active?'Ẩn':'Hiện') + '</button>' +
-        '<button class="admin-act-btn admin-act-btn-red" data-id="' + id + '" onclick="catDelete(this.dataset.id)">🗑️</button>' +
+      '<button class="admin-act-btn" data-id="' + id + '" onclick="catShowForm(this.dataset.id)">✏️ Sửa</button>' +
+      '<button class="admin-act-btn' + (active ? ' admin-act-btn-red' : ' admin-act-btn-green') + '" data-id="' + id + '" onclick="catToggle(this.dataset.id)">' + (active ? 'Ẩn' : 'Hiện') + '</button>' +
+      '<button class="admin-act-btn admin-act-btn-red" data-id="' + id + '" onclick="catDelete(this.dataset.id)">🗑️</button>' +
       '</div></td>' +
-    '</tr>';
+      '</tr>';
   }).join('');
 
   // Footer
   var totalPages = Math.max(1, Math.ceil(total / CAT_PER));
   var pages = '';
   for (var p = 1; p <= totalPages; p++) {
-    pages += '<button class="admin-page-btn' + (p===CAT_PAGE?' active':'') + '" onclick="CAT_PAGE=' + p + ';catRender()">' + p + '</button>';
+    pages += '<button class="admin-page-btn' + (p === CAT_PAGE ? ' active' : '') + '" onclick="CAT_PAGE=' + p + ';catRender()">' + p + '</button>';
   }
   if (footer) footer.innerHTML =
     '<span style="font-size:0.75rem;color:#aaa">Tổng ' + total + ' danh mục</span>' +
     '<div class="admin-pagination">' +
-      '<button class="admin-page-btn text" onclick="if(CAT_PAGE>1){CAT_PAGE--;catRender()}">Trước</button>' +
-      pages +
-      '<button class="admin-page-btn text" onclick="if(CAT_PAGE<' + totalPages + '){CAT_PAGE++;catRender()}">Sau</button>' +
+    '<button class="admin-page-btn text" onclick="if(CAT_PAGE>1){CAT_PAGE--;catRender()}">Trước</button>' +
+    pages +
+    '<button class="admin-page-btn text" onclick="if(CAT_PAGE<' + totalPages + '){CAT_PAGE++;catRender()}">Sau</button>' +
     '</div>';
 }
 
 // Load khi switch tab
 var _origSwitchTab3 = switchTab;
-switchTab = function(name) {
+switchTab = function (name) {
   _origSwitchTab3(name);
   if (name === 'categories') catRender();
 };
@@ -957,10 +1224,10 @@ switchTab = function(name) {
 // BOOKINGS MANAGEMENT (Admin)
 // ============================================================
 var ADMIN_BK_PAGE = 1;
-var ADMIN_BK_PER  = 15;
+var ADMIN_BK_PER = 15;
 
 async function adminBkRender() {
-  var tbody  = document.getElementById('adminBkBody');
+  var tbody = document.getElementById('adminBkBody');
   var footer = document.getElementById('adminBkFooter');
   if (!tbody) return;
 
@@ -975,44 +1242,44 @@ async function adminBkRender() {
   try {
     var params = { page: ADMIN_BK_PAGE, limit: ADMIN_BK_PER };
     if (search) params.keyword = search;
-    if (status) params.status  = parseInt(status);
+    if (status) params.status = parseInt(status);
     var res = await apiAdminGetBookings(params);
     if (res && res.ok && res.data.result) {
       bookings = res.data.result.bookings || res.data.result || [];
-      var pag  = res.data.result.pagination;
+      var pag = res.data.result.pagination;
       if (pag && footer) adminBkPagination(pag.total, footer);
     }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback localStorage
   if (!bookings.length) {
     var db = [];
-    try { db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]'); } catch(e) {}
-    db.forEach(function(u) {
+    try { db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]'); } catch (e) { }
+    db.forEach(function (u) {
       try {
         var bks = JSON.parse(localStorage.getItem('vt_bookings_' + u.email) || '[]');
-        bks.forEach(function(b){ bookings.push({ ...b, _user: u.name || u.email }); });
-      } catch(e) {}
+        bks.forEach(function (b) { bookings.push({ ...b, _user: u.name || u.email }); });
+      } catch (e) { }
     });
 
     // Filter
     if (search) {
       var q = search.toLowerCase();
-      bookings = bookings.filter(function(b){
-        return (b.code||'').toLowerCase().includes(q) ||
-               (b._user||'').toLowerCase().includes(q) ||
-               (b.tourName||b.tour||'').toLowerCase().includes(q);
+      bookings = bookings.filter(function (b) {
+        return (b.code || '').toLowerCase().includes(q) ||
+          (b._user || '').toLowerCase().includes(q) ||
+          (b.tourName || b.tour || '').toLowerCase().includes(q);
       });
     }
     if (status) {
-      var stMap = {'0':'upcoming','1':'confirmed','2':'done','3':'cancelled'};
+      var stMap = { '0': 'upcoming', '1': 'confirmed', '2': 'done', '3': 'cancelled' };
       var stVal = stMap[status];
-      bookings = bookings.filter(function(b){ return (b.status||'upcoming') === stVal; });
+      bookings = bookings.filter(function (b) { return (b.status || 'upcoming') === stVal; });
     }
 
     var total = bookings.length;
-    var start = (ADMIN_BK_PAGE-1) * ADMIN_BK_PER;
-    bookings  = bookings.slice(start, start + ADMIN_BK_PER);
+    var start = (ADMIN_BK_PAGE - 1) * ADMIN_BK_PER;
+    bookings = bookings.slice(start, start + ADMIN_BK_PER);
     if (footer) adminBkPagination(total, footer);
   }
 
@@ -1026,30 +1293,30 @@ async function adminBkRender() {
     1: '<span class="nv-badge nv-badge-processing">ĐÃ XÁC NHẬN</span>',
     2: '<span class="nv-badge nv-badge-done">HOÀN THÀNH</span>',
     3: '<span class="nv-badge nv-badge-urgent">ĐÃ HỦY</span>',
-    upcoming:  '<span class="nv-badge nv-badge-pending">SẮP DIỄN RA</span>',
+    upcoming: '<span class="nv-badge nv-badge-pending">SẮP DIỄN RA</span>',
     confirmed: '<span class="nv-badge nv-badge-processing">ĐÃ XÁC NHẬN</span>',
-    done:      '<span class="nv-badge nv-badge-done">HOÀN THÀNH</span>',
+    done: '<span class="nv-badge nv-badge-done">HOÀN THÀNH</span>',
     completed: '<span class="nv-badge nv-badge-done">HOÀN THÀNH</span>',
     cancelled: '<span class="nv-badge nv-badge-urgent">ĐÃ HỦY</span>',
   };
 
-  tbody.innerHTML = bookings.map(function(b) {
-    var id      = b._id || b.code || '—';
-    var code    = b.booking_code || b.code || '—';
-    var user    = b._user || (b.contact_info && b.contact_info.full_name) || '—';
-    var tour    = b.tourName || b.tour || (b.schedule && b.schedule.tour && b.schedule.tour.name) || '—';
-    var date    = b.date || (b.schedule && b.schedule.departure_date ? b.schedule.departure_date.slice(0,10) : '') || '—';
-    var total   = b.total || b.price || (b.total_amount ? b.total_amount.toLocaleString('vi-VN') + 'đ' : '—');
-    var stRaw   = b.status;
-    var badge   = statusMap[stRaw] || statusMap['upcoming'];
-    var canConfirm  = stRaw === 0 || stRaw === 'upcoming';
+  tbody.innerHTML = bookings.map(function (b) {
+    var id = b._id || b.code || '—';
+    var code = b.booking_code || b.code || '—';
+    var user = b._user || (b.contact_info && b.contact_info.full_name) || '—';
+    var tour = b.tourName || b.tour || (b.schedule && b.schedule.tour && b.schedule.tour.name) || '—';
+    var date = b.date || (b.schedule && b.schedule.departure_date ? b.schedule.departure_date.slice(0, 10) : '') || '—';
+    var total = b.total || b.price || (b.total_amount ? b.total_amount.toLocaleString('vi-VN') + 'đ' : '—');
+    var stRaw = b.status;
+    var badge = statusMap[stRaw] || statusMap['upcoming'];
+    var canConfirm = stRaw === 0 || stRaw === 'upcoming';
     var canComplete = stRaw === 1 || stRaw === 'confirmed';
-    var canCancel   = stRaw !== 3 && stRaw !== 'cancelled' && stRaw !== 2 && stRaw !== 'completed';
+    var canCancel = stRaw !== 3 && stRaw !== 'cancelled' && stRaw !== 2 && stRaw !== 'completed';
 
     var actions = '<div style="display:flex;gap:5px;flex-wrap:wrap">';
-    if (canConfirm)  actions += '<button class="admin-act-btn admin-act-btn-green" data-id="' + id + '" data-status="1" onclick="adminBkUpdateStatus(this)">✓ Xác nhận</button>';
+    if (canConfirm) actions += '<button class="admin-act-btn admin-act-btn-green" data-id="' + id + '" data-status="1" onclick="adminBkUpdateStatus(this)">✓ Xác nhận</button>';
     if (canComplete) actions += '<button class="admin-act-btn" data-id="' + id + '" data-status="2" onclick="adminBkUpdateStatus(this)">✅ Hoàn thành</button>';
-    if (canCancel)   actions += '<button class="admin-act-btn admin-act-btn-red" data-id="' + id + '" data-status="3" onclick="adminBkCancel(this)">✕ Hủy</button>';
+    if (canCancel) actions += '<button class="admin-act-btn admin-act-btn-red" data-id="' + id + '" data-status="3" onclick="adminBkCancel(this)">✕ Hủy</button>';
     actions += '</div>';
 
     return '<tr>' +
@@ -1060,7 +1327,7 @@ async function adminBkRender() {
       '<td style="font-weight:700;color:#2d8a4e;font-size:0.8rem;white-space:nowrap">' + total + '</td>' +
       '<td>' + badge + '</td>' +
       '<td>' + actions + '</td>' +
-    '</tr>';
+      '</tr>';
   }).join('');
 }
 
@@ -1068,29 +1335,29 @@ function adminBkPagination(total, footer) {
   var totalPages = Math.max(1, Math.ceil(total / ADMIN_BK_PER));
   var pages = '';
   for (var p = 1; p <= Math.min(totalPages, 5); p++) {
-    pages += '<button class="admin-page-btn' + (p===ADMIN_BK_PAGE?' active':'') + '" onclick="ADMIN_BK_PAGE=' + p + ';adminBkRender()">' + p + '</button>';
+    pages += '<button class="admin-page-btn' + (p === ADMIN_BK_PAGE ? ' active' : '') + '" onclick="ADMIN_BK_PAGE=' + p + ';adminBkRender()">' + p + '</button>';
   }
   footer.innerHTML =
     '<span style="font-size:0.75rem;color:#aaa">Tổng ' + total + ' đơn hàng</span>' +
     '<div class="admin-pagination">' +
-      '<button class="admin-page-btn text" onclick="if(ADMIN_BK_PAGE>1){ADMIN_BK_PAGE--;adminBkRender()}">Trước</button>' +
-      pages +
-      '<button class="admin-page-btn text" onclick="if(ADMIN_BK_PAGE<' + totalPages + '){ADMIN_BK_PAGE++;adminBkRender()}">Sau</button>' +
+    '<button class="admin-page-btn text" onclick="if(ADMIN_BK_PAGE>1){ADMIN_BK_PAGE--;adminBkRender()}">Trước</button>' +
+    pages +
+    '<button class="admin-page-btn text" onclick="if(ADMIN_BK_PAGE<' + totalPages + '){ADMIN_BK_PAGE++;adminBkRender()}">Sau</button>' +
     '</div>';
 }
 
 // PATCH /api/bookings/:id/status
 async function adminBkUpdateStatus(btn) {
-  var id     = btn.dataset.id;
+  var id = btn.dataset.id;
   var status = parseInt(btn.dataset.status);
-  var labels = {1:'xác nhận', 2:'hoàn thành'};
-  if (!confirm('Xác nhận ' + (labels[status]||'cập nhật') + ' đơn hàng này?')) return;
+  var labels = { 1: 'xác nhận', 2: 'hoàn thành' };
+  if (!confirm('Xác nhận ' + (labels[status] || 'cập nhật') + ' đơn hàng này?')) return;
   btn.disabled = true; btn.textContent = '...';
 
   try {
     var res = await apiAdminUpdateBooking(id, status);
     if (res && res.ok) { showToast('✅ Đã cập nhật trạng thái đơn hàng'); adminBkRender(); return; }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback local
   adminBkUpdateLocal(id, status);
@@ -1107,7 +1374,7 @@ async function adminBkCancel(btn) {
   try {
     var res = await apiAdminUpdateBooking(id, 3, reason);
     if (res && res.ok) { showToast('✅ Đã hủy đơn hàng'); adminBkRender(); return; }
-  } catch(e) {}
+  } catch (e) { }
 
   adminBkUpdateLocal(id, 3);
   showToast('✅ Đã hủy đơn hàng');
@@ -1115,25 +1382,25 @@ async function adminBkCancel(btn) {
 }
 
 function adminBkUpdateLocal(idOrCode, status) {
-  var stStr = {0:'upcoming',1:'confirmed',2:'completed',3:'cancelled'}[status] || 'upcoming';
+  var stStr = { 0: 'upcoming', 1: 'confirmed', 2: 'completed', 3: 'cancelled' }[status] || 'upcoming';
   var db = [];
-  try { db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]'); } catch(e) {}
-  db.forEach(function(u) {
+  try { db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]'); } catch (e) { }
+  db.forEach(function (u) {
     var key = 'vt_bookings_' + u.email;
     try {
       var bks = JSON.parse(localStorage.getItem(key) || '[]');
       var changed = false;
-      bks.forEach(function(b){
+      bks.forEach(function (b) {
         if (b._id === idOrCode || b.code === idOrCode) { b.status = stStr; changed = true; }
       });
       if (changed) localStorage.setItem(key, JSON.stringify(bks));
-    } catch(e) {}
+    } catch (e) { }
   });
 }
 
 // Gọi khi switch tab
 var _origSwitchTab4 = switchTab;
-switchTab = function(name) {
+switchTab = function (name) {
   _origSwitchTab4(name);
   if (name === 'bookings') adminBkRender();
 };
@@ -1143,11 +1410,11 @@ switchTab = function(name) {
 // DELETE TOUR – DELETE /api/tours/:id
 // ============================================================
 async function adminDeleteTour(btn) {
-  var id  = btn.dataset.id;
+  var id = btn.dataset.id;
   var idx = parseInt(btn.dataset.idx);
   var tours = adminGetTours();
-  var tour  = tours[idx];
-  var name  = tour ? (tour.name || 'tour này') : 'tour này';
+  var tour = tours[idx];
+  var name = tour ? (tour.name || 'tour này') : 'tour này';
 
   if (!confirm('Xóa tour "' + name + '"?\nKhông thể xóa nếu còn booking liên quan.')) return;
 
@@ -1166,10 +1433,10 @@ async function adminDeleteTour(btn) {
       btn.disabled = false; btn.textContent = '🗑️ Xóa';
       return;
     }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback: xóa khỏi localStorage
-  var updated = tours.filter(function(t, i){ return i !== idx; });
+  var updated = tours.filter(function (t, i) { return i !== idx; });
   adminSaveTours(updated);
   showToast('🗑️ Đã xóa tour: ' + name);
   adminRenderTours();
@@ -1228,7 +1495,7 @@ async function adminLoadStatsOverview(period) {
 
       return;
     }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback: tính từ localStorage
   adminLoadStatsFallback();
@@ -1253,7 +1520,7 @@ async function adminLoadStatsRevenue(period) {
       adminDrawRevenueChart(res.data.result.chart_result);
       return;
     }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback: tính từ localStorage bookings
   var allBks = adminGetAllBookingsLocal();
@@ -1264,15 +1531,15 @@ function adminDrawRevenueChart(data) {
   var card = document.querySelector('.stats-chart-card');
   if (!card) return;
 
-  var maxRev = Math.max(...data.map(function(d){ return d.revenue || 0; }), 1);
+  var maxRev = Math.max(...data.map(function (d) { return d.revenue || 0; }), 1);
 
-  var barsHtml = data.map(function(d) {
+  var barsHtml = data.map(function (d) {
     var h = Math.round((d.revenue / maxRev) * 100);
     return '<div class="stats-bar-wrap">' +
-      '<div class="stats-bar-tooltip">' + (d.revenue||0).toLocaleString('vi-VN') + 'đ<br>' + (d.bookings||0) + ' đơn</div>' +
-      '<div class="stats-bar" style="height:' + Math.max(h,2) + '%"></div>' +
-      '<div class="stats-bar-label">' + (d.date||'').slice(5) + '</div>' +
-    '</div>';
+      '<div class="stats-bar-tooltip">' + (d.revenue || 0).toLocaleString('vi-VN') + 'đ<br>' + (d.bookings || 0) + ' đơn</div>' +
+      '<div class="stats-bar" style="height:' + Math.max(h, 2) + '%"></div>' +
+      '<div class="stats-bar-label">' + (d.date || '').slice(5) + '</div>' +
+      '</div>';
   }).join('');
 
   card.innerHTML = '<div class="stats-chart-header"><span class="stats-card-title">Tăng trưởng doanh thu</span></div>' +
@@ -1282,16 +1549,16 @@ function adminDrawRevenueChart(data) {
 function adminDrawRevenueChartLocal(bookings) {
   // Nhóm theo tháng
   var byMonth = {};
-  bookings.forEach(function(b) {
+  bookings.forEach(function (b) {
     if (b.status === 'cancelled' || b.status === 3) return; // bỏ qua đã hủy
-    var d = (b.createdAt || b.date || '').slice(0,7);
+    var d = (b.createdAt || b.date || '').slice(0, 7);
     if (!d) return;
     if (!byMonth[d]) byMonth[d] = { date: d, revenue: 0, bookings: 0 };
-    var price = parseInt(String(b.total||b.price||'0').replace(/[^0-9]/g,'')) || 0;
-    byMonth[d].revenue   += price;
-    byMonth[d].bookings  += 1;
+    var price = parseInt(String(b.total || b.price || '0').replace(/[^0-9]/g, '')) || 0;
+    byMonth[d].revenue += price;
+    byMonth[d].bookings += 1;
   });
-  var data = Object.values(byMonth).sort(function(a,b){ return a.date.localeCompare(b.date); }).slice(-12);
+  var data = Object.values(byMonth).sort(function (a, b) { return a.date.localeCompare(b.date); }).slice(-12);
   if (data.length) adminDrawRevenueChart(data);
 }
 
@@ -1306,20 +1573,20 @@ async function adminLoadTopTours(period) {
     if (res && res.ok && res.data.result && res.data.result.tours) {
       tours = res.data.result.tours;
     }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback từ localStorage
   if (!tours.length) {
     var allBks = adminGetAllBookingsLocal();
     var tourMap = {};
-    allBks.forEach(function(b) {
+    allBks.forEach(function (b) {
       if (b.status === 'cancelled' || b.status === 3) return; // bỏ qua đã hủy
       var name = b.tourName || b.tour || '—';
       if (!tourMap[name]) tourMap[name] = { name: name, booking_count: 0, revenue: 0 };
       tourMap[name].booking_count++;
-      tourMap[name].revenue += parseInt(String(b.total||b.price||'0').replace(/[^0-9]/g,'')) || 0;
+      tourMap[name].revenue += parseInt(String(b.total || b.price || '0').replace(/[^0-9]/g, '')) || 0;
     });
-    tours = Object.values(tourMap).sort(function(a,b){ return b.booking_count - a.booking_count; }).slice(0,10);
+    tours = Object.values(tourMap).sort(function (a, b) { return b.booking_count - a.booking_count; }).slice(0, 10);
   }
 
   if (!tours.length) {
@@ -1327,19 +1594,19 @@ async function adminLoadTopTours(period) {
     return;
   }
 
-  var maxBookings = Math.max(...tours.map(function(t){ return t.booking_count||0; }), 1);
-  listEl.innerHTML = tours.map(function(t, i) {
-    var pct = Math.round(((t.booking_count||0) / maxBookings) * 100);
+  var maxBookings = Math.max(...tours.map(function (t) { return t.booking_count || 0; }), 1);
+  listEl.innerHTML = tours.map(function (t, i) {
+    var pct = Math.round(((t.booking_count || 0) / maxBookings) * 100);
     return '<div class="stats-tour-row">' +
-      '<div class="stats-tour-rank">' + (i+1) + '</div>' +
+      '<div class="stats-tour-rank">' + (i + 1) + '</div>' +
       '<div class="stats-tour-name">' +
-        '<div style="font-weight:600;font-size:0.8rem;color:#1a1a1a;margin-bottom:3px">' + (t.name || t.tour_id || '—') + '</div>' +
-        '<div class="stats-rb-track"><div class="stats-rb-fill" style="width:' + pct + '%;background:#2d8a4e"></div></div>' +
+      '<div style="font-weight:600;font-size:0.8rem;color:#1a1a1a;margin-bottom:3px">' + (t.name || t.tour_id || '—') + '</div>' +
+      '<div class="stats-rb-track"><div class="stats-rb-fill" style="width:' + pct + '%;background:#2d8a4e"></div></div>' +
       '</div>' +
-      '<div class="stats-tour-stat">' + (t.booking_count||0) + '</div>' +
-      '<div class="stats-tour-stat" style="color:#2d8a4e">' + (t.revenue||0).toLocaleString('vi-VN') + 'đ</div>' +
+      '<div class="stats-tour-stat">' + (t.booking_count || 0) + '</div>' +
+      '<div class="stats-tour-stat" style="color:#2d8a4e">' + (t.revenue || 0).toLocaleString('vi-VN') + 'đ</div>' +
       '<div class="stats-tour-stat">' + pct + '%</div>' +
-    '</div>';
+      '</div>';
   }).join('');
 }
 
@@ -1348,13 +1615,13 @@ function adminGetAllBookingsLocal() {
   var all = [];
   try {
     var db = JSON.parse(localStorage.getItem('vt_userdb') || '[]');
-    db.forEach(function(u) {
+    db.forEach(function (u) {
       try {
         var bks = JSON.parse(localStorage.getItem('vt_bookings_' + u.email) || '[]');
         all = all.concat(bks);
-      } catch(e) {}
+      } catch (e) { }
     });
-  } catch(e) {}
+  } catch (e) { }
   return all;
 }
 
@@ -1362,30 +1629,143 @@ function adminGetAllBookingsLocal() {
 function adminLoadStatsFallback() {
   var all = adminGetAllBookingsLocal();
   // Chỉ tính booking chưa hủy
-  var active = all.filter(function(b){ return b.status !== 'cancelled' && b.status !== 3; });
+  var active = all.filter(function (b) { return b.status !== 'cancelled' && b.status !== 3; });
   var revenue = 0;
-  active.forEach(function(b) {
-    revenue += parseInt(String(b.total||b.price||'0').replace(/[^0-9]/g,'')) || 0;
+  active.forEach(function (b) {
+    revenue += parseInt(String(b.total || b.price || '0').replace(/[^0-9]/g, '')) || 0;
   });
   var revEl = document.getElementById('statRevenue');
-  var bkEl  = document.getElementById('statTotalBookings');
+  var bkEl = document.getElementById('statTotalBookings');
   var donut = document.getElementById('statsDonutVal');
   if (revEl) revEl.textContent = revenue.toLocaleString('vi-VN') + 'đ';
-  if (bkEl)  bkEl.textContent  = active.length.toLocaleString('vi-VN');
-  if (donut) donut.textContent  = active.length;
+  if (bkEl) bkEl.textContent = active.length.toLocaleString('vi-VN');
+  if (donut) donut.textContent = active.length;
 }
 
 // Period buttons
 function statsPeriod(btn, val) {
-  document.querySelectorAll('.stats-period').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.stats-period').forEach(function (b) { b.classList.remove('active'); });
   btn.classList.add('active');
-  var periodMap = { '30':'month', '90':'month', '365':'year' };
+  var periodMap = { '30': 'month', '90': 'month', '365': 'year' };
   adminLoadStats(periodMap[val] || val);
 }
 
 // Override switchTab để load stats khi mở tab
 var _origSwitchTabStats = switchTab;
-switchTab = function(name, btn) {
+switchTab = function (name, btn) {
   _origSwitchTabStats(name, btn);
   if (name === 'stats') adminLoadStats('month');
 };
+
+function dashNormalizeChart(chart) {
+  let { labels, revenues, bookings, cancelled } = chart;
+
+  if (labels.length === 1) {
+    const d = new Date(labels[0]);
+    const prev = new Date(d);
+    prev.setDate(d.getDate() - 1);
+
+    const prevLabel = prev.toISOString().slice(0, 10);
+
+    labels = [prevLabel, ...labels];
+    revenues = [0, ...revenues];
+    bookings = [0, ...bookings];
+    cancelled = [0, ...cancelled];
+  }
+
+  return { labels, revenues, bookings, cancelled };
+}
+let revenueChart;
+
+function renderRevenueChart(labels, data) {
+  const ctx = document.getElementById('dashRevenueLineChart');
+  if (!ctx) return;
+  const displayLabels = (labels || []).map(dashFormatShortDateLabel);
+
+  if (revenueChart) revenueChart.destroy();
+
+  revenueChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: displayLabels,
+      datasets: [{
+        label: 'Doanh thu',
+        data,
+        tension: 0.4,
+        borderWidth: 3,
+        borderColor: '#2d8a4e',
+        pointBackgroundColor: '#2d8a4e',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true,
+        backgroundColor: 'rgba(45, 138, 78, 0.12)'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function (ctx) {
+              return ctx.raw.toLocaleString('vi-VN') + 'đ';
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+let bookingChart;
+
+function renderBookingChart(labels, bookings, cancelled) {
+  const ctx = document.getElementById('dashBookingCancelChart');
+  if (!ctx) return;
+  const displayLabels = (labels || []).map(dashFormatShortDateLabel);
+  const b = bookings || [];
+  const c = cancelled || [];
+
+  if (bookingChart) bookingChart.destroy();
+
+  bookingChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: displayLabels,
+      datasets: [
+        {
+          label: 'Đặt thành công',
+          data: b,
+          backgroundColor: '#2d8a4e',
+          borderRadius: 8
+        },
+        {
+          label: 'Huỷ',
+          data: c,
+          backgroundColor: '#dc2626',
+          borderRadius: 8
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 } }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            afterBody: function (items) {
+              if (!items || !items.length) return '';
+              var i = items[0].dataIndex;
+              var total = dashNumber(b[i], 0);
+              var cancel = dashNumber(c[i], 0);
+              var rate = total > 0 ? (cancel / total) * 100 : 0;
+              return 'Tỷ lệ huỷ: ' + rate.toFixed(1) + '%';
+            }
+          }
+        }
+      }
+    }
+  });
+}
