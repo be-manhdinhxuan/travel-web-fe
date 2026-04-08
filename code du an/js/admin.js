@@ -10,6 +10,16 @@ function switchTab(name) {
   var nav = document.getElementById('aNav-' + name);
   if (tab) { tab.classList.add('active'); tab.style.display = 'flex'; }
   if (nav) nav.classList.add('active');
+
+  // Keep active tab in query params so reload keeps current tab.
+  try {
+    if (tab) {
+      var url = new URL(window.location.href);
+      url.searchParams.set('tab', name);
+      window.history.replaceState({}, '', url.toString());
+    }
+  } catch (e) { }
+
   if (name === 'tours') adminRenderTours();
   if (name === 'users') renderUsersTable();
   if (name === 'dashboard') adminUpdateDashStats();
@@ -457,7 +467,7 @@ function atfAddImages(input) {
 function atfFormat(cmd) { document.execCommand(cmd, false, null); }
 
 // ============================================================
-// PROMOTIONS – Quản lý Ưu đãi
+// coupons – Quản lý Ưu đãi
 // ============================================================
 var PROMO_KEY = 'vt_admin_promos';
 
@@ -627,11 +637,11 @@ function promoUpdatePreview(name, type, value) {
   if (useEl) useEl.textContent = Math.floor(Math.random() * 20 + 10) + '.4k';
 }
 
-// Init promotions when tab opens
+// Init coupons when tab opens
 var _origSwitchTab = switchTab;
 switchTab = function (name) {
   _origSwitchTab(name);
-  if (name === 'promotions') {
+  if (name === 'coupons') {
     promoRenderList();
     promoUpdateCountBadge();
   }
@@ -700,7 +710,7 @@ function statsLoadData() {
   // Tour list
   var tourList = el('statsToursList');
   if (tourList) {
-    var entries = Object.entries(tourBookings).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 5);
+    var entries = Object.entries(tourBookings || {}).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 5);
     if (!entries.length) {
       tourList.innerHTML = '<div class="stats-tours-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10z"/></svg><p>Chưa có dữ liệu đặt tour</p></div>';
     } else {
@@ -741,10 +751,10 @@ function adminRenderPromoPreview() {
       '</div>' +
       '<div class="admin-promo-name">' + p.name + '</div>' +
       '<div class="admin-promo-desc">Giảm ' + disc + ' · Hết hạn: ' + (p.end || '—') + '</div>' +
-      '<div class="admin-promo-footer"><span>Hết hạn: ' + (p.end || '—') + '</span><button class="admin-promo-edit" onclick="switchTab(\"promotions\")">Chỉnh sửa</button></div>' +
+      '<div class="admin-promo-footer"><span>Hết hạn: ' + (p.end || '—') + '</span><button class="admin-promo-edit" onclick="switchTab(\"coupons\")">Chỉnh sửa</button></div>' +
       '</div>';
   }).join('');
-  html += '<div class="admin-promo-card admin-promo-card-add" onclick="switchTab(\"promotions\")">' +
+  html += '<div class="admin-promo-card admin-promo-card-add" onclick="switchTab(\"coupons\")">' +
     '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
     '<strong>Thêm Ưu đãi Mới</strong>' +
     '<span>Tạo mã giảm giá hoặc chương trình quà tặng mới</span>' +
@@ -1054,6 +1064,7 @@ function adminUpdateDashStats() {
 // ============================================================
 var CAT_KEY = 'vt_admin_categories';
 var CAT_PAGE = 1;
+var CAT_API_CACHE = [];
 var CAT_PER = 10;
 
 var DEFAULT_CATS = [
@@ -1072,22 +1083,31 @@ function catSaveAll(cats) { localStorage.setItem(CAT_KEY, JSON.stringify(cats));
 // Show/hide form
 function catShowForm(id) {
   var card = document.getElementById('catFormCard');
-  card.style.display = 'block';
+  card.style.display = 'flex';
   document.getElementById('catEditId').value = id || '';
   document.getElementById('catFormTitle').textContent = id ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới';
+  var fileInput = document.getElementById('catThumbnail');
+  if (fileInput) fileInput.value = '';
   if (id) {
-    var cat = catGetAll().find(function (c) { return c.id === id; });
+    var cat = CAT_API_CACHE.find(function (c) { return (c._id || c.id) === id; })
+      || catGetAll().find(function (c) { return c.id === id; });
     if (cat) {
       document.getElementById('catName').value = cat.name || '';
-      document.getElementById('catDesc').value = cat.desc || '';
+      document.getElementById('catDesc').value = cat.description || cat.desc || '';
     }
   } else {
     document.getElementById('catName').value = '';
     document.getElementById('catDesc').value = '';
   }
-  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 function catHideForm() { document.getElementById('catFormCard').style.display = 'none'; }
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    var card = document.getElementById('catFormCard');
+    if (card && card.style.display !== 'none') catHideForm();
+  }
+});
 
 // Save – POST /api/categories hoặc PUT /api/categories/:id
 async function catSave() {
@@ -1098,29 +1118,45 @@ async function catSave() {
 
   if (!name) { showToast('⚠️ Vui lòng nhập tên danh mục'); return; }
 
-  // Gọi API
+  // Gọi API với multipart/form-data đúng contract BE
   try {
+    var formData = new FormData();
+    formData.append('name', name);
+    if (desc) formData.append('description', desc);
+
     var res;
     if (id) {
-      res = await apiAdminUpdateCategory(id, { name, description: desc, is_active: true });
+      res = await apiAdminUpdateCategory(id, formData);
+      if (res && res.ok && file) {
+        var imageRes = await apiAdminUpdateCategoryImage(id, file);
+        if (!imageRes || !imageRes.ok) {
+          var imageMsg = (imageRes && imageRes.data && (imageRes.data.message || imageRes.data.error))
+            ? (imageRes.data.message || imageRes.data.error)
+            : 'Cập nhật ảnh danh mục thất bại';
+          showToast('❌ ' + imageMsg);
+          return;
+        }
+      }
     } else {
-      res = await apiAdminCreateCategory({ name, description: desc });
+      if (file) formData.append('thumbnail', file);
+      res = await apiAdminCreateCategory(formData);
     }
-    if (res && res.ok) { showToast('✅ Đã lưu danh mục!'); catHideForm(); catRender(); return; }
-  } catch (e) { }
+    if (res && res.ok) {
+      showToast('✅ Đã lưu danh mục!');
+      catHideForm();
+      catRender();
+      return;
+    }
 
-  // Fallback local
-  var cats = catGetAll();
-  if (id) {
-    var idx = cats.findIndex(function (c) { return c.id === id; });
-    if (idx >= 0) { cats[idx].name = name; cats[idx].desc = desc; }
-  } else {
-    cats.unshift({ id: 'c' + Date.now(), name, desc, active: true });
+    var msg = (res && res.data && (res.data.message || res.data.error))
+      ? (res.data.message || res.data.error)
+      : 'Lưu danh mục thất bại';
+    showToast('❌ ' + msg);
+    return;
+  } catch (e) {
+    showToast('❌ Không thể kết nối server');
+    return;
   }
-  catSaveAll(cats);
-  showToast('✅ Đã lưu danh mục!');
-  catHideForm();
-  catRender();
 }
 
 // Delete – DELETE /api/categories/:id
@@ -1145,7 +1181,11 @@ async function catToggle(id) {
   var cat = cats.find(function (c) { return c.id === id; });
   if (!cat) return;
   cat.active = !cat.active;
-  try { await apiAdminUpdateCategory(id, { is_active: cat.active }); } catch (e) { }
+  try {
+    var fd = new FormData();
+    fd.append('is_active', String(cat.active));
+    await apiAdminUpdateCategory(id, fd);
+  } catch (e) { }
   catSaveAll(cats);
   catRender();
 }
@@ -1163,6 +1203,7 @@ async function catRender() {
     var res = await apiGetCategories();
     if (res && res.ok && res.data.result) {
       cats = res.data.result.categories || res.data.result || [];
+      CAT_API_CACHE = cats;
     }
   } catch (e) { }
 
@@ -1177,19 +1218,23 @@ async function catRender() {
   var paged = cats.slice(start, start + CAT_PER);
 
   if (!paged.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;padding:32px">Chưa có danh mục nào</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:32px">Chưa có danh mục nào</td></tr>';
     if (footer) footer.innerHTML = '';
     return;
   }
 
   tbody.innerHTML = paged.map(function (c, i) {
     var id = c._id || c.id;
-    var active = c.is_active !== false && c.active !== false;
+    var thumb = c.thumbnail || '../images/vietnam.png';
+    var active = typeof c.is_active === 'boolean'
+      ? c.is_active
+      : (c.active !== false);
     return '<tr>' +
       '<td style="color:#aaa;font-size:0.75rem">' + (start + i + 1) + '</td>' +
       '<td><strong style="font-size:0.83rem">' + (c.name || '—') + '</strong></td>' +
+      '<td><img src="' + thumb + '" alt="thumbnail" style="width:72px;height:48px;object-fit:cover;border-radius:8px;border:1px solid #eee" onerror="this.onerror=null;this.src=\'../images/vietnam.png\'" /></td>' +
       '<td style="font-size:0.78rem;color:#888;max-width:280px">' + (c.description || c.desc || '—') + '</td>' +
-      '<td>' + (active ? '<span class="admin-badge-active">Hiển thị</span>' : '<span class="admin-badge-inactive">Ẩn</span>') + '</td>' +
+      '<td>' + (active ? '<span class="admin-badge-active">Đang hoạt động</span>' : '<span class="admin-badge-inactive">Ngừng hoạt động</span>') + '</td>' +
       '<td><div style="display:flex;gap:6px">' +
       '<button class="admin-act-btn" data-id="' + id + '" onclick="catShowForm(this.dataset.id)">✏️ Sửa</button>' +
       '<button class="admin-act-btn' + (active ? ' admin-act-btn-red' : ' admin-act-btn-green') + '" data-id="' + id + '" onclick="catToggle(this.dataset.id)">' + (active ? 'Ẩn' : 'Hiện') + '</button>' +
@@ -1558,7 +1603,7 @@ function adminDrawRevenueChartLocal(bookings) {
     byMonth[d].revenue += price;
     byMonth[d].bookings += 1;
   });
-  var data = Object.values(byMonth).sort(function (a, b) { return a.date.localeCompare(b.date); }).slice(-12);
+  var data = Object.values(byMonth || {}).sort(function (a, b) { return a.date.localeCompare(b.date); }).slice(-12);
   if (data.length) adminDrawRevenueChart(data);
 }
 
@@ -1586,7 +1631,7 @@ async function adminLoadTopTours(period) {
       tourMap[name].booking_count++;
       tourMap[name].revenue += parseInt(String(b.total || b.price || '0').replace(/[^0-9]/g, '')) || 0;
     });
-    tours = Object.values(tourMap).sort(function (a, b) { return b.booking_count - a.booking_count; }).slice(0, 10);
+    tours = Object.values(tourMap || {}).sort(function (a, b) { return b.booking_count - a.booking_count; }).slice(0, 10);
   }
 
   if (!tours.length) {

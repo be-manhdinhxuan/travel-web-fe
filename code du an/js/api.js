@@ -259,7 +259,7 @@ async function apiGetWishlist() {
 // Admin — GET /users
 async function apiAdminGetUsers(params = {}) {
   const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== "") query.append(key, value);
   });
   const qs = query.toString() ? "?" + query.toString() : "";
@@ -311,7 +311,7 @@ async function apiAdminStatsTopTours(period = "month", limit = 10) {
 // GET /categories
 async function apiGetCategories(params = {}) {
   const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== "") query.append(key, value);
   });
   const qs = query.toString() ? "?" + query.toString() : "";
@@ -323,12 +323,27 @@ async function apiGetCategory(id) {
   return apiCall("GET", "/categories/" + id);
 }
 
+function normalizeCategoryFormData(payload) {
+  if (payload instanceof FormData) return payload;
+
+  const form = new FormData();
+  const data = payload && typeof payload === 'object' ? payload : {};
+
+  if (data.name !== undefined && data.name !== null && data.name !== '') form.append('name', data.name);
+  if (data.description !== undefined && data.description !== null && data.description !== '') form.append('description', data.description);
+  if (data.thumbnail instanceof File) form.append('thumbnail', data.thumbnail);
+  if (data.is_active !== undefined && data.is_active !== null) form.append('is_active', String(data.is_active));
+
+  return form;
+}
+
 // Admin — POST /categories
-async function apiAdminCreateCategory(formData) {
+async function apiAdminCreateCategory(payload) {
   if (!ensureUserVerified('quản lý danh mục')) {
     return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
   }
   try {
+    const formData = normalizeCategoryFormData(payload);
     const token = localStorage.getItem("vt_access_token");
     const res = await fetch(API_BASE + "/categories", {
       method: "POST",
@@ -344,11 +359,12 @@ async function apiAdminCreateCategory(formData) {
 }
 
 // Admin — PUT /categories/:id
-async function apiAdminUpdateCategory(id, formData) {
+async function apiAdminUpdateCategory(id, payload) {
   if (!ensureUserVerified('quản lý danh mục')) {
     return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
   }
   try {
+    const formData = normalizeCategoryFormData(payload);
     const token = localStorage.getItem("vt_access_token");
     const res = await fetch(API_BASE + "/categories/" + id, {
       method: "PUT",
@@ -360,6 +376,46 @@ async function apiAdminUpdateCategory(id, formData) {
     return { ok: res.ok, status: res.status, data };
   } catch (err) {
     return { ok: false, status: 0, data: { message: "Cannot connect to server" } };
+  }
+}
+
+// Admin — POST /categories/:id/image
+async function apiAdminUpdateCategoryImage(id, thumbnail) {
+  if (!ensureUserVerified('quản lý danh mục')) {
+    return { ok: false, status: 403, data: { message: 'Vui lòng xác thực email trước' } };
+  }
+  try {
+    const token = localStorage.getItem('vt_access_token');
+    const formData = new FormData();
+    if (thumbnail) formData.append('thumbnail', thumbnail);
+
+    let res = await fetch(API_BASE + '/categories/' + id + '/image', {
+      method: 'POST',
+      headers: token ? { Authorization: 'Bearer ' + token } : {},
+      body: formData,
+    });
+
+    if (res.status === 401) {
+      const refreshed = await apiRefreshToken();
+      if (refreshed) {
+        const newToken = localStorage.getItem('vt_access_token');
+        res = await fetch(API_BASE + '/categories/' + id + '/image', {
+          method: 'POST',
+          headers: newToken ? { Authorization: 'Bearer ' + newToken } : {},
+          body: formData,
+        });
+      } else {
+        apiLogoutLocal();
+        return { ok: false, status: 401, data: { message: 'Session expired' } };
+      }
+    }
+
+    let data = null;
+    try { data = await res.json(); } catch { data = {}; }
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    console.error('API ERROR: /categories/' + id + '/image', err);
+    return { ok: false, status: 0, data: { message: 'Cannot connect to server' } };
   }
 }
 
@@ -375,7 +431,7 @@ async function apiAdminDeleteCategory(id) {
 // GET /tours
 async function apiGetTours(params = {}) {
   const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== "") query.append(key, value);
   });
   const qs = query.toString() ? "?" + query.toString() : "";
@@ -449,7 +505,7 @@ async function apiAdminDeleteTour(id) {
 // GET /tours/:tour_id/schedules
 async function apiGetSchedules(tour_id, params = {}) {
   const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== "") query.append(key, value);
   });
   const qs = query.toString() ? "?" + query.toString() : "";
@@ -483,7 +539,7 @@ async function apiCreateBooking(data) {
 // GET /bookings/my
 async function apiGetMyBookings(params = {}) {
   const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== "") query.append(key, value);
   });
   const qs = query.toString() ? "?" + query.toString() : "";
@@ -503,7 +559,7 @@ async function apiCancelBooking(id, reason = "") {
 // Admin/Employee — GET /bookings
 async function apiAdminGetBookings(params = {}) {
   const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== "") query.append(key, value);
   });
   const qs = query.toString() ? "?" + query.toString() : "";
@@ -551,7 +607,7 @@ async function apiCreatePayment(booking_id, method = "momo") {
 // GET /coupons/public-coupons
 async function apiGetPublicCoupons(params = {}) {
   const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") query.append(key, value);
   });
   const qs = query.toString() ? "?" + query.toString() : "";
@@ -571,7 +627,7 @@ async function apiApplyBookingCoupon(id, data) {
 // Admin — GET /coupons
 async function apiAdminGetCoupons(params = {}) {
   const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== "") query.append(key, value);
   });
   const qs = query.toString() ? "?" + query.toString() : "";
@@ -647,6 +703,7 @@ window.apiGetCategories = apiGetCategories;
 window.apiGetCategory = apiGetCategory;
 window.apiAdminCreateCategory = apiAdminCreateCategory;
 window.apiAdminUpdateCategory = apiAdminUpdateCategory;
+window.apiAdminUpdateCategoryImage = apiAdminUpdateCategoryImage;
 window.apiAdminDeleteCategory = apiAdminDeleteCategory;
 
 // Tours

@@ -56,14 +56,14 @@ document.addEventListener('DOMContentLoaded', async function () {
   var activeTabName = 'info';
 
   if (activeBtn) {
-    if (activeBtn.id === 'cpNavPromotions') activeTabName = 'promotions';
+    if (activeBtn.id === 'cpNavcoupons') activeTabName = 'coupons';
     if (activeBtn.id === 'cpNavHistory') activeTabName = 'history';
     if (activeBtn.id === 'cpNavSettings') activeTabName = 'password';
   }
 
   syncProfileMainVisibility(activeTabName);
 
-  if (activeBtn && activeBtn.id === 'cpNavPromotions') {
+  if (activeBtn && activeBtn.id === 'cpNavcoupons') {
     await renderWishlist();
   }
 
@@ -511,7 +511,7 @@ function switchTab(name, btn) {
 
   if (btn) btn.classList.add('active');
 
-  if (name === 'promotions') {
+  if (name === 'coupons') {
     renderWishlist();
   }
 
@@ -523,7 +523,7 @@ function switchTab(name, btn) {
 function switchTabById(name) {
   var map = {
     info: 'cpNavInfo',
-    promotions: 'cpNavPromotions',
+    coupons: 'cpNavcoupons',
     history: 'cpNavHistory',
     password: 'cpNavSettings',
   };

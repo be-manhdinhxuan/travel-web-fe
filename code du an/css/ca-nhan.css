@@ -778,17 +778,17 @@ body {
   background: var(--green-lt);
 }
 
-#tab-promotions .cp-card {
+#tab-coupons .cp-card {
   display: flex;
   flex-direction: column;
   min-height: 420px;
 }
 
-#tab-promotions #cpWishlistGrid {
+#tab-coupons #cpWishlistGrid {
   min-height: 0;
 }
 
-#tab-promotions #cpWishlistEmpty {
+#tab-coupons #cpWishlistEmpty {
   flex: 1;
   margin-top: 4px;
   border: 1px dashed #d7e7dd;
@@ -801,14 +801,14 @@ body {
   text-align: center;
 }
 
-#tab-promotions #cpWishlistEmpty p {
+#tab-coupons #cpWishlistEmpty p {
   margin: 2px 0 8px;
   font-size: 14px;
   font-weight: 600;
   color: #5f6b76;
 }
 
-#tab-promotions #cpWishlistEmpty span {
+#tab-coupons #cpWishlistEmpty span {
   max-width: 360px;
 }
 
@@ -1016,11 +1016,11 @@ body {
     gap: 12px;
   }
 
-  #tab-promotions .cp-card {
+  #tab-coupons .cp-card {
     min-height: 360px;
   }
 
-  #tab-promotions #cpWishlistEmpty {
+  #tab-coupons #cpWishlistEmpty {
     padding: 28px 16px;
   }
 
