@@ -617,7 +617,7 @@ function promoMenu(idx, e) {
       promoSaveAll(promos);
       promoRenderList();
       promoUpdateCountBadge();
-      showToast('🗑️ Đã xóa ưu đãi');
+      showToast('Đã xóa ưu đãi');
     }
   }
 }
@@ -1129,10 +1129,12 @@ function catHideForm(force) {
   document.getElementById('catFormCard').style.display = 'none';
 }
 
-function catToggleConfirmOpen(text) {
+function catToggleConfirmOpen(text, title) {
   var modal = document.getElementById('catToggleConfirmModal');
   var textEl = document.getElementById('catToggleConfirmText');
+  var titleEl = document.getElementById('catToggleConfirmTitle');
   if (!modal) return Promise.resolve(false);
+  if (titleEl) titleEl.textContent = title || 'Xác nhận thao tác';
   if (textEl) textEl.textContent = text || 'Bạn có chắc muốn thay đổi trạng thái danh mục này?';
   modal.style.display = 'flex';
   return new Promise(function (resolve) {
@@ -1234,18 +1236,30 @@ async function catSave() {
 
 // Delete – DELETE /api/categories/:id
 async function catDelete(id) {
-  var cat = catGetAll().find(function (c) { return c.id === id; });
-  if (!confirm('Xóa danh mục "' + (cat ? cat.name : id) + '"?\nKhông thể xóa nếu còn tour đang dùng.')) return;
+  var apiCat = CAT_API_CACHE.find(function (c) { return (c._id || c.id) === id; });
+  var localCat = catGetAll().find(function (c) { return (c._id || c.id) === id || c.id === id; });
+  var cat = apiCat || localCat;
+
+  var confirmed = await catToggleConfirmOpen(
+    'Bạn có chắc muốn xóa danh mục "' + (cat ? (cat.name || id) : id) + '"? Hành động này không thể hoàn tác.',
+    'Xác nhận xóa danh mục'
+  );
+  if (!confirmed) return;
+
   try {
     var res = await apiAdminDeleteCategory(id);
-    if (res && res.ok) { showToast('🗑️ Đã xóa danh mục'); catRender(); return; }
-    if (res && res.status === 400) { showToast('❌ ' + (res.data?.message || 'Còn tour đang dùng danh mục này')); return; }
-  } catch (e) { }
-  // Fallback
-  var cats = catGetAll().filter(function (c) { return c.id !== id; });
-  catSaveAll(cats);
-  showToast('🗑️ Đã xóa danh mục');
-  catRender();
+    if (res && res.ok) { showToast('Đã xóa danh mục'); catRender(); return; }
+    var errMsg = (res && res.data && (res.data.message || res.data.error)) ? (res.data.message || res.data.error) : '';
+    if (res && res.status === 400 && errMsg === 'Category has tours, cannot be deleted') {
+      showToast('❌ Không thể xóa danh mục đang có tour hoạt động');
+      return;
+    }
+    showToast('❌ ' + (errMsg || 'Không thể xóa danh mục'));
+    return;
+  } catch (e) {
+    showToast('❌ Không thể kết nối server');
+    return;
+  }
 }
 
 // Toggle active
@@ -1267,7 +1281,7 @@ async function catToggle(id, inputEl) {
   var confirmText = nextActive
     ? 'Bạn có chắc muốn BẬT trạng thái danh mục này?'
     : 'Bạn có chắc muốn TẮT trạng thái danh mục này?';
-  var confirmed = await catToggleConfirmOpen(confirmText);
+  var confirmed = await catToggleConfirmOpen(confirmText, 'Xác nhận thay đổi trạng thái');
   if (!confirmed) {
     if (inputEl) inputEl.checked = currentActive;
     return;
@@ -1578,7 +1592,7 @@ async function adminDeleteTour(btn) {
   try {
     var res = await apiDeleteTour(id);
     if (res && res.ok) {
-      showToast('🗑️ Đã xóa tour: ' + name);
+      showToast('Đã xóa tour: ' + name);
       adminRenderTours();
       return;
     }
@@ -1592,7 +1606,7 @@ async function adminDeleteTour(btn) {
   // Fallback: xóa khỏi localStorage
   var updated = tours.filter(function (t, i) { return i !== idx; });
   adminSaveTours(updated);
-  showToast('🗑️ Đã xóa tour: ' + name);
+  showToast('Đã xóa tour: ' + name);
   adminRenderTours();
 }
 
