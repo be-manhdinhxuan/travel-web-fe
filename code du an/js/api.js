@@ -281,6 +281,29 @@ async function apiAdminSetUserStatus(id, status) {
   return apiCall("PATCH", "/users/" + id + "/status", { status }, true);
 }
 
+// Admin Stats — GET /admin/stats/overview
+async function apiAdminStatsOverview(period = "today") {
+  const query = new URLSearchParams();
+  if (period) query.append("period", period);
+  return apiCall("GET", "/admin/stats/overview?" + query.toString(), null, true);
+}
+
+// Admin Stats — GET /admin/stats/revenue
+async function apiAdminStatsRevenue(period = "month", year) {
+  const query = new URLSearchParams();
+  if (period) query.append("period", period);
+  if (year !== undefined && year !== null && year !== "") query.append("year", year);
+  return apiCall("GET", "/admin/stats/revenue?" + query.toString(), null, true);
+}
+
+// Admin Stats — GET /admin/stats/top-tours
+async function apiAdminStatsTopTours(period = "month", limit = 10) {
+  const query = new URLSearchParams();
+  if (period) query.append("period", period);
+  if (limit) query.append("limit", limit);
+  return apiCall("GET", "/admin/stats/top-tours?" + query.toString(), null, true);
+}
+
 // ============================================================
 // CATEGORIES
 // ============================================================

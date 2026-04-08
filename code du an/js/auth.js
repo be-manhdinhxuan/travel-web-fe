@@ -93,7 +93,7 @@ async function handleLogin() {
     // Redirect theo role
     if (user.role === 1 || user.role === 'admin') {
       window.location.href = 'admin.html'
-    } else if (user.role === 2 || user.role === 'staff') {
+    } else if (user.role === 2 || user.role === 'employee') {
       window.location.href = 'nhan-vien.html'
     } else {
       window.location.href = 'trang-chu.html'
@@ -262,7 +262,7 @@ async function doLogin() {
 
     if (user.role === 1 || user.role === 'admin') {
       window.location.href = 'admin.html'
-    } else if (user.role === 2 || user.role === 'staff') {
+    } else if (user.role === 2 || user.role === 'employee') {
       window.location.href = 'nhan-vien.html'
     } else {
       window.location.href = 'trang-chu.html'
