@@ -37,6 +37,60 @@ var ADMIN_USER_PAGE = 1;
 var ADMIN_USER_PER = 10;
 var ADMIN_USER_SEARCH = '';
 
+function adminNormalizeUserRole(role) {
+  if (role === 1 || role === 'admin') return 1;
+  if (role === 2 || role === 'employee' || role === 'staff') return 2;
+  return 0;
+}
+
+function adminGetCurrentUserIdentity() {
+  var u = null;
+  try {
+    u = JSON.parse(localStorage.getItem('vt_user') || sessionStorage.getItem('vt_user') || 'null');
+  } catch (e) { u = null; }
+  return {
+    id: (u && (u._id || u.id)) ? String(u._id || u.id) : '',
+    email: (u && u.email) ? String(u.email).toLowerCase() : ''
+  };
+}
+
+function adminTranslateUserRoleError(msg) {
+  var raw = String(msg || '').trim();
+  if (!raw) return 'Không thể cập nhật quyền người dùng';
+
+  var map = {
+    CANNOT_UPDATE_OWN_ROLE: 'Bạn không thể tự thay đổi quyền của chính mình.',
+    USER_NOT_FOUND: 'Không tìm thấy người dùng.',
+    NOT_ALLOWWED_TO_UPDATE_ADMIN_ROLE: 'Không được phép thay đổi quyền Quản trị viên.'
+  };
+  if (map[raw]) return map[raw];
+
+  var lower = raw.toLowerCase();
+  if (lower.includes('cannot update own role')) return 'Bạn không thể tự thay đổi quyền của chính mình.';
+  if (lower.includes('user not found')) return 'Không tìm thấy người dùng.';
+  if (lower.includes('admin role')) return 'Không được phép thay đổi quyền Quản trị viên.';
+
+  return raw;
+}
+
+function adminExtractUserRoleErrorMessage(res) {
+  if (!res || !res.data) return 'Không thể cập nhật quyền người dùng';
+  var data = res.data || {};
+
+  if (data.errors) {
+    var first = Object.values(data.errors)[0];
+    if (Array.isArray(first) && first.length) {
+      return adminTranslateUserRoleError(first[0].msg || first[0].message || first[0]);
+    }
+    if (first && (first.msg || first.message)) return adminTranslateUserRoleError(first.msg || first.message);
+    if (typeof first === 'string') return adminTranslateUserRoleError(first);
+  }
+
+  if (data.message) return adminTranslateUserRoleError(data.message);
+  if (data.error) return adminTranslateUserRoleError(data.error);
+  return 'Không thể cập nhật quyền người dùng';
+}
+
 async function renderUsersTable() {
   var tbody = document.getElementById('usersTableBody');
   var footer = document.getElementById('usersTableFooter');
@@ -82,29 +136,39 @@ async function renderUsersTable() {
     return;
   }
 
+  var me = adminGetCurrentUserIdentity();
+
   tbody.innerHTML = users.map(function (u, i) {
     var id = u._id || u.id || i;
     var name = u.full_name || u.name || '—';
     var email = u.email || '—';
     var phone = u.phone || '—';
-    var role = u.role;
-    var status = u.status; // 1=active, 2=banned (API) hoặc locked (local)
-    var isAdmin = role === 'admin' || role === 1;
-    var isBanned = status === 2 || u.locked === true;
+    var role = adminNormalizeUserRole(u.role);
+    var status = u.status; // 0=active, 1=banned (API) hoặc locked (local)
+    var isAdmin = role === 1;
+    var isEmployee = role === 2;
+    var isBanned = status === 1 || String(status) === '1' || u.locked === true;
+    var isSelf = (me.id && String(id) === me.id) || (me.email && String(email).toLowerCase() === me.email);
 
     var roleBadge = isAdmin
-      ? '<span class="admin-badge-active">👑 Admin</span>'
-      : '<span class="admin-badge-inactive" style="background:#f0f0f0;color:#888">👤 User</span>';
+      ? '<span class="admin-badge-active">Quản trị viên</span>'
+      : isEmployee
+        ? '<span class="admin-badge-active" style="background:#e8f0ff;color:#3a7abf">Nhân viên</span>'
+        : '<span class="admin-badge-inactive" style="background:#f0f0f0;color:#888">Người dùng</span>';
     var statusBadge = isBanned
       ? '<span class="admin-badge-inactive">🔒 Bị khóa</span>'
       : '<span class="admin-badge-active">✅ Hoạt động</span>';
 
-    var roleBtn = isAdmin
-      ? '<button class="admin-act-btn" data-id="' + id + '" data-role="0" onclick="adminSetRoleBtn(this)">↓ Hạ quyền</button>'
-      : '<button class="admin-act-btn" data-id="' + id + '" data-role="1" onclick="adminSetRoleBtn(this)">↑ Admin</button>';
-    var statusBtn = isBanned
-      ? '<button class="admin-act-btn admin-act-btn-green" data-id="' + id + '" data-status="1" onclick="adminSetStatusBtn(this)">🔓 Mở khóa</button>'
-      : '<button class="admin-act-btn admin-act-btn-red"   data-id="' + id + '" data-status="2" onclick="adminSetStatusBtn(this)">🔒 Khóa</button>';
+    var actionHtml = '<span style="font-size:0.75rem;color:#aaa">—</span>';
+    if (!isAdmin && !isSelf) {
+      var nextRole = isEmployee ? 0 : 2;
+      var roleBtnLabel = isEmployee ? '→ Người dùng' : '→ Nhân viên';
+      var roleBtn = '<button class="admin-act-btn" data-id="' + id + '" data-role="' + nextRole + '" onclick="adminSetRoleBtn(this)">' + roleBtnLabel + '</button>';
+      var statusBtn = isBanned
+        ? '<button class="admin-act-btn admin-act-btn-green" data-id="' + id + '" data-status="0" onclick="adminSetStatusBtn(this)">🔓 Mở khóa</button>'
+        : '<button class="admin-act-btn admin-act-btn-red"   data-id="' + id + '" data-status="1" onclick="adminSetStatusBtn(this)">🔒 Khóa</button>';
+      actionHtml = '<div style="display:flex;gap:6px">' + roleBtn + statusBtn + '</div>';
+    }
 
     return '<tr>' +
       '<td style="color:#aaa;font-size:0.75rem">' + ((ADMIN_USER_PAGE - 1) * ADMIN_USER_PER + i + 1) + '</td>' +
@@ -113,7 +177,7 @@ async function renderUsersTable() {
       '<td style="font-size:0.78rem;color:#555">' + phone + '</td>' +
       '<td>' + roleBadge + '</td>' +
       '<td>' + statusBadge + '</td>' +
-      '<td><div style="display:flex;gap:6px">' + roleBtn + statusBtn + '</div></td>' +
+      '<td>' + actionHtml + '</td>' +
       '</tr>';
   }).join('');
 }
@@ -144,38 +208,87 @@ function adminSearchUsers() {
 function adminSetRoleBtn(btn) { adminSetRole(btn.dataset.id, parseInt(btn.dataset.role), btn); }
 function adminSetStatusBtn(btn) { adminSetStatus(btn.dataset.id, parseInt(btn.dataset.status), btn); }
 
+var ADMIN_GLOBAL_CONFIRM_RESOLVE = null;
+
+function adminEnsureGlobalConfirmModal() {
+  var modal = document.getElementById('adminGlobalConfirmModal');
+  if (modal) return modal;
+
+  modal = document.createElement('div');
+  modal.id = 'adminGlobalConfirmModal';
+  modal.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:99999;background:rgba(0,0,0,.45);padding:16px;';
+  modal.innerHTML =
+    '<div style="width:min(420px,95vw);background:#fff;border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.25);overflow:hidden">' +
+    '<div style="padding:16px 18px;border-bottom:1px solid #eee;font-size:1rem;font-weight:800;color:#1f2937" id="adminGlobalConfirmTitle">Xác nhận thao tác</div>' +
+    '<div style="padding:16px 18px;font-size:.92rem;color:#374151;line-height:1.55" id="adminGlobalConfirmText">Bạn có chắc muốn tiếp tục?</div>' +
+    '<div style="display:flex;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid #eee">' +
+    '<button type="button" class="admin-act-btn" onclick="adminGlobalConfirmClose(false)">Hủy</button>' +
+    '<button type="button" class="admin-act-btn admin-act-btn-red" onclick="adminGlobalConfirmClose(true)">Xác nhận</button>' +
+    '</div>' +
+    '</div>';
+
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) adminGlobalConfirmClose(false);
+  });
+
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function adminGlobalConfirmClose(accepted) {
+  var modal = document.getElementById('adminGlobalConfirmModal');
+  if (modal) modal.style.display = 'none';
+  if (ADMIN_GLOBAL_CONFIRM_RESOLVE) {
+    var resolve = ADMIN_GLOBAL_CONFIRM_RESOLVE;
+    ADMIN_GLOBAL_CONFIRM_RESOLVE = null;
+    resolve(!!accepted);
+  }
+}
+
+function adminOpenConfirmModal(message, title) {
+  var modal = adminEnsureGlobalConfirmModal();
+  var titleEl = document.getElementById('adminGlobalConfirmTitle');
+  var textEl = document.getElementById('adminGlobalConfirmText');
+
+  if (titleEl) titleEl.textContent = title || 'Xác nhận thao tác';
+  if (textEl) textEl.textContent = message || 'Bạn có chắc muốn tiếp tục?';
+  if (modal) modal.style.display = 'flex';
+
+  return new Promise(function (resolve) {
+    ADMIN_GLOBAL_CONFIRM_RESOLVE = resolve;
+  });
+}
+
 // PATCH /api/users/:id/role
 async function adminSetRole(id, role, btn) {
-  var label = role === 1 ? 'Admin' : 'User';
-  if (!confirm('Đổi quyền tài khoản này thành ' + label + '?')) return;
+  var label = role === 2 ? 'Nhân viên' : 'Người dùng';
+  if (role !== 0 && role !== 2) {
+    showToast('⚠️ Chỉ được chuyển quyền giữa Người dùng và Nhân viên');
+    return;
+  }
+  var roleConfirmed = await adminOpenConfirmModal('Đổi quyền tài khoản này thành ' + label + '?', 'Xác nhận đổi quyền');
+  if (!roleConfirmed) return;
   btn.disabled = true; btn.textContent = '...';
 
   try {
     var res = await apiAdminSetUserRole(id, role);
     if (res && res.ok) {
       showToast('✅ Đã đổi quyền thành ' + label);
-    } else { showToast('⚠️ Không thể đổi quyền qua API, đang cập nhật local...'); }
-  } catch (e) { }
-
-  // Fallback: cập nhật localStorage
-  try {
-    var db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]');
-    var u = db.find(function (x) { return x.id == id || x._id == id || x.email == id; });
-    if (u) {
-      u.role = role === 1 ? 'admin' : 'customer';
-      localStorage.setItem('vt_userdb', JSON.stringify(db));
-      sessionStorage.setItem('vt_userdb', JSON.stringify(db));
-      showToast('✅ Đã đổi quyền thành ' + label);
+    } else {
+      showToast('❌ ' + adminExtractUserRoleErrorMessage(res));
     }
-  } catch (e) { }
+  } catch (e) {
+    showToast('❌ Không thể kết nối server');
+  }
 
   renderUsersTable();
 }
 
 // PATCH /api/users/:id/status
 async function adminSetStatus(id, status, btn) {
-  var label = status === 2 ? 'khóa' : 'mở khóa';
-  if (!confirm('Bạn muốn ' + label + ' tài khoản này?')) return;
+  var label = status === 1 ? 'khóa' : 'mở khóa';
+  var statusConfirmed = await adminOpenConfirmModal('Bạn muốn ' + label + ' tài khoản này?', 'Xác nhận trạng thái');
+  if (!statusConfirmed) return;
   btn.disabled = true; btn.textContent = '...';
 
   try {
@@ -190,7 +303,7 @@ async function adminSetStatus(id, status, btn) {
     var db2 = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]');
     var u2 = db2.find(function (x) { return x.id == id || x._id == id || x.email == id; });
     if (u2) {
-      u2.locked = (status === 2);
+      u2.locked = (status === 1);
       u2.status = status;
       localStorage.setItem('vt_userdb', JSON.stringify(db2));
       sessionStorage.setItem('vt_userdb', JSON.stringify(db2));
@@ -1491,6 +1604,11 @@ function catToggleConfirmClose(accepted) {
 
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
+    var globalConfirmModal = document.getElementById('adminGlobalConfirmModal');
+    if (globalConfirmModal && globalConfirmModal.style.display !== 'none') {
+      adminGlobalConfirmClose(false);
+      return;
+    }
     var couponConfirmModal = document.getElementById('couponConfirmModal');
     if (couponConfirmModal && couponConfirmModal.style.display !== 'none') {
       adminCouponConfirmClose(false);
@@ -1871,7 +1989,8 @@ async function adminBkUpdateStatus(btn) {
   var id = btn.dataset.id;
   var status = parseInt(btn.dataset.status);
   var labels = { 1: 'xác nhận', 2: 'hoàn thành' };
-  if (!confirm('Xác nhận ' + (labels[status] || 'cập nhật') + ' đơn hàng này?')) return;
+  var bookingConfirmed = await adminOpenConfirmModal('Xác nhận ' + (labels[status] || 'cập nhật') + ' đơn hàng này?', 'Xác nhận đơn hàng');
+  if (!bookingConfirmed) return;
   btn.disabled = true; btn.textContent = '...';
 
   try {
@@ -1936,7 +2055,11 @@ async function adminDeleteTour(btn) {
   var tour = tours[idx];
   var name = tour ? (tour.name || 'tour này') : 'tour này';
 
-  if (!confirm('Xóa tour "' + name + '"?\nKhông thể xóa nếu còn booking liên quan.')) return;
+  var deleteTourConfirmed = await adminOpenConfirmModal(
+    'Xóa tour "' + name + '"? Không thể xóa nếu còn booking liên quan.',
+    'Xác nhận xóa tour'
+  );
+  if (!deleteTourConfirmed) return;
 
   btn.disabled = true; btn.textContent = '...';
 
