@@ -133,132 +133,49 @@
 
         <!-- ===== TOURS TAB (default) ===== -->
         <div class="admin-tab" id="tab-tours" style="display:none">
-          <!-- TOPBAR -->
           <div class="admin-topbar">
-            <h1 class="admin-page-title" style="flex-shrink:0">Hệ thống Quản lý Tour & Nội dung</h1>
+            <div>
+              <h1 class="admin-page-title">Quản lý Tour</h1>
+            </div>
             <div class="admin-topbar-actions">
-              <div class="admin-search-bar">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input type="text" placeholder="Tìm kiếm tour..." id="adminTourSearch" oninput="adminRenderTours()">
-              </div>
-              <button class="admin-btn-primary" onclick="window.location.href='admin-tour.html'">＋ Tạo Tour Mới</button>
+              <button class="admin-btn-primary" onclick="window.location.href='admin-tour.html'">＋ Thêm Tour</button>
             </div>
           </div>
 
           <div class="admin-content">
-            <!-- KPI CARDS -->
-            <div class="admin-kpi-grid">
-              <div class="admin-kpi-card">
-                <div class="admin-kpi-icon" style="background:#e8f4ff;color:#3a7abf">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="2" y1="12" x2="22" y2="12" />
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10z" />
-                  </svg>
-                </div>
-                <div>
-                  <div class="admin-kpi-label">Tổng số Tour</div>
-                  <div class="admin-kpi-val" id="kpiTotal">0</div>
-                </div>
-              </div>
-              <div class="admin-kpi-card">
-                <div class="admin-kpi-icon" style="background:#e8f5ee;color:#2d8a4e">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
-                <div>
-                  <div class="admin-kpi-label">Đã Xuất bản</div>
-                  <div class="admin-kpi-val" id="kpiActive">0</div>
-                </div>
-              </div>
-              <div class="admin-kpi-card">
-                <div class="admin-kpi-icon" style="background:#fff8e8;color:#c9963a">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                  </svg>
-                </div>
-                <div>
-                  <div class="admin-kpi-label">Bản nháp/Chờ</div>
-                  <div class="admin-kpi-val" id="kpiDraft">0</div>
-                </div>
-              </div>
-              <div class="admin-kpi-card">
-                <div class="admin-kpi-icon" style="background:#ffeef8;color:#c0397a">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                </div>
-                <div>
-                  <div class="admin-kpi-label">Ưu đãi Đang chạy</div>
-                  <div class="admin-kpi-val" id="kpiPromo">0</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- TOUR TABLE SECTION -->
             <div class="admin-section">
               <div class="admin-section-head">
                 <div>
-                  <div class="admin-section-title" style="white-space:nowrap">Quản lý Nội dung & Trạng thái Xuất bản
-                  </div>
-                  <div class="admin-section-sub">Quản lý thông tin chi tiết, hình ảnh và lịch trình tour trước khi hiển
-                    thị cho khách hàng.</div>
+                  <div class="admin-section-title">Danh sách tour</div>
                 </div>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <button class="admin-btn-ghost" onclick="adminFilterTours()">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-                    </svg>
-                    Lọc trạng thái
-                  </button>
-                  <button class="admin-btn-ghost">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                  </button>
+                <div class="admin-search-bar" style="width:280px">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  <input type="text" placeholder="Tìm kiếm tour..." id="adminTourSearch" oninput="adminRenderTours()">
                 </div>
               </div>
-
-              <table class="admin-tour-table">
-                <thead>
-                  <tr>
-                    <th>TOUR & NỘI DUNG</th>
-                    <th>HOÀN THIỆN NỘI DUNG</th>
-                    <th>GIÁ & ƯU ĐÃI</th>
-                    <th>TRẠNG THÁI</th>
-                    <th>HÀNH ĐỘNG</th>
-                  </tr>
-                </thead>
-                <tbody id="adminToursBody"></tbody>
-              </table>
-
-              <div class="admin-table-footer" id="adminToursFooter"></div>
-            </div>
-
-            <!-- PROMO SECTION -->
-            <div class="admin-section" style="margin-top:20px">
-              <div class="admin-section-head">
-                <div>
-                  <div class="admin-section-title">🎉 Chương trình Ưu đãi & Khuyến mãi</div>
-                </div>
-                <a class="admin-view-all" onclick="switchTab('coupons')">Xem tất cả ›</a>
+              <div class="admin-table-wrap">
+                <table class="admin-table admin-tour-table">
+                  <thead>
+                    <tr>
+                      <th>STT</th>
+                      <th>Tên tour & slug</th>
+                      <th>Mô tả & highlights</th>
+                      <th>Điểm đến</th>
+                      <th>Thời lượng</th>
+                      <th>Ảnh & lịch trình</th>
+                      <th>Bao gồm / Không gồm</th>
+                      <th>Trạng thái</th>
+                      <th>Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminToursBody"></tbody>
+                </table>
+                <div class="admin-table-footer" id="adminToursFooter"></div>
               </div>
-              <div class="admin-promo-preview-grid" id="adminPromoPreview"></div>
             </div>
 
           </div><!-- /admin-content -->
@@ -594,7 +511,7 @@
                 </div>
                 <div style="display:flex;gap:10px">
                   <button class="admin-btn-ghost" id="catCancelBtn" onclick="catHideForm()">Hủy</button>
-                  <button class="admin-btn-primary" id="catSaveBtn" onclick="catSave()">💾 Lưu danh mục</button>
+                  <button class="admin-btn-primary" id="catSaveBtn" onclick="catSave()">Lưu danh mục</button>
                 </div>
                 <div id="catSaveLoading"
                   style="display:none;margin-top:10px;font-size:0.78rem;color:#2d8a4e;font-weight:600">
@@ -638,7 +555,7 @@
                 <table class="admin-table">
                   <thead>
                     <tr>
-                      <th>#</th>
+                      <th>STT</th>
                       <th>Tên danh mục</th>
                       <th>Thumbnail</th>
                       <th>Mô tả</th>
@@ -657,105 +574,150 @@
         <div class="admin-tab" id="tab-coupons" style="display:none">
           <div class="admin-topbar">
             <div>
-              <h1 class="admin-page-title">Quản lý Chương trình Ưu đãi</h1>
-              <p class="admin-page-sub">Quản lý và theo dõi các chiến dịch marketing bán tour</p>
+              <h1 class="admin-page-title">Quản lý Mã giảm giá</h1>
             </div>
-            <button class="admin-btn-primary" onclick="promoShowCreate()">＋ Tạo Ưu đãi Mới</button>
+            <button class="admin-btn-primary" onclick="adminCouponCreate()">＋ Thêm Mã Giảm Giá</button>
           </div>
           <div class="admin-content">
-            <div class="promo-tabs"><button class="promo-tab active" onclick="promoSwitchTab('active',this)">Đang hoạt
-                động <span class="promo-count" id="promoCountActive">0</span></button><button class="promo-tab"
-                onclick="promoSwitchTab('paused',this)">Ngừng hoạt động <span
-                  class="promo-count">0</span></button><button class="promo-tab"
-                onclick="promoSwitchTab('draft',this)">Đã lưu trữ <span class="promo-count">0</span></button></div>
-            <div class="promo-main-grid">
-              <div class="promo-left">
-                <div class="promo-search-bar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#bbb"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg><input type="text" id="promoSearchInput" placeholder="Tìm kiếm ưu đãi..."
-                    oninput="promoRenderList()"><select id="promoFilterType" onchange="promoRenderList()"
-                    class="promo-filter-select">
-                    <option value="">Loại giảm giá</option>
-                    <option value="percent">Phần trăm</option>
-                    <option value="fixed">Số tiền cố định</option>
-                  </select></div>
-                <div class="promo-form-card" id="promoFormCard" style="display:none">
-                  <div class="promo-form-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                      stroke="#f5c518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polygon
-                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg><span id="promoFormTitleText">Chi tiết Ưu đãi</span></div>
-                  <input type="hidden" id="promoEditIdx" value="-1">
-                  <div class="promo-form-field"><label>Tên chương trình</label><input type="text" id="promoName"
-                      placeholder="Summer Flash Sale 2024"></div>
-                  <div class="promo-form-row2">
-                    <div class="promo-form-field"><label>Loại giảm giá</label><select id="promoType">
-                        <option value="fixed">Số tiền cố định (đ)</option>
-                        <option value="percent">Phần trăm (%)</option>
-                      </select></div>
-                    <div class="promo-form-field"><label>Giá trị</label>
-                      <div class="promo-input-prefix"><span id="promoValPrefix">₫</span><input type="number"
-                          id="promoValue" placeholder="50" min="0"></div>
-                    </div>
-                  </div>
-                  <div class="promo-form-row2">
-                    <div class="promo-form-field"><label>Ngày bắt đầu</label><input type="date" id="promoStart"></div>
-                    <div class="promo-form-field"><label>Ngày kết thúc</label><input type="date" id="promoEnd"></div>
-                  </div>
-                  <div class="promo-form-row2">
-                    <div class="promo-form-field"><label>Tổng lượt tối đa</label><input type="number" id="promoMaxUse"
-                        placeholder="1000" min="1"></div>
-                    <div class="promo-form-field"><label>Giới hạn mỗi KH</label><input type="number" id="promoPerUser"
-                        value="1" min="1"></div>
-                  </div>
-                  <div class="promo-form-actions"><button class="admin-btn-ghost" onclick="promoHideCreate()">Hủy
-                      bỏ</button><button class="admin-btn-primary" onclick="promoSave()">💾 Lưu</button></div>
+            <div id="couponCreateModal"
+              style="display:none;position:fixed;inset:0;background:rgba(8,12,20,.45);z-index:1300;align-items:center;justify-content:center;padding:20px"
+              onclick="if(event.target===this) adminCouponHideCreateModal()">
+              <div class="admin-section" style="width:min(680px,100%);max-height:92vh;overflow:auto;margin:0">
+                <div class="admin-section-head">
+                  <div class="admin-section-title">Thêm Mã Giảm Giá</div>
+                  <button class="admin-btn-ghost" onclick="adminCouponHideCreateModal()">✕ Đóng</button>
                 </div>
-                <div class="promo-list-section">
-                  <div class="promo-list-header"><span class="promo-list-title">Chiến dịch Đang hoạt động</span><a
-                      class="promo-view-all" href="#">Xem tất cả</a></div>
-                  <div class="promo-list-table">
-                    <div class="promo-list-head"><span>Ưu đãi</span><span>Giảm giá</span><span>Kết thúc
-                        sau</span><span>Sử dụng</span><span>Trạng thái</span><span></span></div>
-                    <div id="promoListBody"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+                  <div class="afp-field">
+                    <label>Code <span style="color:#e55">*</span></label>
+                    <input type="text" id="couponCreateCode" placeholder="Ví dụ: YEAR2027">
                   </div>
+                  <div class="afp-field">
+                    <label>Giá trị giảm (VNĐ) <span style="color:#e55">*</span></label>
+                    <input type="number" id="couponCreateValue" min="1" placeholder="500000">
+                  </div>
+                  <div class="afp-field">
+                    <label>Đơn tối thiểu (VNĐ) <span style="color:#e55">*</span></label>
+                    <input type="number" id="couponCreateMinOrderValue" min="0" placeholder="3000000">
+                  </div>
+                  <div class="afp-field">
+                    <label>Tổng lượt sử dụng tối đa <span style="color:#e55">*</span></label>
+                    <input type="number" id="couponCreateMaxUsage" min="1" placeholder="100">
+                  </div>
+                  <div class="afp-field" style="grid-column:1/-1">
+                    <label>Hạn dùng <span style="color:#e55">*</span></label>
+                    <input type="date" id="couponCreateExpiresAt">
+                  </div>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end">
+                  <button class="admin-btn-ghost" id="couponCreateCancelBtn"
+                    onclick="adminCouponHideCreateModal()">Hủy</button>
+                  <button class="admin-btn-primary" id="couponCreateSaveBtn" onclick="adminCouponSubmitCreate()">Lưu mã
+                    giảm giá</button>
                 </div>
               </div>
-              <div class="promo-right">
-                <div class="promo-preview-card">
-                  <div class="promo-preview-header"><span class="promo-preview-title">Xem trước hiển thị</span><span
-                      class="promo-preview-badge">Trang chủ</span></div>
-                  <div class="promo-preview-visual">
-                    <div class="promo-preview-img"></div>
-                    <div class="promo-preview-tag">THAY ĐỔI CÓ ÍCH</div>
-                    <div class="promo-preview-body">
-                      <div class="promo-preview-name" id="promoPreviewName">Summer Flash Sale 2024</div>
-                      <div class="promo-preview-desc">Ưu đãi đặc biệt cho khách hàng thân thiết</div>
-                      <div class="promo-preview-price"><span id="promoPreviewVal">—</span><button>→</button></div>
-                    </div>
+            </div>
+
+            <div id="couponEditModal"
+              style="display:none;position:fixed;inset:0;background:rgba(8,12,20,.45);z-index:1300;align-items:center;justify-content:center;padding:20px"
+              onclick="if(event.target===this) adminCouponHideEditModal()">
+              <div class="admin-section" style="width:min(680px,100%);max-height:92vh;overflow:auto;margin:0">
+                <div class="admin-section-head">
+                  <div class="admin-section-title">Chỉnh Sửa Mã Giảm Giá</div>
+                  <button class="admin-btn-ghost" onclick="adminCouponHideEditModal()">✕ Đóng</button>
+                </div>
+                <input type="hidden" id="couponEditId">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+                  <div class="afp-field">
+                    <label>Code <span style="color:#e55">*</span></label>
+                    <input type="text" id="couponEditCode" placeholder="Ví dụ: YEAR2027">
                   </div>
-                  <div class="promo-stats-mini">
-                    <div class="promo-stats-title">THỐNG KÊ THỜI GIAN THỰC</div>
-                    <div class="promo-stats-row">
-                      <div class="promo-stat-mini">
-                        <div class="promo-stat-val" id="promoStatUse">0</div>
-                        <div class="promo-stat-lbl">Tiếp cận ước tính</div>
-                      </div>
-                      <div class="promo-stat-mini">
-                        <div class="promo-stat-val">4.8%</div>
-                        <div class="promo-stat-lbl">CTR tự vọng</div>
-                      </div>
-                    </div>
-                    <div class="promo-warning"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                        stroke="#e67e00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
-                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                      </svg>Độ trễ dữ liệu 14 phút</div>
+                  <div class="afp-field">
+                    <label>Giá trị giảm (VNĐ) <span style="color:#e55">*</span></label>
+                    <input type="number" id="couponEditValue" min="1" placeholder="500000">
+                  </div>
+                  <div class="afp-field">
+                    <label>Đơn tối thiểu (VNĐ) <span style="color:#e55">*</span></label>
+                    <input type="number" id="couponEditMinOrderValue" min="0" placeholder="3000000">
+                  </div>
+                  <div class="afp-field">
+                    <label>Tổng lượt sử dụng tối đa <span style="color:#e55">*</span></label>
+                    <input type="number" id="couponEditMaxUsage" min="1" placeholder="100">
+                  </div>
+                  <div class="afp-field" style="grid-column:1/-1">
+                    <label>Hạn dùng <span style="color:#e55">*</span></label>
+                    <input type="date" id="couponEditExpiresAt">
                   </div>
                 </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end">
+                  <button class="admin-btn-ghost" id="couponEditCancelBtn"
+                    onclick="adminCouponHideEditModal()">Hủy</button>
+                  <button class="admin-btn-primary" id="couponEditSaveBtn" onclick="adminCouponSubmitEdit()">Lưu thay
+                    đổi</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="couponConfirmModal"
+              style="display:none;position:fixed;inset:0;background:rgba(8,12,20,.45);z-index:1310;align-items:center;justify-content:center;padding:20px"
+              onclick="if(event.target===this) adminCouponConfirmClose(false)">
+              <div class="admin-section" style="width:min(460px,100%);margin:0">
+                <div class="admin-section-head" style="margin-bottom:8px">
+                  <div class="admin-section-title" id="couponConfirmTitle">Xác nhận thao tác</div>
+                </div>
+                <p id="couponConfirmText" style="font-size:0.86rem;color:#4b5563;line-height:1.5;margin:8px 0 16px">
+                  Bạn có chắc muốn tiếp tục?
+                </p>
+                <div style="display:flex;justify-content:flex-end;gap:10px">
+                  <button class="admin-btn-ghost" onclick="adminCouponConfirmClose(false)">Hủy</button>
+                  <button class="admin-btn-primary" onclick="adminCouponConfirmClose(true)">Xác nhận</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-section">
+              <div class="admin-section-head">
+                <div>
+                  <div class="admin-section-title">Danh sách mã giảm giá</div>
+                  <div class="admin-section-sub">Dữ liệu đồng bộ từ endpoint /api/coupons</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div class="admin-search-bar" style="width:280px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input type="text" id="adminCouponSearch" placeholder="Tìm mã giảm giá..."
+                      oninput="adminCouponSearch()">
+                  </div>
+                  <select id="adminCouponStatusFilter" class="promo-filter-select" onchange="adminCouponFilterStatus()">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="true">Đang hoạt động</option>
+                    <option value="false">Ngừng hoạt động</option>
+                  </select>
+                </div>
+              </div>
+              <div class="admin-table-wrap">
+                <table class="admin-table admin-coupon-table">
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Giá trị</th>
+                      <th>Điều kiện</th>
+                      <th>Đã dùng</th>
+                      <th>Hạn</th>
+                      <th>Trạng thái</th>
+                      <th>Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminCouponsBody">
+                    <tr>
+                      <td colspan="7" style="text-align:center;color:#aaa;padding:32px">Đang tải...</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="admin-table-footer" id="adminCouponsFooter"></div>
               </div>
             </div>
           </div>

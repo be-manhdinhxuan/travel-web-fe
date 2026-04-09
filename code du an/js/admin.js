@@ -21,6 +21,7 @@ function switchTab(name) {
   } catch (e) { }
 
   if (name === 'tours') adminRenderTours();
+  if (name === 'tours') adminRenderPromoPreview();
   if (name === 'users') renderUsersTable();
   if (name === 'dashboard') adminUpdateDashStats();
 }
@@ -227,66 +228,100 @@ function adminRenderTours() {
   if (!tbody) return;
 
   var search = (document.getElementById('adminTourSearch')?.value || '').toLowerCase();
-  var tours = adminGetTours().filter(function (t) {
-    return !search || t.name.toLowerCase().includes(search) || t.location.toLowerCase().includes(search);
+  var escapeHtml = function (val) {
+    return String(val || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+  var shortText = function (val, limit) {
+    var s = String(val || '');
+    return s.length <= limit ? s : (s.slice(0, limit - 1) + '...');
+  };
+  var isPublished = function (t) {
+    if (typeof t.status === 'number') return t.status === 1;
+    if (typeof t.active === 'boolean') return t.active;
+    return false;
+  };
+
+  var allTours = adminGetTours();
+  var tours = allTours.filter(function (t) {
+    var raw = [
+      t._id,
+      t.category_id,
+      t.name,
+      t.slug,
+      t.description || t.desc,
+      t.destination || t.location,
+      t.departure_city,
+      Array.isArray(t.highlights) ? t.highlights.join(' ') : '',
+      Array.isArray(t.includes) ? t.includes.join(' ') : '',
+      Array.isArray(t.excludes) ? t.excludes.join(' ') : ''
+    ].join(' ').toLowerCase();
+    return !search || raw.includes(search);
   });
 
   var total = tours.length;
   var start = (ADMIN_TOUR_PAGE - 1) * ADMIN_TOUR_PER;
   var paged = tours.slice(start, start + ADMIN_TOUR_PER);
 
-  // Update KPIs
-  var allTours = adminGetTours();
-  var el = function (id) { return document.getElementById(id); };
-  if (el('kpiTotal')) el('kpiTotal').textContent = allTours.length;
-  if (el('kpiActive')) el('kpiActive').textContent = allTours.filter(function (t) { return t.active; }).length;
-  if (el('kpiDraft')) el('kpiDraft').textContent = allTours.filter(function (t) { return !t.active; }).length;
-  try {
-    var promos = JSON.parse(localStorage.getItem('vt_admin_promos') || '[]');
-    if (el('kpiPromo')) el('kpiPromo').textContent = promos.filter(function (p) { return p.status === 'active'; }).length;
-  } catch (e) { }
-
   if (!paged.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;padding:40px;font-size:0.85rem">Chưa có tour nào</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#aaa;padding:40px;font-size:0.85rem">Chưa có tour nào</td></tr>';
     if (footer) footer.innerHTML = '';
     return;
   }
 
-  tbody.innerHTML = paged.map(function (t, i) {
-    var realIdx = adminGetTours().indexOf(t);
-    var imgBg = 'linear-gradient(135deg,#2d8a4e,#3aaa62)';
-    var pct = t.active ? 100 : (t.desc ? 70 : 40);
-    var barCls = pct >= 80 ? 'content-fill-green' : 'content-fill-orange';
-    var barTxt = pct >= 80 ? '<span class="content-status-text content-ok">Đầy đủ thông tin</span>'
-      : '<span class="content-status-text content-warn">Thiếu ' + (t.schedules && t.schedules.length ? '' : 'lịch trình') + '</span>';
-    var statusBadge = t.active
+  tbody.innerHTML = paged.map(function (t) {
+    var realIdx = allTours.indexOf(t);
+    var published = isPublished(t);
+    var statusBadge = published
       ? '<span class="badge-published">ĐANG HIỂN THỊ</span>'
       : '<span class="badge-draft">BẢN NHÁP</span>';
-    var actionBtns = t.active
+    var actionBtns = published
       ? '<button class="act-btn-content" onclick="adminEditTour(' + realIdx + ')">📄 Nội dung</button><button class="act-btn-delete" onclick="adminToggleTour(' + realIdx + ')">Gỡ bỏ</button><button class="admin-act-btn admin-act-btn-red" data-id="' + (t._id || t.id || '') + '" data-idx="' + realIdx + '" onclick="adminDeleteTour(this)" style="font-size:0.72rem;padding:4px 10px">🗑️ Xóa</button>'
       : '<button class="act-btn-content" onclick="adminEditTour(' + realIdx + ')">📄 Nội dung</button><button class="act-btn-publish" onclick="adminToggleTour(' + realIdx + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Xuất bản</button><button class="admin-act-btn admin-act-btn-red" data-id="' + (t._id || t.id || '') + '" data-idx="' + realIdx + '" onclick="adminDeleteTour(this)" style="font-size:0.72rem;padding:4px 10px">🗑️ Xóa</button>';
 
+    var highlights = Array.isArray(t.highlights) ? t.highlights : [];
+    var images = Array.isArray(t.images) ? t.images : [];
+    var itinerary = Array.isArray(t.itinerary) ? t.itinerary : [];
+    var includes = Array.isArray(t.includes) ? t.includes : [];
+    var excludes = Array.isArray(t.excludes) ? t.excludes : [];
+
+    var idText = t._id || ('TOUR-' + String(t.id || realIdx + 1).padStart(5, '0'));
+    var catText = t.category_id || '—';
+    var nameText = t.name || '—';
+    var slugText = t.slug || '—';
+    var descText = t.description || t.desc || '—';
+    var destinationText = t.destination || t.location || '—';
+    var departureText = t.departure_city || '—';
+
+    var days = Number(t.duration_days || t.duration || 0);
+    var nights = (t.duration_nights !== undefined && t.duration_nights !== null) ? Number(t.duration_nights) : null;
+    var durationText = days > 0 ? (days + 'N' + (nights !== null && !isNaN(nights) ? (' ' + nights + 'Đ') : '')) : '—';
+
     return '<tr>' +
-      '<td><div style="display:flex;align-items:center;gap:10px">' +
-      '<div class="tour-img-thumb" style="background:' + imgBg + '">🗺️</div>' +
-      '<div><div style="font-weight:700;font-size:0.82rem;color:#1a1a1a">' + t.name + '</div>' +
-      '<div class="tour-id-badge">ID: TOUR-' + String(t.id || realIdx + 1).padStart(5, '0') + ' · Cập nhật: ' + (t.updatedAt || '—') + '</div></div>' +
-      '</div></td>' +
-      '<td><div class="content-bar"><div class="' + barCls + '" style="width:' + pct + '%"></div></div>' + barTxt + '</td>' +
-      '<td><div class="price-main">' + t.price + '</div>' + (!t.active ? '<div class="price-promo">Không ưu đãi</div>' : '') + '</td>' +
-      '<td>' + statusBadge + '</td>' +
+      '<td style="max-width:170px"><div style="font-size:0.76rem;font-weight:700;color:#374151;word-break:break-all">' + escapeHtml(idText) + '</div></td>' +
+      '<td style="max-width:170px"><div style="font-size:0.76rem;color:#4b5563;word-break:break-all">' + escapeHtml(catText) + '</div></td>' +
+      '<td style="max-width:260px"><div style="font-weight:700;font-size:0.82rem;color:#1a1a1a">' + escapeHtml(nameText) + '</div><div class="tour-id-badge">' + escapeHtml(slugText) + '</div></td>' +
+      '<td style="max-width:300px"><div style="font-size:0.78rem;color:#374151;line-height:1.45">' + escapeHtml(shortText(descText, 120)) + '</div><div class="tour-id-badge">Highlights: ' + escapeHtml(highlights.length ? highlights.slice(0, 2).join(' | ') : '—') + (highlights.length > 2 ? ' +' + (highlights.length - 2) : '') + '</div></td>' +
+      '<td style="max-width:220px"><div style="font-size:0.8rem;font-weight:600;color:#111827">' + escapeHtml(destinationText) + '</div><div class="tour-id-badge">Khởi hành: ' + escapeHtml(departureText) + '</div></td>' +
+      '<td style="white-space:nowrap"><div style="font-size:0.8rem;font-weight:700;color:#1f2937">' + escapeHtml(durationText) + '</div></td>' +
+      '<td style="max-width:180px"><div style="font-size:0.78rem;color:#374151">Ảnh: ' + images.length + '</div><div class="tour-id-badge">Lịch trình: ' + itinerary.length + ' ngày</div></td>' +
+      '<td style="max-width:230px"><div style="font-size:0.76rem;color:#374151;line-height:1.4">+' + escapeHtml(includes.slice(0, 2).join(', ') || '—') + (includes.length > 2 ? '...' : '') + '</div><div class="tour-id-badge">-' + escapeHtml(excludes.slice(0, 2).join(', ') || '—') + (excludes.length > 2 ? '...' : '') + '</div></td>' +
+      '<td><div style="display:flex;flex-direction:column;gap:6px">' + statusBadge + '<span class="tour-id-badge">status: ' + (t.status !== undefined ? t.status : (published ? 1 : 0)) + '</span></div></td>' +
       '<td><div class="act-btns">' + actionBtns + '</div></td>' +
       '</tr>';
   }).join('');
 
-  // Footer pagination
   var totalPages = Math.max(1, Math.ceil(total / ADMIN_TOUR_PER));
   var pageLinks = '';
   for (var p = 1; p <= totalPages; p++) {
     pageLinks += '<button class="admin-page-btn' + (p === ADMIN_TOUR_PAGE ? ' active' : '') + '" onclick="adminGoTourPage(' + p + ')">' + p + '</button>';
   }
   if (footer) footer.innerHTML =
-    '<span>Hiện thị ' + Math.min(start + 1, total) + ' - ' + Math.min(start + ADMIN_TOUR_PER, total) + ' của ' + total + ' tours</span>' +
+    '<span>Hiển thị ' + Math.min(start + 1, total) + ' - ' + Math.min(start + ADMIN_TOUR_PER, total) + ' của ' + total + ' tour</span>' +
     '<div class="admin-pagination">' +
     '<button class="admin-page-btn text" onclick="adminGoTourPage(' + Math.max(1, ADMIN_TOUR_PAGE - 1) + ')">Trước</button>' +
     pageLinks +
@@ -299,10 +334,16 @@ function adminGoTourPage(p) { ADMIN_TOUR_PAGE = p; adminRenderTours(); }
 function adminToggleTour(idx) {
   var tours = adminGetTours();
   if (!tours[idx]) return;
-  tours[idx].active = !tours[idx].active;
+  if (typeof tours[idx].status === 'number') {
+    tours[idx].status = tours[idx].status === 1 ? 0 : 1;
+    tours[idx].active = tours[idx].status === 1;
+  } else {
+    tours[idx].active = !tours[idx].active;
+    tours[idx].status = tours[idx].active ? 1 : 0;
+  }
   adminSaveTours(tours);
   adminRenderTours();
-  showToast((tours[idx].active ? '✅ Đã bật' : '⏸ Đã tắt') + ' tour: ' + tours[idx].name);
+  showToast(((tours[idx].status === 1 || tours[idx].active) ? '✅ Đã bật' : '⏸ Đã tắt') + ' tour: ' + tours[idx].name);
 }
 
 // ===== SHOW/HIDE VIEWS =====
@@ -365,7 +406,6 @@ function adminDoSaveTour(publish) {
   if (!name) { showToast('⚠️ Vui lòng nhập tên tour'); return; }
   if (!location) { showToast('⚠️ Vui lòng chọn địa điểm'); return; }
 
-  // Thu thập days
   var days = [];
   document.querySelectorAll('.atf-day-item').forEach(function (row) {
     var t = row.querySelector('.day-title-inp');
@@ -373,7 +413,6 @@ function adminDoSaveTour(publish) {
     days.push({ title: t ? t.value : '', desc: d ? d.value : '' });
   });
 
-  // Thu thập schedules
   var schedules = [];
   document.querySelectorAll('.atf-schedule-row').forEach(function (row) {
     var d = row.querySelector('.sched-date-inp');
@@ -467,193 +506,491 @@ function atfAddImages(input) {
 function atfFormat(cmd) { document.execCommand(cmd, false, null); }
 
 // ============================================================
-// coupons – Quản lý Ưu đãi
+// COUPONS – Quản lý Mã giảm giá
 // ============================================================
-var PROMO_KEY = 'vt_admin_promos';
+var ADMIN_COUPON_PAGE = 1;
+var ADMIN_COUPON_PER = 10;
+var ADMIN_COUPON_KEYWORD = '';
+var ADMIN_COUPON_IS_ACTIVE = '';
+var ADMIN_COUPON_ROWS_CACHE = [];
+var ADMIN_COUPON_CONFIRM_RESOLVE = null;
 
-var DEFAULT_PROMOS = [
-  { id: 1, name: 'Giải Chào Mừng 1%', type: 'percent', value: 15, start: '2026-01-01', end: '2026-12-31', maxUse: 1000, perUser: 1, used: 880, status: 'active' },
-  { id: 2, name: 'Đặc biệt Cuối tuần', type: 'percent', value: 20, start: '2026-03-01', end: '2026-03-31', maxUse: 500, perUser: 1, used: 200, status: 'active' },
-  { id: 3, name: 'Summer Flash Sale', type: 'fixed', value: 50, start: '2026-06-01', end: '2026-08-31', maxUse: 2000, perUser: 2, used: 0, status: 'draft' },
-];
+var ADMIN_COUPON_ERROR_VI = {
+  COUPON_CODE_IS_REQUIRED: 'Vui lòng nhập mã giảm giá.',
+  COUPON_CODE_MUST_BE_A_STRING: 'Mã giảm giá phải là chuỗi ký tự.',
+  COUPON_CODE_LENGTH_INVALID: 'Mã giảm giá phải từ 3 đến 20 ký tự.',
+  COUPON_CODE_ALREADY_EXISTS: 'Mã giảm giá đã tồn tại.',
+  COUPON_VALUE_IS_REQUIRED: 'Vui lòng nhập giá trị giảm.',
+  COUPON_VALUE_MUST_BE_A_POSITIVE_INTEGER: 'Giá trị giảm phải là số nguyên dương.',
+  COUPON_MIN_ORDER_VALUE_IS_REQUIRED: 'Vui lòng nhập giá trị đơn tối thiểu.',
+  COUPON_MIN_ORDER_VALUE_MUST_BE_NON_NEGATIVE: 'Đơn tối thiểu phải là số nguyên không âm.',
+  COUPON_MAX_USAGE_IS_REQUIRED: 'Vui lòng nhập tổng lượt sử dụng tối đa.',
+  COUPON_MAX_USAGE_MUST_BE_A_POSITIVE_INTEGER: 'Tổng lượt sử dụng tối đa phải là số nguyên dương.',
+  COUPON_EXPIRES_AT_IS_REQUIRED: 'Vui lòng chọn hạn dùng.',
+  COUPON_EXPIRES_AT_IS_INVALID: 'Hạn dùng không đúng định dạng ISO8601.',
+  COUPON_EXPIRES_AT_MUST_BE_IN_FUTURE: 'Hạn dùng phải lớn hơn thời điểm hiện tại.'
+};
 
-function promoGetAll() {
-  try { var r = localStorage.getItem(PROMO_KEY); return r ? JSON.parse(r) : DEFAULT_PROMOS; } catch (e) { return DEFAULT_PROMOS; }
-}
-function promoSaveAll(p) { localStorage.setItem(PROMO_KEY, JSON.stringify(p)); }
+function adminCouponTranslateErrorMessage(msg) {
+  if (!msg) return '';
+  var raw = String(msg).trim();
+  if (ADMIN_COUPON_ERROR_VI[raw]) return ADMIN_COUPON_ERROR_VI[raw];
 
-// Switch sub-tab
-function promoSwitchTab(type, btn) {
-  document.querySelectorAll('.promo-tab').forEach(function (b) { b.classList.remove('active'); });
-  btn.classList.add('active');
-  promoRenderList(type);
-}
+  var lower = raw.toLowerCase();
+  if (lower.includes('already exists') || lower.includes('đã tồn tại')) return 'Mã giảm giá đã tồn tại.';
+  if (lower.includes('iso8601') || lower.includes('invalid date')) return 'Hạn dùng không hợp lệ.';
+  if (lower.includes('future')) return 'Hạn dùng phải lớn hơn thời điểm hiện tại.';
 
-// Show/hide form
-function promoShowCreate(idx) {
-  var card = document.getElementById('promoFormCard');
-  card.style.display = 'block';
-  document.getElementById('promoFormTitleText').textContent = idx !== undefined ? 'Chỉnh sửa Ưu đãi' : 'Chi tiết Ưu đãi';
-  document.getElementById('promoEditIdx').value = idx !== undefined ? idx : -1;
-  if (idx !== undefined) {
-    var p = promoGetAll()[idx];
-    if (!p) return;
-    document.getElementById('promoName').value = p.name || '';
-    document.getElementById('promoType').value = p.type || 'fixed';
-    document.getElementById('promoValue').value = p.value || '';
-    document.getElementById('promoStart').value = p.start || '';
-    document.getElementById('promoEnd').value = p.end || '';
-    document.getElementById('promoMaxUse').value = p.maxUse || '';
-    document.getElementById('promoPerUser').value = p.perUser || 1;
-    promoUpdatePreview(p.name, p.type, p.value);
-  } else {
-    ['promoName', 'promoType', 'promoValue', 'promoStart', 'promoEnd', 'promoMaxUse'].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
-    document.getElementById('promoPerUser').value = 1;
-  }
-  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  return raw;
 }
 
-function promoHideCreate() {
-  document.getElementById('promoFormCard').style.display = 'none';
-}
+function adminCouponExtractErrorMessage(res, fallback) {
+  var fb = fallback || 'Thao tác thất bại';
+  if (!res || !res.data) return fb;
 
-// Save
-function promoSave() {
-  var name = (document.getElementById('promoName').value || '').trim();
-  var type = document.getElementById('promoType').value || 'fixed';
-  var value = parseFloat(document.getElementById('promoValue').value) || 0;
-  var start = document.getElementById('promoStart').value || '';
-  var end = document.getElementById('promoEnd').value || '';
-  var maxUse = parseInt(document.getElementById('promoMaxUse').value) || 1000;
-  var perUser = parseInt(document.getElementById('promoPerUser').value) || 1;
-  var idxStr = document.getElementById('promoEditIdx').value;
+  var data = res.data || {};
+  var errors = data.errors;
+  if (errors) {
+    if (Array.isArray(errors) && errors.length) {
+      var arrMsg = errors[0] && (errors[0].msg || errors[0].message || errors[0].errorMessage || errors[0]);
+      return adminCouponTranslateErrorMessage(arrMsg) || fb;
+    }
 
-  if (!name) { showToast('⚠️ Vui lòng nhập tên chương trình'); return; }
-  if (!value) { showToast('⚠️ Vui lòng nhập giá trị giảm'); return; }
-  if (!start || !end) { showToast('⚠️ Vui lòng chọn thời gian'); return; }
+    var firstVal = Object.values(errors)[0];
+    if (Array.isArray(firstVal) && firstVal.length) {
+      var groupedMsg = firstVal[0] && (firstVal[0].msg || firstVal[0].message || firstVal[0].errorMessage || firstVal[0]);
+      return adminCouponTranslateErrorMessage(groupedMsg) || fb;
+    }
 
-  var promos = promoGetAll();
-  var promo = { name: name, type: type, value: value, start: start, end: end, maxUse: maxUse, perUser: perUser, used: 0, status: 'active' };
-  var idx = parseInt(idxStr);
-
-  if (idx >= 0) {
-    promo.id = promos[idx].id;
-    promo.used = promos[idx].used || 0;
-    promos[idx] = promo;
-    showToast('✅ Đã cập nhật ưu đãi: ' + name);
-  } else {
-    promo.id = promos.reduce(function (m, p) { return Math.max(m, p.id || 0); }, 0) + 1;
-    promos.push(promo);
-    showToast('✅ Đã tạo ưu đãi: ' + name);
+    var firstMsg = firstVal && (firstVal.msg || firstVal.message || firstVal.errorMessage || firstVal);
+    if (firstMsg) return adminCouponTranslateErrorMessage(firstMsg) || fb;
   }
 
-  promoSaveAll(promos);
-  promoHideCreate();
-  promoRenderList();
-  promoUpdateCountBadge();
-  promoUpdatePreview(name, type, value);
+  if (data.message) return adminCouponTranslateErrorMessage(data.message) || fb;
+  if (data.error) return adminCouponTranslateErrorMessage(data.error) || fb;
+  return fb;
 }
 
-// Render list
-function promoRenderList(filterStatus) {
-  var body = document.getElementById('promoListBody');
-  if (!body) return;
-  var search = (document.getElementById('promoSearchInput')?.value || '').toLowerCase();
-  var fType = document.getElementById('promoFilterType')?.value || '';
-  var today = new Date().toISOString().slice(0, 10);
-  var promos = promoGetAll().filter(function (p) {
-    if (search && !p.name.toLowerCase().includes(search)) return false;
-    if (fType && p.type !== fType) return false;
-    if (filterStatus === 'active' && p.status !== 'active') return false;
-    if (filterStatus === 'paused' && p.status !== 'paused') return false;
-    if (filterStatus === 'draft' && p.status !== 'draft') return false;
-    return true;
-  });
-
-  if (!promos.length) {
-    body.innerHTML = '<div class="promo-empty">Không có ưu đãi nào</div>'; return;
-  }
-
-  body.innerHTML = promos.map(function (p, i) {
-    var realIdx = promoGetAll().indexOf(promoGetAll().find(function (x) { return x.id === p.id; }));
-    var pct = p.maxUse > 0 ? Math.round((p.used / p.maxUse) * 100) : 0;
-    var fillCls = pct >= 80 ? 'warn' : '';
-    var remain = promoDaysLeft(p.end);
-    var discStr = p.type === 'percent' ? p.value + '%' : p.value.toLocaleString() + 'đ';
-    var statusBadge = p.status === 'active'
-      ? '<span class="promo-status-active">HOẠT ĐỘNG</span>'
-      : p.status === 'paused'
-        ? '<span class="promo-status-paused">TẠM DỪNG</span>'
-        : '<span class="promo-status-draft">BẢN NHÁP</span>';
-    return '<div class="promo-list-row">' +
-      '<div><div class="promo-item-name">' + p.name + '</div><div class="promo-item-type">Giảm ' + (p.type === 'percent' ? 'phần trăm' : 'cố định') + '</div></div>' +
-      '<div class="promo-item-discount">' + discStr + '</div>' +
-      '<div class="promo-item-expire">' + remain + '</div>' +
-      '<div><div style="font-size:0.75rem;color:#666">' + p.used + '/' + p.maxUse + '</div><div class="promo-usage-bar"><div class="promo-usage-fill ' + fillCls + '" style="width:' + pct + '%"></div></div></div>' +
-      '<div>' + statusBadge + '</div>' +
-      '<div><button class="promo-action-btn" onclick="promoMenu(' + realIdx + ',event)">⋮</button></div>' +
-      '</div>';
-  }).join('');
+function adminCouponEscapeHtml(val) {
+  return String(val || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
-function promoDaysLeft(endDate) {
-  if (!endDate) return '—';
-  var diff = Math.ceil((new Date(endDate) - new Date()) / 86400000);
-  if (diff < 0) return 'Đã hết hạn';
-  if (diff === 0) return 'Hôm nay';
-  return diff + ' ngày';
+function adminCouponFormatValue(value) {
+  var n = Number(value);
+  if (!isFinite(n) || n <= 0) return '0đ';
+  return Math.round(n).toLocaleString('vi-VN') + 'đ';
 }
 
-function promoMenu(idx, e) {
-  e.stopPropagation();
-  var promos = promoGetAll();
-  var p = promos[idx];
-  if (!p) return;
-  var act = confirm('Tour: ' + p.name + '\nChọn OK để sửa, Cancel để xóa');
-  if (act) { promoShowCreate(idx); }
-  else {
-    if (confirm('Xóa ưu đãi "' + p.name + '"?')) {
-      promos.splice(idx, 1);
-      promoSaveAll(promos);
-      promoRenderList();
-      promoUpdateCountBadge();
-      showToast('Đã xóa ưu đãi');
+function adminCouponFormatCondition(minOrderValue) {
+  var n = Number(minOrderValue);
+  if (!isFinite(n) || n <= 0) return 'Không yêu cầu';
+  return '≥ ' + Math.round(n).toLocaleString('vi-VN') + 'đ';
+}
+
+function adminCouponFormatDate(iso) {
+  if (!iso) return '—';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '—';
+  var dd = String(d.getDate()).padStart(2, '0');
+  var mm = String(d.getMonth() + 1).padStart(2, '0');
+  var yyyy = d.getFullYear();
+  return dd + '/' + mm + '/' + yyyy;
+}
+
+function adminCouponToInputDate(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  var mm = String(d.getMonth() + 1).padStart(2, '0');
+  var dd = String(d.getDate()).padStart(2, '0');
+  return d.getFullYear() + '-' + mm + '-' + dd;
+}
+
+function adminExtractCoupons(response) {
+  if (!response || !response.ok) return [];
+  var data = response.data || {};
+  var result = data.result !== undefined ? data.result : data;
+
+  if (Array.isArray(result)) return result;
+  if (Array.isArray(result && result.coupons)) return result.coupons;
+  if (Array.isArray(result && result.items)) return result.items;
+  if (Array.isArray(data.coupons)) return data.coupons;
+  if (Array.isArray(data.items)) return data.items;
+  return [];
+}
+
+function adminExtractCouponPagination(response, fallbackCount) {
+  var total = Number(fallbackCount) || 0;
+  var currentPage = ADMIN_COUPON_PAGE;
+  var limit = ADMIN_COUPON_PER;
+
+  if (response && response.data) {
+    var data = response.data;
+    var result = data.result !== undefined ? data.result : data;
+    var pagination = result && result.pagination ? result.pagination : (data.pagination || null);
+    if (pagination) {
+      if (pagination.total !== undefined) total = Number(pagination.total) || total;
+      if (pagination.page !== undefined) currentPage = Number(pagination.page) || currentPage;
+      if (pagination.limit !== undefined) limit = Number(pagination.limit) || limit;
     }
   }
+
+  return {
+    total: Math.max(0, total),
+    page: Math.max(1, currentPage),
+    limit: Math.max(1, limit)
+  };
 }
 
-function promoUpdateCountBadge() {
-  var active = promoGetAll().filter(function (p) { return p.status === 'active'; }).length;
-  var el = document.getElementById('promoCountActive');
-  if (el) el.textContent = active;
+function adminCouponSearch() {
+  ADMIN_COUPON_KEYWORD = (document.getElementById('adminCouponSearch')?.value || '').trim();
+  ADMIN_COUPON_PAGE = 1;
+  adminRenderCouponsTable();
 }
 
-function promoUpdatePreview(name, type, value) {
-  var nameEl = document.getElementById('promoPreviewName');
-  var valEl = document.getElementById('promoPreviewVal');
-  var useEl = document.getElementById('promoStatUse');
-  if (nameEl) nameEl.textContent = name || 'Summer Flash Sale 2024';
-  if (valEl) valEl.textContent = type === 'percent' ? '-' + (value || 0) + '%' : (value || 0).toLocaleString() + 'đ';
-  if (useEl) useEl.textContent = Math.floor(Math.random() * 20 + 10) + '.4k';
+function adminCouponFilterStatus() {
+  ADMIN_COUPON_IS_ACTIVE = document.getElementById('adminCouponStatusFilter')?.value || '';
+  ADMIN_COUPON_PAGE = 1;
+  adminRenderCouponsTable();
+}
+
+function adminCouponGoPage(page) {
+  ADMIN_COUPON_PAGE = Math.max(1, Number(page) || 1);
+  adminRenderCouponsTable();
+}
+
+function adminCouponConfirmOpen(text, title) {
+  var modal = document.getElementById('couponConfirmModal');
+  var textEl = document.getElementById('couponConfirmText');
+  var titleEl = document.getElementById('couponConfirmTitle');
+  if (!modal) return Promise.resolve(false);
+  if (titleEl) titleEl.textContent = title || 'Xác nhận thao tác';
+  if (textEl) textEl.textContent = text || 'Bạn có chắc muốn tiếp tục?';
+  modal.style.display = 'flex';
+
+  return new Promise(function (resolve) {
+    ADMIN_COUPON_CONFIRM_RESOLVE = resolve;
+  });
+}
+
+function adminCouponConfirmClose(accepted) {
+  var modal = document.getElementById('couponConfirmModal');
+  if (modal) modal.style.display = 'none';
+  if (ADMIN_COUPON_CONFIRM_RESOLVE) {
+    var resolve = ADMIN_COUPON_CONFIRM_RESOLVE;
+    ADMIN_COUPON_CONFIRM_RESOLVE = null;
+    resolve(!!accepted);
+  }
+}
+
+function adminCouponCreate() {
+  var modal = document.getElementById('couponCreateModal');
+  if (!modal) return;
+
+  var codeEl = document.getElementById('couponCreateCode');
+  var valueEl = document.getElementById('couponCreateValue');
+  var minEl = document.getElementById('couponCreateMinOrderValue');
+  var maxEl = document.getElementById('couponCreateMaxUsage');
+  var expiresEl = document.getElementById('couponCreateExpiresAt');
+
+  if (codeEl) codeEl.value = '';
+  if (valueEl) valueEl.value = '';
+  if (minEl) minEl.value = '';
+  if (maxEl) maxEl.value = '';
+  if (expiresEl) expiresEl.value = '';
+
+  modal.style.display = 'flex';
+  if (codeEl) codeEl.focus();
+}
+
+function adminCouponHideCreateModal() {
+  var modal = document.getElementById('couponCreateModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function adminCouponSetCreateLoading(isLoading) {
+  var saveBtn = document.getElementById('couponCreateSaveBtn');
+  var cancelBtn = document.getElementById('couponCreateCancelBtn');
+  var ids = ['couponCreateCode', 'couponCreateValue', 'couponCreateMinOrderValue', 'couponCreateMaxUsage', 'couponCreateExpiresAt'];
+
+  ids.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.disabled = !!isLoading;
+  });
+
+  if (cancelBtn) cancelBtn.disabled = !!isLoading;
+  if (saveBtn) {
+    if (!saveBtn.dataset.defaultText) saveBtn.dataset.defaultText = saveBtn.textContent;
+    saveBtn.disabled = !!isLoading;
+    saveBtn.textContent = isLoading ? 'Đang lưu...' : saveBtn.dataset.defaultText;
+  }
+}
+
+function adminCouponHideEditModal() {
+  var modal = document.getElementById('couponEditModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function adminCouponSetEditLoading(isLoading) {
+  var saveBtn = document.getElementById('couponEditSaveBtn');
+  var cancelBtn = document.getElementById('couponEditCancelBtn');
+  var ids = ['couponEditCode', 'couponEditValue', 'couponEditMinOrderValue', 'couponEditMaxUsage', 'couponEditExpiresAt'];
+
+  ids.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.disabled = !!isLoading;
+  });
+
+  if (cancelBtn) cancelBtn.disabled = !!isLoading;
+  if (saveBtn) {
+    if (!saveBtn.dataset.defaultText) saveBtn.dataset.defaultText = saveBtn.textContent;
+    saveBtn.disabled = !!isLoading;
+    saveBtn.textContent = isLoading ? 'Đang lưu...' : saveBtn.dataset.defaultText;
+  }
+}
+
+async function adminCouponSubmitCreate() {
+  var code = (document.getElementById('couponCreateCode')?.value || '').trim().toUpperCase();
+  var value = Number(document.getElementById('couponCreateValue')?.value || 0);
+  var min_order_value = Number(document.getElementById('couponCreateMinOrderValue')?.value || 0);
+  var max_usage = Number(document.getElementById('couponCreateMaxUsage')?.value || 0);
+  var expiresDate = (document.getElementById('couponCreateExpiresAt')?.value || '').trim();
+
+  if (!code) { showToast('⚠️ Vui lòng nhập code'); return; }
+  if (!isFinite(value) || value <= 0) { showToast('⚠️ Giá trị giảm không hợp lệ'); return; }
+  if (!isFinite(min_order_value) || min_order_value < 0) { showToast('⚠️ Đơn tối thiểu không hợp lệ'); return; }
+  if (!isFinite(max_usage) || max_usage <= 0) { showToast('⚠️ Tổng lượt sử dụng tối đa không hợp lệ'); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(expiresDate)) { showToast('⚠️ Vui lòng chọn hạn dùng'); return; }
+
+  adminCouponSetCreateLoading(true);
+  try {
+    var payload = {
+      code: code,
+      value: Math.round(value),
+      min_order_value: Math.round(min_order_value),
+      max_usage: Math.round(max_usage),
+      expires_at: expiresDate + 'T00:00:00.000Z'
+    };
+
+    var res = await apiAdminCreateCoupon(payload);
+    if (res && res.ok) {
+      showToast('✅ Đã thêm mã giảm giá');
+      adminCouponHideCreateModal();
+      ADMIN_COUPON_PAGE = 1;
+      adminRenderCouponsTable();
+      return;
+    }
+
+    var msg = adminCouponExtractErrorMessage(res, 'Không thể thêm mã giảm giá');
+    showToast('❌ ' + msg);
+  } catch (e) {
+    showToast('❌ Không thể kết nối server');
+  } finally {
+    adminCouponSetCreateLoading(false);
+  }
+}
+
+async function adminCouponToggle(id, inputEl) {
+  if (!id) {
+    showToast('⚠️ Không tìm thấy mã giảm giá');
+    return;
+  }
+
+  // onchange chạy sau khi checkbox đã đổi, nên trạng thái trước đó là đảo ngược lại
+  var previousChecked = inputEl ? !inputEl.checked : false;
+  var confirmed = await adminCouponConfirmOpen(
+    'Bạn có chắc muốn thay đổi trạng thái mã giảm giá này?',
+    'Xác nhận thay đổi trạng thái'
+  );
+  if (!confirmed) {
+    if (inputEl) inputEl.checked = previousChecked;
+    return;
+  }
+
+  if (inputEl) inputEl.disabled = true;
+  try {
+    // Toggle trạng thái bằng endpoint chuẩn PATCH /api/coupons/:id/toggle
+    var res = await apiAdminToggleCoupon(id);
+    if (res && res.ok) {
+      showToast('✅ Đã cập nhật trạng thái mã giảm giá');
+      adminRenderCouponsTable();
+      return;
+    }
+    if (inputEl) inputEl.checked = previousChecked;
+    var msg = adminCouponExtractErrorMessage(res, 'Không thể cập nhật trạng thái');
+    showToast('❌ ' + msg);
+  } catch (e) {
+    if (inputEl) inputEl.checked = previousChecked;
+    showToast('❌ Không thể kết nối server');
+  } finally {
+    if (inputEl) inputEl.disabled = false;
+  }
+}
+
+function adminCouponEdit(id) {
+  var list = ADMIN_COUPON_ROWS_CACHE || [];
+  var c = list.find(function (x) { return (x._id || x.id) === id; });
+  if (!c) { showToast('⚠️ Không tìm thấy mã giảm giá'); return; }
+
+  var modal = document.getElementById('couponEditModal');
+  if (!modal) return;
+
+  var idEl = document.getElementById('couponEditId');
+  var codeEl = document.getElementById('couponEditCode');
+  var valueEl = document.getElementById('couponEditValue');
+  var minEl = document.getElementById('couponEditMinOrderValue');
+  var maxEl = document.getElementById('couponEditMaxUsage');
+  var expiresEl = document.getElementById('couponEditExpiresAt');
+
+  if (idEl) idEl.value = c._id || c.id || '';
+  if (codeEl) codeEl.value = c.code || '';
+  if (valueEl) valueEl.value = Number(c.value) || 0;
+  if (minEl) minEl.value = Number(c.min_order_value) || 0;
+  if (maxEl) maxEl.value = Number(c.max_usage) || 0;
+  if (expiresEl) expiresEl.value = adminCouponToInputDate(c.expires_at) || '';
+
+  modal.style.display = 'flex';
+  if (codeEl) codeEl.focus();
+}
+
+async function adminCouponSubmitEdit() {
+  var id = (document.getElementById('couponEditId')?.value || '').trim();
+  var code = (document.getElementById('couponEditCode')?.value || '').trim().toUpperCase();
+  var value = Number(document.getElementById('couponEditValue')?.value || 0);
+  var min_order_value = Number(document.getElementById('couponEditMinOrderValue')?.value || 0);
+  var max_usage = Number(document.getElementById('couponEditMaxUsage')?.value || 0);
+  var expiresDate = (document.getElementById('couponEditExpiresAt')?.value || '').trim();
+
+  if (!id) { showToast('⚠️ Không tìm thấy coupon cần sửa'); return; }
+  if (!code) { showToast('⚠️ Vui lòng nhập code'); return; }
+  if (!isFinite(value) || value <= 0) { showToast('⚠️ Giá trị giảm không hợp lệ'); return; }
+  if (!isFinite(min_order_value) || min_order_value < 0) { showToast('⚠️ Đơn tối thiểu không hợp lệ'); return; }
+  if (!isFinite(max_usage) || max_usage <= 0) { showToast('⚠️ Tổng lượt sử dụng tối đa không hợp lệ'); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(expiresDate)) { showToast('⚠️ Vui lòng chọn hạn dùng'); return; }
+
+  adminCouponSetEditLoading(true);
+  try {
+    var payload = {
+      code: code,
+      value: Math.round(value),
+      min_order_value: Math.round(min_order_value),
+      max_usage: Math.round(max_usage),
+      expires_at: expiresDate + 'T00:00:00.000Z'
+    };
+
+    var res = await apiAdminUpdateCoupon(id, payload);
+    if (res && res.ok) {
+      showToast('✅ Đã cập nhật mã giảm giá');
+      adminCouponHideEditModal();
+      adminRenderCouponsTable();
+      return;
+    }
+    var msg = adminCouponExtractErrorMessage(res, 'Không thể cập nhật mã giảm giá');
+    showToast('❌ ' + msg);
+  } catch (e) {
+    showToast('❌ Không thể kết nối server');
+  } finally {
+    adminCouponSetEditLoading(false);
+  }
+}
+
+async function adminRenderCouponsTable() {
+  var tbody = document.getElementById('adminCouponsBody');
+  var footer = document.getElementById('adminCouponsFooter');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:32px">Đang tải...</td></tr>';
+
+  var coupons = [];
+  var pagination = { total: 0, page: ADMIN_COUPON_PAGE, limit: ADMIN_COUPON_PER };
+  try {
+    var params = {
+      page: ADMIN_COUPON_PAGE,
+      limit: ADMIN_COUPON_PER
+    };
+    if (ADMIN_COUPON_KEYWORD) params.keyword = ADMIN_COUPON_KEYWORD;
+    if (ADMIN_COUPON_IS_ACTIVE !== '') params.is_active = ADMIN_COUPON_IS_ACTIVE;
+
+    var res = await apiAdminGetCoupons(params);
+    coupons = adminExtractCoupons(res);
+    pagination = adminExtractCouponPagination(res, coupons.length);
+  } catch (e) {
+    coupons = [];
+  }
+
+  ADMIN_COUPON_ROWS_CACHE = coupons;
+
+  if (!coupons.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:32px">Chưa có mã giảm giá</td></tr>';
+    if (footer) footer.innerHTML = '<span style="font-size:0.75rem;color:#aaa">Tổng 0 mã giảm giá</span>';
+    return;
+  }
+
+  tbody.innerHTML = coupons.map(function (c) {
+    var id = c._id || c.id || '';
+    var used = Number(c.used_count) || 0;
+    var max = Number(c.max_usage);
+    var usageText = used + ' / ' + (isFinite(max) && max > 0 ? max : '∞');
+    var code = adminCouponEscapeHtml(c.code || '—');
+    var value = adminCouponFormatValue(c.value || 0);
+    var condition = adminCouponFormatCondition(c.min_order_value);
+    var expiry = adminCouponFormatDate(c.expires_at);
+    var active = c.is_active !== false;
+
+    return '<tr>' +
+      '<td style="font-weight:700">' + code + '</td>' +
+      '<td>' + value + '</td>' +
+      '<td>' + condition + '</td>' +
+      '<td>' + usageText + '</td>' +
+      '<td>' + expiry + '</td>' +
+      '<td><div style="display:flex;align-items:center;gap:8px">' +
+      '<label class="afp-toggle" style="transform:scale(.88);transform-origin:left center">' +
+      '<input type="checkbox" ' + (active ? 'checked' : '') + ' onchange="adminCouponToggle(\'' + id + '\', this)">' +
+      '<span class="afp-toggle-slider"></span>' +
+      '</label>' +
+      '<span style="font-size:0.78rem;font-weight:600;color:' + (active ? '#2d8a4e' : '#888') + '">' + (active ? 'Đang hoạt động' : 'Ngừng hoạt động') + '</span>' +
+      '</div></td>' +
+      '<td><div style="display:flex;gap:6px">' +
+      '<button class="admin-act-btn" data-id="' + id + '" onclick="adminCouponEdit(this.dataset.id)">Sửa</button>' +
+      '</div></td>' +
+      '</tr>';
+  }).join('');
+
+  var total = Math.max(coupons.length, Number(pagination.total) || 0);
+  var limit = Number(pagination.limit) || ADMIN_COUPON_PER;
+  var page = Number(pagination.page) || ADMIN_COUPON_PAGE;
+  var totalPages = Math.max(1, Math.ceil(total / limit));
+  ADMIN_COUPON_PAGE = Math.min(page, totalPages);
+
+  var pages = '';
+  var startPage = Math.max(1, ADMIN_COUPON_PAGE - 2);
+  var endPage = Math.min(totalPages, startPage + 4);
+  for (var p = startPage; p <= endPage; p++) {
+    pages += '<button class="admin-page-btn' + (p === ADMIN_COUPON_PAGE ? ' active' : '') + '" onclick="adminCouponGoPage(' + p + ')">' + p + '</button>';
+  }
+
+  var from = total ? ((ADMIN_COUPON_PAGE - 1) * limit + 1) : 0;
+  var to = Math.min(ADMIN_COUPON_PAGE * limit, total);
+  if (footer) footer.innerHTML =
+    '<span style="font-size:0.75rem;color:#aaa">Hiển thị ' + from + ' - ' + to + ' / ' + total + ' mã giảm giá</span>' +
+    '<div class="admin-pagination">' +
+    '<button class="admin-page-btn text" onclick="adminCouponGoPage(' + Math.max(1, ADMIN_COUPON_PAGE - 1) + ')">Trước</button>' +
+    pages +
+    '<button class="admin-page-btn text" onclick="adminCouponGoPage(' + Math.min(totalPages, ADMIN_COUPON_PAGE + 1) + ')">Sau</button>' +
+    '</div>';
 }
 
 // Init coupons when tab opens
 var _origSwitchTab = switchTab;
 switchTab = function (name) {
   _origSwitchTab(name);
-  if (name === 'coupons') {
-    promoRenderList();
-    promoUpdateCountBadge();
-  }
+  if (name === 'coupons') adminRenderCouponsTable();
 };
-
-// Sync prefix ₫ / %
-document.addEventListener('change', function (e) {
-  if (e.target.id === 'promoType') {
-    var prefix = document.getElementById('promoValPrefix');
-    if (prefix) prefix.textContent = e.target.value === 'percent' ? '%' : '₫';
-  }
-});
 
 // ============================================================
 // THỐNG KÊ
@@ -1154,6 +1491,21 @@ function catToggleConfirmClose(accepted) {
 
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
+    var couponConfirmModal = document.getElementById('couponConfirmModal');
+    if (couponConfirmModal && couponConfirmModal.style.display !== 'none') {
+      adminCouponConfirmClose(false);
+      return;
+    }
+    var couponModal = document.getElementById('couponCreateModal');
+    if (couponModal && couponModal.style.display !== 'none') {
+      adminCouponHideCreateModal();
+      return;
+    }
+    var couponEditModal = document.getElementById('couponEditModal');
+    if (couponEditModal && couponEditModal.style.display !== 'none') {
+      adminCouponHideEditModal();
+      return;
+    }
     var toggleModal = document.getElementById('catToggleConfirmModal');
     if (toggleModal && toggleModal.style.display !== 'none') {
       catToggleConfirmClose(false);
