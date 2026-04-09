@@ -2223,6 +2223,7 @@ function renderRevenueChart(labels, data) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -2269,6 +2270,7 @@ function renderBookingChart(labels, bookings, cancelled) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       scales: {
         y: { beginAtZero: true, ticks: { precision: 0 } }
       },

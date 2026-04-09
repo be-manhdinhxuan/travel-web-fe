@@ -1494,7 +1494,22 @@
    background: #fff;
    border-radius: 12px;
    padding: 18px 20px;
-   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05)
+   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
+   overflow: hidden
+}
+
+#dashRevenueChartCard .chart-container,
+#dashBookingChartCard .chart-container {
+   height: 280px;
+   max-height: 280px;
+   overflow: hidden
+}
+
+#dashRevenueLineChart,
+#dashBookingCancelChart {
+   width: 100% !important;
+   height: 100% !important;
+   display: block
 }
 
 .stats-chart-header {
