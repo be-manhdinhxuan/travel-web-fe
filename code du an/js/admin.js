@@ -34,13 +34,53 @@ function adminUpdateDashStats() {
 // ===== USERS TABLE =====
 // ===== USERS MANAGEMENT =====
 var ADMIN_USER_PAGE = 1;
-var ADMIN_USER_PER = 10;
+var ADMIN_USER_PER = 20;
+var ADMIN_USER_ALL_LIMIT = 1000;
 var ADMIN_USER_SEARCH = '';
+var ADMIN_USER_ROLE = '';
+var ADMIN_USER_STATUS = '';
 
 function adminNormalizeUserRole(role) {
   if (role === 1 || role === 'admin') return 1;
   if (role === 2 || role === 'employee' || role === 'staff') return 2;
   return 0;
+}
+
+function adminNormalizeUserStatus(status, locked) {
+  if (locked === true) return 1;
+  if (status === 1 || status === '1' || status === 'banned' || status === 'locked' || status === true) return 1;
+  return 0;
+}
+
+function adminGetUserFilterState() {
+  return {
+    keyword: ADMIN_USER_SEARCH,
+    role: ADMIN_USER_ROLE,
+    status: ADMIN_USER_STATUS
+  };
+}
+
+function adminFilterUsersByState(list, filters) {
+  var items = Array.isArray(list) ? list.slice() : [];
+
+  if (filters.keyword) {
+    var q = filters.keyword.toLowerCase();
+    items = items.filter(function (u) {
+      return (u.name || u.full_name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+    });
+  }
+
+  if (filters.role !== '') {
+    var roleFilter = parseInt(filters.role, 10);
+    items = items.filter(function (u) { return adminNormalizeUserRole(u.role) === roleFilter; });
+  }
+
+  if (filters.status !== '') {
+    var statusFilter = parseInt(filters.status, 10);
+    items = items.filter(function (u) { return adminNormalizeUserStatus(u.status, u.locked) === statusFilter; });
+  }
+
+  return items;
 }
 
 function adminGetCurrentUserIdentity() {
@@ -99,36 +139,39 @@ async function renderUsersTable() {
   tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:32px">Đang tải...</td></tr>';
 
   var users = [];
+  var apiLoaded = false;
+  var filters = adminGetUserFilterState();
+  var useClientPagination = filters.status !== '';
 
   // Thử API trước
   try {
-    var res = await apiAdminGetUsers({
-      page: ADMIN_USER_PAGE,
-      limit: ADMIN_USER_PER,
-      keyword: ADMIN_USER_SEARCH
-    });
+    var params = {
+      page: useClientPagination ? 1 : ADMIN_USER_PAGE,
+      limit: useClientPagination ? ADMIN_USER_ALL_LIMIT : ADMIN_USER_PER,
+      keyword: filters.keyword
+    };
+    if (filters.role !== '') params.role = parseInt(filters.role, 10);
+    if (!useClientPagination && filters.status !== '') params.status = parseInt(filters.status, 10);
+
+    var res = await apiAdminGetUsers(params);
     if (res && res.ok && res.data.result) {
       users = res.data.result.users || res.data.result || [];
-      // Render pagination từ API
-      var pagination = res.data.result.pagination;
-      if (pagination && footer) renderUsersPagination(pagination.total, footer);
+      apiLoaded = true;
     }
   } catch (e) { }
 
   // Fallback localStorage
-  if (!users.length) {
+  if (!apiLoaded) {
     try {
       var raw = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]');
-      // Lọc theo search
-      if (ADMIN_USER_SEARCH) {
-        var q = ADMIN_USER_SEARCH.toLowerCase();
-        raw = raw.filter(function (u) { return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q); });
-      }
-      var total = raw.length;
-      var start = (ADMIN_USER_PAGE - 1) * ADMIN_USER_PER;
-      users = raw.slice(start, start + ADMIN_USER_PER);
-      if (footer) renderUsersPagination(total, footer);
+      raw = adminFilterUsersByState(raw, filters);
+      var localTotal = raw.length;
+      var localStart = (ADMIN_USER_PAGE - 1) * ADMIN_USER_PER;
+      users = raw.slice(localStart, localStart + ADMIN_USER_PER);
+      if (footer) renderUsersPagination(localTotal, footer);
     } catch (e) { }
+  } else if (useClientPagination) {
+    users = adminFilterUsersByState(users, filters);
   }
 
   if (!users.length) {
@@ -137,8 +180,23 @@ async function renderUsersTable() {
   }
 
   var me = adminGetCurrentUserIdentity();
+  var totalForFooter = users.length;
+  var pagedUsers = users;
 
-  tbody.innerHTML = users.map(function (u, i) {
+  if (apiLoaded && !useClientPagination) {
+    var pagination = null;
+    try { pagination = (res && res.data && res.data.result && res.data.result.pagination) ? res.data.result.pagination : null; } catch (e) { pagination = null; }
+    if (pagination && footer) renderUsersPagination(pagination.total, footer);
+  } else if (footer) {
+    renderUsersPagination(totalForFooter, footer);
+  }
+
+  if (apiLoaded && useClientPagination) {
+    var clientStart = (ADMIN_USER_PAGE - 1) * ADMIN_USER_PER;
+    pagedUsers = users.slice(clientStart, clientStart + ADMIN_USER_PER);
+  }
+
+  tbody.innerHTML = pagedUsers.map(function (u, i) {
     var id = u._id || u.id || i;
     var name = u.full_name || u.name || '—';
     var email = u.email || '—';
@@ -147,7 +205,7 @@ async function renderUsersTable() {
     var status = u.status; // 0=active, 1=banned (API) hoặc locked (local)
     var isAdmin = role === 1;
     var isEmployee = role === 2;
-    var isBanned = status === 1 || String(status) === '1' || u.locked === true;
+    var isBanned = adminNormalizeUserStatus(status, u.locked) === 1;
     var isSelf = (me.id && String(id) === me.id) || (me.email && String(email).toLowerCase() === me.email);
 
     var roleBadge = isAdmin
@@ -201,6 +259,8 @@ function adminGoUserPage(p) { ADMIN_USER_PAGE = p; renderUsersTable(); }
 
 function adminSearchUsers() {
   ADMIN_USER_SEARCH = (document.getElementById('adminUserSearch')?.value || '').trim();
+  ADMIN_USER_ROLE = (document.getElementById('adminUserRoleFilter')?.value || '').trim();
+  ADMIN_USER_STATUS = (document.getElementById('adminUserStatusFilter')?.value || '').trim();
   ADMIN_USER_PAGE = 1;
   renderUsersTable();
 }

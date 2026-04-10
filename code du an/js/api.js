@@ -256,14 +256,18 @@ async function apiGetWishlist() {
   return apiCall("GET", "/users/me/wishlist", null, true);
 }
 
-// Admin — GET /users
+// Admin — GET /users or /user
 async function apiAdminGetUsers(params = {}) {
   const query = new URLSearchParams();
   Object.entries(params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== "") query.append(key, value);
   });
   const qs = query.toString() ? "?" + query.toString() : "";
-  return apiCall("GET", "/users" + qs, null, true);
+  let res = await apiCall("GET", "/users" + qs, null, true);
+  if (res && res.status === 404) {
+    res = await apiCall("GET", "/user" + qs, null, true);
+  }
+  return res;
 }
 
 // Admin — GET /users/:id
