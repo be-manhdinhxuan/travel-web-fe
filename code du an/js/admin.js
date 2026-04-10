@@ -242,12 +242,14 @@ async function renderUsersTable() {
 
 function renderUsersPagination(total, footer) {
   var totalPages = Math.max(1, Math.ceil(total / ADMIN_USER_PER));
+  var from = total ? ((ADMIN_USER_PAGE - 1) * ADMIN_USER_PER + 1) : 0;
+  var to = total ? Math.min(ADMIN_USER_PAGE * ADMIN_USER_PER, total) : 0;
   var pages = '';
   for (var p = 1; p <= Math.min(totalPages, 5); p++) {
     pages += '<button class="admin-page-btn' + (p === ADMIN_USER_PAGE ? ' active' : '') + '" onclick="adminGoUserPage(' + p + ')">' + p + '</button>';
   }
   footer.innerHTML =
-    '<span style="font-size:0.75rem;color:#aaa">Tổng ' + total + ' người dùng</span>' +
+    '<span style="font-size:0.75rem;color:#aaa">Hiển thị ' + from + ' - ' + to + ' / ' + total + ' người dùng</span>' +
     '<div class="admin-pagination">' +
     '<button class="admin-page-btn text" onclick="adminGoUserPage(' + Math.max(1, ADMIN_USER_PAGE - 1) + ')">Trước</button>' +
     pages +
@@ -1100,7 +1102,7 @@ async function adminRenderCouponsTable() {
 
   if (!coupons.length) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:32px">Chưa có mã giảm giá</td></tr>';
-    if (footer) footer.innerHTML = '<span style="font-size:0.75rem;color:#aaa">Tổng 0 mã giảm giá</span>';
+    if (footer) footer.innerHTML = '<span style="font-size:0.75rem;color:#aaa">Hiển thị 0 - 0 / 0 mã giảm giá</span>';
     return;
   }
 
@@ -1903,7 +1905,7 @@ async function catRender() {
     pages += '<button class="admin-page-btn' + (p === CAT_PAGE ? ' active' : '') + '" onclick="CAT_PAGE=' + p + ';catRender()">' + p + '</button>';
   }
   if (footer) footer.innerHTML =
-    '<span style="font-size:0.75rem;color:#aaa">Tổng ' + total + ' danh mục</span>' +
+    '<span style="font-size:0.75rem;color:#aaa">Hiển thị ' + (total ? (start + 1) : 0) + ' - ' + (total ? Math.min(start + CAT_PER, total) : 0) + ' / ' + total + ' danh mục</span>' +
     '<div class="admin-pagination">' +
     '<button class="admin-page-btn text" onclick="if(CAT_PAGE>1){CAT_PAGE--;catRender()}">Trước</button>' +
     pages +
@@ -1922,7 +1924,525 @@ switchTab = function (name) {
 // BOOKINGS MANAGEMENT (Admin)
 // ============================================================
 var ADMIN_BK_PAGE = 1;
-var ADMIN_BK_PER = 15;
+var ADMIN_BK_PER = 10;
+
+function adminBkFormatDate(dateInput) {
+  if (!dateInput) return '—';
+  var d = new Date(dateInput);
+  if (isNaN(d.getTime())) {
+    return String(dateInput).slice(0, 10) || '—';
+  }
+  var dd = String(d.getDate()).padStart(2, '0');
+  var mm = String(d.getMonth() + 1).padStart(2, '0');
+  var yyyy = d.getFullYear();
+  return dd + '/' + mm + '/' + yyyy;
+}
+
+function adminBkFormatMoney(value) {
+  var n = Number(value);
+  if (!isFinite(n) || n < 0) return '—';
+  return Math.round(n).toLocaleString('vi-VN') + 'đ';
+}
+
+function adminBkGetTourName(b) {
+  return (b.tour_snapshot && b.tour_snapshot.tour_name) ||
+    b.tourName ||
+    b.tour ||
+    (b.schedule && b.schedule.tour && b.schedule.tour.name) ||
+    '—';
+}
+
+function adminBkGetDepartureDate(b) {
+  var rawDate = (b.tour_snapshot && b.tour_snapshot.departure_date) ||
+    b.date ||
+    (b.schedule && b.schedule.departure_date);
+  return adminBkFormatDate(rawDate);
+}
+
+function adminBkGetCalculatedTotal(b) {
+  if (b && b.final_price !== undefined && b.final_price !== null) {
+    return adminBkFormatMoney(b.final_price);
+  }
+
+  var snapshot = b.tour_snapshot || {};
+  var pax = b.passengers || {};
+
+  var adults = Number(pax.adults || 0);
+  var children = Number(pax.children || 0);
+  var babies = Number(pax.babies || 0);
+
+  var adultPrice = Number(snapshot.price_adult || 0);
+  var childPrice = Number(snapshot.price_child || 0);
+  var babyPrice = Number(snapshot.price_baby || 0);
+
+  var computedTotal = adultPrice * adults + childPrice * children + babyPrice * babies;
+  if (isFinite(computedTotal) && computedTotal > 0) {
+    return adminBkFormatMoney(computedTotal);
+  }
+
+  var fallback = b.total_price || b.total_amount || b.total || b.price;
+  return adminBkFormatMoney(fallback);
+}
+
+function adminBkFormatRawMoney(value) {
+  var n = Number(value);
+  if (!isFinite(n)) return 0;
+  return Math.round(n);
+}
+
+function adminBkNormalizeBookingStatus(status) {
+  if (status === 0 || status === '0' || status === 'upcoming') return 0;
+  if (status === 1 || status === '1' || status === 'confirmed') return 1;
+  if (status === 2 || status === '2' || status === 'done' || status === 'completed') return 2;
+  if (status === 3 || status === '3' || status === 'cancelled') return 3;
+  return 0;
+}
+
+function adminBkNormalizePaymentStatus(status) {
+  var raw = String(status === undefined || status === null ? '' : status).trim().toLowerCase();
+  if (status === 1 || status === '1' || raw === 'success' || raw === 'paid') return 1;
+  if (status === 3 || status === '3' || raw === 'refunded' || raw === 'refund' || raw === 'done_refund') return 3;
+  if (status === 4 || status === '4' || raw === 'refunded_pending' || raw === 'refund_pending' || raw === 'pending_refund' || raw === 'awaiting_refund') return 4;
+  return null;
+}
+
+function adminBkGetPaymentStatus(booking) {
+  var payment = booking && booking.payment ? booking.payment : null;
+  var candidates = [
+    payment && payment.status,
+    payment && payment.status_code,
+    payment && payment.statusCode,
+    payment && payment.status_name,
+    payment && payment.statusName,
+    payment && payment.state,
+    payment && payment.refund_status,
+    payment && payment.refundStatus,
+    booking && booking.payment_status,
+    booking && booking.paymentStatus,
+    booking && booking.payment_state,
+    booking && booking.paymentState,
+    booking && booking.status_payment,
+    booking && booking.statusPayment,
+    booking && booking.refund_status,
+    booking && booking.refundStatus
+  ];
+
+  for (var i = 0; i < candidates.length; i++) {
+    if (candidates[i] !== undefined && candidates[i] !== null && candidates[i] !== '') {
+      var normalized = adminBkNormalizePaymentStatus(candidates[i]);
+      if (normalized !== null) return normalized;
+    }
+  }
+
+  return null;
+}
+
+var ADMIN_BK_BOOKING_OVERRIDES = {};
+
+function adminBkBookingKey(booking) {
+  if (!booking) return '';
+  return String(booking._id || booking.id || booking.booking_id || booking.bookingId || booking.code || booking.booking_code || '').trim();
+}
+
+function adminBkRememberBooking(booking) {
+  var key = adminBkBookingKey(booking);
+  if (!key) return;
+  ADMIN_BK_BOOKING_OVERRIDES[key] = booking;
+}
+
+function adminBkMergeBookingOverrides(bookings) {
+  return (bookings || []).map(function (booking) {
+    var key = adminBkBookingKey(booking);
+    if (key && ADMIN_BK_BOOKING_OVERRIDES[key]) {
+      return Object.assign({}, booking, ADMIN_BK_BOOKING_OVERRIDES[key]);
+    }
+    return booking;
+  });
+}
+
+function adminBkGetStatusText(status) {
+  var normalized = adminBkNormalizeBookingStatus(status);
+  if (normalized === 1) return 'Đã xác nhận';
+  if (normalized === 2) return 'Hoàn thành';
+  if (normalized === 3) return 'Đã hủy';
+  return 'Chờ thanh toán';
+}
+
+function adminBkGetPaymentMethodText(b) {
+  var payment = b && b.payment ? b.payment : null;
+  var provider = payment && payment.provider !== undefined && payment.provider !== null
+    ? payment.provider
+    : (b && (b.payment_method || b.paymentMethod || b.payment_type || b.payment_type_name));
+
+  if (provider === 0 || provider === '0' || provider === 'momo') return 'MoMo';
+  if (provider === 1 || provider === '1' || provider === 'vnpay') return 'VNPay';
+  if (provider === 2 || provider === '2') return 'Chuyển khoản';
+  return provider === undefined || provider === null || provider === '' ? '—' : String(provider);
+}
+
+function adminBkGetPassengerTotal(b) {
+  var pax = (b && b.passengers) || {};
+  var adults = Number(pax.adults || 0);
+  var children = Number(pax.children || 0);
+  var babies = Number(pax.babies || 0);
+  return adults + children + babies;
+}
+
+function adminBkGetPriceDetailRows(b) {
+  var snapshot = (b && b.tour_snapshot) || {};
+  var pax = (b && b.passengers) || {};
+  var priceDetail = (b && b.price_detail) || {};
+
+  var adultCount = Number(priceDetail.adult_count !== undefined ? priceDetail.adult_count : (pax.adults || 0));
+  var childCount = Number(priceDetail.child_count !== undefined ? priceDetail.child_count : (pax.children || 0));
+  var babyCount = Number(priceDetail.baby_count !== undefined ? priceDetail.baby_count : (pax.babies || 0));
+
+  var adultPrice = Number(snapshot.price_adult || 0);
+  var childPrice = Number(snapshot.price_child || 0);
+  var babyPrice = Number(snapshot.price_baby || 0);
+
+  var adultTotal = priceDetail.adult_total !== undefined ? Number(priceDetail.adult_total) : adultPrice * adultCount;
+  var childTotal = priceDetail.child_total !== undefined ? Number(priceDetail.child_total) : childPrice * childCount;
+  var babyTotal = priceDetail.baby_total !== undefined ? Number(priceDetail.baby_total) : babyPrice * babyCount;
+  var discount = Number(priceDetail.discount_amount || 0);
+  var finalPrice = b && b.final_price !== undefined && b.final_price !== null ? Number(b.final_price) : (b.total_price || 0);
+
+  return {
+    adultCount: adultCount,
+    childCount: childCount,
+    babyCount: babyCount,
+    adultPrice: adultPrice,
+    childPrice: childPrice,
+    babyPrice: babyPrice,
+    adultTotal: adultTotal,
+    childTotal: childTotal,
+    babyTotal: babyTotal,
+    discount: discount,
+    couponCode: priceDetail.coupon_code || b.coupon_code || '—',
+    finalPrice: finalPrice,
+    subtotal: adultTotal + childTotal + babyTotal
+  };
+}
+
+function adminBkExtractStatusErrorMessage(res, fallback) {
+  var defaultMsg = fallback || 'Không thể cập nhật trạng thái đơn hàng';
+  if (!res || !res.data) return defaultMsg;
+  var data = res.data || {};
+  if (data.errors) {
+    var first = Array.isArray(data.errors) ? data.errors[0] : Object.values(data.errors)[0];
+    if (Array.isArray(first) && first.length) {
+      return adminBkTranslateStatusError(first[0].msg || first[0].message || first[0].errorMessage || first[0]);
+    }
+    if (first && (first.msg || first.message || first.errorMessage)) {
+      return adminBkTranslateStatusError(first.msg || first.message || first.errorMessage);
+    }
+    if (typeof first === 'string') return adminBkTranslateStatusError(first);
+  }
+
+  return adminBkTranslateStatusError(data.message || data.error || defaultMsg, defaultMsg);
+}
+
+function adminBkTranslateStatusError(msg, fallback) {
+  var raw = String(msg || '').trim();
+  var defaultMsg = fallback || 'Không thể cập nhật trạng thái đơn hàng';
+  if (!raw) return defaultMsg;
+
+  var map = {
+    TOUR_NOT_FINISHED_YET: 'Tour chưa kết thúc, không thể đánh dấu hoàn thành.',
+    CANNOT_UPDATE_CANCELLED_BOOKING: 'Không thể cập nhật booking đã hủy.',
+    CANCELLED_REASON_IS_REQUIRED: 'Vui lòng nhập lý do hủy đơn hàng.',
+    BOOKING_NOT_FOUND: 'Không tìm thấy booking.',
+    BOOKING_NOT_CANCELLED: 'Chỉ có thể xác nhận hoàn tiền khi booking đã hủy.',
+    PAYMENT_NOT_FOUND_OR_INVALID: 'Không tìm thấy giao dịch hợp lệ để xác nhận hoàn tiền.',
+    REFUND_CONFIRM_FAILED: 'Không thể xác nhận hoàn tiền.',
+    BOOKING_ALREADY_CANCELLED: 'Booking này đã bị hủy rồi.',
+    BOOKING_ALREADY_COMPLETED: 'Booking này đã hoàn thành rồi.',
+    CANNOT_COMPLETE_BOOKING: 'Không thể đánh dấu hoàn thành booking này.',
+    CANNOT_CANCEL_BOOKING: 'Không thể hủy booking này.',
+    INVALID_BOOKING_STATUS: 'Trạng thái booking không hợp lệ.',
+    BOOKING_STATUS_INVALID: 'Trạng thái booking không hợp lệ.'
+  };
+  if (map[raw]) return map[raw];
+
+  var lower = raw.toLowerCase();
+  if (lower.includes('tour not finished yet')) return 'Tour chưa kết thúc, không thể đánh dấu hoàn thành.';
+  if (lower.includes('return date') || lower.includes('ngày về')) return 'Tour chưa kết thúc, không thể đánh dấu hoàn thành.';
+  if (lower.includes('not finished') || lower.includes('chưa kết thúc')) return 'Tour chưa kết thúc, không thể đánh dấu hoàn thành.';
+  if (lower.includes('cannot update cancelled booking')) return 'Không thể cập nhật booking đã hủy.';
+  if (lower.includes('cancelled booking') || lower.includes('booking was cancelled') || lower.includes('đã hủy')) return 'Không thể cập nhật booking đã hủy.';
+  if (lower.includes('cancelled reason is required') || lower.includes('cancel reason is required') || lower.includes('lý do hủy')) return 'Vui lòng nhập lý do hủy đơn hàng.';
+  if (lower.includes('booking not found')) return 'Không tìm thấy booking.';
+  if (lower.includes('booking not cancelled')) return 'Chỉ có thể xác nhận hoàn tiền khi booking đã hủy.';
+  if (lower.includes('payment not found') || lower.includes('payment invalid')) return 'Không tìm thấy giao dịch hợp lệ để xác nhận hoàn tiền.';
+  if (lower.includes('refund')) return 'Không thể xác nhận hoàn tiền.';
+  if (lower.includes('already cancelled')) return 'Booking này đã bị hủy rồi.';
+  if (lower.includes('already completed')) return 'Booking này đã hoàn thành rồi.';
+  if (lower.includes('complete') && lower.includes('cannot')) return 'Không thể đánh dấu hoàn thành booking này.';
+  if (lower.includes('cancel') && lower.includes('cannot')) return 'Không thể hủy booking này.';
+  if (lower.includes('invalid status') || lower.includes('status invalid')) return 'Trạng thái booking không hợp lệ.';
+
+  return defaultMsg;
+}
+
+var ADMIN_BK_CANCEL_MODAL_RESOLVE = null;
+
+function adminBkEnsureCancelModal() {
+  var modal = document.getElementById('adminBkCancelModal');
+  if (modal) return modal;
+
+  modal = document.createElement('div');
+  modal.id = 'adminBkCancelModal';
+  modal.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100001;background:rgba(0,0,0,.5);padding:16px;';
+  modal.innerHTML =
+    '<div style="width:min(520px,100%);background:#fff;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.24);overflow:hidden">' +
+    '<div style="padding:14px 16px;border-bottom:1px solid #eef2f7;font-size:1rem;font-weight:800;color:#1f2937">Lý do hủy đơn hàng</div>' +
+    '<div style="padding:14px 16px">' +
+    '<p style="font-size:.84rem;color:#6b7280;margin-bottom:10px">Vui lòng nhập lý do hủy (bắt buộc):</p>' +
+    '<textarea id="adminBkCancelReasonInput" rows="4" placeholder="Nhập lý do hủy..." style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:.85rem;resize:vertical;outline:none"></textarea>' +
+    '<div id="adminBkCancelReasonError" style="display:none;color:#dc2626;font-size:.78rem;margin-top:8px">Vui lòng nhập lý do hủy.</div>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:flex-end;gap:10px;padding:12px 16px;border-top:1px solid #eef2f7">' +
+    '<button type="button" class="admin-act-btn" onclick="adminBkCloseCancelModal()">Hủy</button>' +
+    '<button type="button" class="admin-act-btn admin-act-btn-red" onclick="adminBkSubmitCancelModal()">Xác nhận hủy đơn</button>' +
+    '</div>' +
+    '</div>';
+
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) adminBkCloseCancelModal('');
+  });
+
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function adminBkOpenCancelModal() {
+  var modal = adminBkEnsureCancelModal();
+  var input = document.getElementById('adminBkCancelReasonInput');
+  var err = document.getElementById('adminBkCancelReasonError');
+  if (input) input.value = '';
+  if (err) err.style.display = 'none';
+  modal.style.display = 'flex';
+  if (input) input.focus();
+
+  return new Promise(function (resolve) {
+    ADMIN_BK_CANCEL_MODAL_RESOLVE = resolve;
+  });
+}
+
+function adminBkCloseCancelModal(reason) {
+  var modal = document.getElementById('adminBkCancelModal');
+  if (modal) modal.style.display = 'none';
+  if (ADMIN_BK_CANCEL_MODAL_RESOLVE) {
+    var resolve = ADMIN_BK_CANCEL_MODAL_RESOLVE;
+    ADMIN_BK_CANCEL_MODAL_RESOLVE = null;
+    resolve(reason || '');
+  }
+}
+
+function adminBkSubmitCancelModal() {
+  var input = document.getElementById('adminBkCancelReasonInput');
+  var err = document.getElementById('adminBkCancelReasonError');
+  var reason = (input && input.value ? input.value : '').trim();
+  if (!reason) {
+    if (err) err.style.display = 'block';
+    return;
+  }
+  if (err) err.style.display = 'none';
+  adminBkCloseCancelModal(reason);
+}
+
+function adminBkEnsureDetailModal() {
+  var modal = document.getElementById('adminBookingDetailModal');
+  if (modal) return modal;
+
+  modal = document.createElement('div');
+  modal.id = 'adminBookingDetailModal';
+  modal.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100000;background:rgba(0,0,0,.48);padding:16px;';
+  modal.innerHTML =
+    '<div style="width:min(1040px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.28)">' +
+    '<div style="padding:18px 22px;border-bottom:1px solid #eef2f7;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;background:linear-gradient(135deg,#0f3a21,#135d34);color:#fff;border-radius:18px 18px 0 0">' +
+    '<div>' +
+    '<div style="font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;opacity:.75">Chi tiết đơn hàng</div>' +
+    '<div id="adminBookingDetailHeaderCode" style="font-size:1.25rem;font-weight:800;margin-top:4px">—</div>' +
+    '<div id="adminBookingDetailHeaderMeta" style="font-size:.86rem;opacity:.85;margin-top:6px">—</div>' +
+    '</div>' +
+    '<button type="button" onclick="adminBkCloseDetailModal()" style="border:none;background:rgba(255,255,255,.12);color:#fff;width:40px;height:40px;border-radius:12px;font-size:1.3rem;cursor:pointer">×</button>' +
+    '</div>' +
+    '<div style="padding:18px 22px 22px">' +
+    '<div style="display:grid;grid-template-columns:1.2fr .95fr;gap:16px">' +
+    '<div style="display:grid;gap:16px">' +
+    '<section style="border:1px solid #edf0f3;border-radius:16px;padding:16px;background:#fff">' +
+    '<div style="font-size:.78rem;font-weight:800;color:#2b3a46;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Thông tin tour</div>' +
+    '<div id="adminBookingDetailTour"></div>' +
+    '</section>' +
+    '<section style="border:1px solid #edf0f3;border-radius:16px;padding:16px;background:#fff">' +
+    '<div style="font-size:.78rem;font-weight:800;color:#2b3a46;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Thông tin khách hàng</div>' +
+    '<div id="adminBookingDetailCustomer"></div>' +
+    '</section>' +
+    '</div>' +
+    '<div style="display:grid;gap:16px">' +
+    '<section style="border:1px solid #edf0f3;border-radius:16px;padding:16px;background:#fff">' +
+    '<div style="font-size:.78rem;font-weight:800;color:#2b3a46;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Hành khách</div>' +
+    '<div id="adminBookingDetailPassengers"></div>' +
+    '</section>' +
+    '<section style="border:1px solid #edf0f3;border-radius:16px;padding:16px;background:#fff">' +
+    '<div style="font-size:.78rem;font-weight:800;color:#2b3a46;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Chi tiết giá</div>' +
+    '<div id="adminBookingDetailPrice"></div>' +
+    '</section>' +
+    '</div>' +
+    '</div>' +
+    '<section style="border:1px solid #edf0f3;border-radius:16px;padding:16px;background:#fff;margin-top:16px">' +
+    '<div style="font-size:.78rem;font-weight:800;color:#2b3a46;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Trạng thái và hành động</div>' +
+    '<div id="adminBookingDetailStatus"></div>' +
+    '</section>' +
+    '</div>' +
+    '</div>';
+
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) adminBkCloseDetailModal();
+  });
+
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function adminBkCloseDetailModal() {
+  var modal = document.getElementById('adminBookingDetailModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function adminBkEscapeHtml(value) {
+  return String(value === undefined || value === null ? '—' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function adminBkStatusBadgeText(status) {
+  var normalized = adminBkNormalizeBookingStatus(status);
+  if (normalized === 1) return '<span class="nv-badge nv-badge-processing">ĐÃ XÁC NHẬN</span>';
+  if (normalized === 2) return '<span class="nv-badge nv-badge-done">HOÀN THÀNH</span>';
+  if (normalized === 3) return '<span class="nv-badge nv-badge-urgent">ĐÃ HỦY</span>';
+  return '<span class="nv-badge nv-badge-pending">CHỜ THANH TOÁN</span>';
+}
+
+async function adminOpenBookingDetail(id) {
+  if (!id || id === '—') return;
+
+  var modal = adminBkEnsureDetailModal();
+  var headerCode = document.getElementById('adminBookingDetailHeaderCode');
+  var headerMeta = document.getElementById('adminBookingDetailHeaderMeta');
+  var tourEl = document.getElementById('adminBookingDetailTour');
+  var customerEl = document.getElementById('adminBookingDetailCustomer');
+  var passengersEl = document.getElementById('adminBookingDetailPassengers');
+  var priceEl = document.getElementById('adminBookingDetailPrice');
+  var statusEl = document.getElementById('adminBookingDetailStatus');
+
+  if (headerCode) headerCode.textContent = 'Đang tải...';
+  if (headerMeta) headerMeta.textContent = 'Vui lòng chờ trong giây lát';
+  if (tourEl) tourEl.innerHTML = '<div style="color:#888">Đang tải...</div>';
+  if (customerEl) customerEl.innerHTML = '<div style="color:#888">Đang tải...</div>';
+  if (passengersEl) passengersEl.innerHTML = '<div style="color:#888">Đang tải...</div>';
+  if (priceEl) priceEl.innerHTML = '<div style="color:#888">Đang tải...</div>';
+  if (statusEl) statusEl.innerHTML = '<div style="color:#888">Đang tải...</div>';
+
+  if (modal) modal.style.display = 'flex';
+
+  try {
+    var res = await apiAdminGetBooking(id);
+    var booking = res && res.ok && res.data && res.data.result && res.data.result.booking ? res.data.result.booking : null;
+    if (!booking) throw new Error('BOOKING_NOT_FOUND');
+
+    var statusText = adminBkGetStatusText(booking.status);
+    var paymentMethod = adminBkGetPaymentMethodText(booking);
+    var createdAt = adminBkFormatDate(booking.created_at || booking.createdAt);
+    var updatedAt = adminBkFormatDate(booking.updated_at || booking.updatedAt);
+    var tourSnapshot = booking.tour_snapshot || {};
+    var passengers = booking.passengers || {};
+    var contactInfo = booking.contact_info || {};
+    var priceRows = adminBkGetPriceDetailRows(booking);
+    var totalPassengers = adminBkGetPassengerTotal(booking);
+
+    if (headerCode) headerCode.textContent = booking.booking_code || booking.code || booking._id || '—';
+    if (headerMeta) headerMeta.textContent = 'Trạng thái: ' + statusText + ' • Ngày tạo: ' + createdAt + ' • Phương thức thanh toán: ' + paymentMethod;
+
+    if (tourEl) {
+      tourEl.innerHTML = '' +
+        '<div style="display:grid;gap:8px">' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Tên tour</span><strong style="text-align:right">' + adminBkEscapeHtml(tourSnapshot.tour_name || '—') + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Ngày đi</span><strong>' + adminBkEscapeHtml(adminBkFormatDate(tourSnapshot.departure_date)) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Ngày về</span><strong>' + adminBkEscapeHtml(adminBkFormatDate(tourSnapshot.return_date)) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Giá người lớn</span><strong>' + adminBkFormatMoney(tourSnapshot.price_adult) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Giá trẻ em</span><strong>' + adminBkFormatMoney(tourSnapshot.price_child) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Giá em bé</span><strong>' + adminBkFormatMoney(tourSnapshot.price_baby) + '</strong></div>' +
+        '</div>';
+    }
+
+    if (customerEl) {
+      customerEl.innerHTML = '' +
+        '<div style="display:grid;gap:8px">' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Tên khách</span><strong>' + adminBkEscapeHtml(contactInfo.full_name || '—') + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Email</span><strong style="text-align:right">' + adminBkEscapeHtml(contactInfo.email || '—') + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">SĐT</span><strong>' + adminBkEscapeHtml(contactInfo.phone || '—') + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Cập nhật lần cuối</span><strong>' + adminBkEscapeHtml(updatedAt) + '</strong></div>' +
+        '</div>';
+    }
+
+    if (passengersEl) {
+      passengersEl.innerHTML = '' +
+        '<div style="display:grid;gap:8px">' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Người lớn</span><strong>' + (Number(passengers.adults || 0)) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Trẻ em</span><strong>' + (Number(passengers.children || 0)) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Em bé</span><strong>' + (Number(passengers.babies || 0)) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;padding-top:8px;border-top:1px solid #eef2f7"><span style="color:#667085">Tổng người</span><strong>' + totalPassengers + '</strong></div>' +
+        '</div>';
+    }
+
+    if (priceEl) {
+      var priceDetail = booking.price_detail || {};
+      priceEl.innerHTML = '' +
+        '<div style="display:grid;gap:8px">' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Người lớn</span><strong>' + adminBkFormatMoney(priceRows.adultTotal) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Trẻ em</span><strong>' + adminBkFormatMoney(priceRows.childTotal) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Em bé</span><strong>' + adminBkFormatMoney(priceRows.babyTotal) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Tổng</span><strong>' + adminBkFormatMoney(priceRows.subtotal) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Giảm giá (' + adminBkEscapeHtml(priceRows.couponCode) + ')</span><strong style="color:#c00">- ' + adminBkFormatMoney(priceRows.discount) + '</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;padding-top:8px;border-top:1px solid #eef2f7"><span style="color:#667085">Thanh toán</span><strong style="color:#2d8a4e;font-size:1.05rem">' + adminBkFormatMoney(booking.final_price) + '</strong></div>' +
+        '</div>';
+    }
+
+    if (statusEl) {
+      var bookingStatus = adminBkNormalizeBookingStatus(booking.status);
+      var paymentStatus = adminBkGetPaymentStatus(booking);
+      var canConfirm = bookingStatus === 0;
+      var canComplete = bookingStatus === 1;
+      var canCancel = bookingStatus !== 2 && bookingStatus !== 3;
+      var canConfirmRefund = bookingStatus === 3 && paymentStatus === 4;
+      var statusHtml = '' +
+        '<div style="display:grid;gap:10px">' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><span style="color:#667085">Trạng thái hiện tại</span><span>' + adminBkStatusBadgeText(booking.status) + '</span></div>' +
+        (bookingStatus === 3 ? '<div style="display:grid;gap:8px"><div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#667085">Lý do hủy</span><strong style="text-align:right;color:#b42318">' + adminBkEscapeHtml(booking.cancelled_reason || '—') + '</strong></div></div>' : '') +
+        '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;padding-top:4px">' +
+        (canConfirm ? '<button class="admin-act-btn admin-act-btn-green" data-id="' + (booking._id || id) + '" data-status="1" onclick="event.stopPropagation(); adminBkUpdateStatus(this)">✓ Xác nhận</button>' : '') +
+        (canComplete ? '<button class="admin-act-btn" data-id="' + (booking._id || id) + '" data-status="2" onclick="event.stopPropagation(); adminBkUpdateStatus(this)">✅ Hoàn thành</button>' : '') +
+        (canCancel ? '<button class="admin-act-btn admin-act-btn-red" data-id="' + (booking._id || id) + '" data-status="3" onclick="event.stopPropagation(); adminBkCancel(this)">✕ Hủy</button>' : '') +
+        (canConfirmRefund ? '<button class="admin-act-btn" data-id="' + (booking._id || id) + '" onclick="event.stopPropagation(); adminBkConfirmRefund(this)">💸 Đã hoàn tiền</button>' : '') +
+        '</div>' +
+        '</div>';
+      statusEl.innerHTML = statusHtml;
+    }
+  } catch (e) {
+    if (headerCode) headerCode.textContent = 'Không thể tải chi tiết booking';
+    if (headerMeta) headerMeta.textContent = 'Vui lòng thử lại sau';
+    if (tourEl) tourEl.innerHTML = '<div style="color:#b42318">Không thể tải dữ liệu booking.</div>';
+    if (customerEl) customerEl.innerHTML = '<div style="color:#b42318">Không thể tải dữ liệu booking.</div>';
+    if (passengersEl) passengersEl.innerHTML = '<div style="color:#b42318">Không thể tải dữ liệu booking.</div>';
+    if (priceEl) priceEl.innerHTML = '<div style="color:#b42318">Không thể tải dữ liệu booking.</div>';
+    if (statusEl) statusEl.innerHTML = '<div style="color:#b42318">Không thể tải dữ liệu booking.</div>';
+  }
+}
 
 async function adminBkRender() {
   var tbody = document.getElementById('adminBkBody');
@@ -1944,6 +2464,7 @@ async function adminBkRender() {
     var res = await apiAdminGetBookings(params);
     if (res && res.ok && res.data.result) {
       bookings = res.data.result.bookings || res.data.result || [];
+      bookings = adminBkMergeBookingOverrides(bookings);
       var pag = res.data.result.pagination;
       if (pag && footer) adminBkPagination(pag.total, footer);
     }
@@ -1964,9 +2485,9 @@ async function adminBkRender() {
     if (search) {
       var q = search.toLowerCase();
       bookings = bookings.filter(function (b) {
-        return (b.code || '').toLowerCase().includes(q) ||
+        return (b.booking_code || b.code || '').toLowerCase().includes(q) ||
           (b._user || '').toLowerCase().includes(q) ||
-          (b.tourName || b.tour || '').toLowerCase().includes(q);
+          adminBkGetTourName(b).toLowerCase().includes(q);
       });
     }
     if (status) {
@@ -2002,22 +2523,26 @@ async function adminBkRender() {
     var id = b._id || b.code || '—';
     var code = b.booking_code || b.code || '—';
     var user = b._user || (b.contact_info && b.contact_info.full_name) || '—';
-    var tour = b.tourName || b.tour || (b.schedule && b.schedule.tour && b.schedule.tour.name) || '—';
-    var date = b.date || (b.schedule && b.schedule.departure_date ? b.schedule.departure_date.slice(0, 10) : '') || '—';
-    var total = b.total || b.price || (b.total_amount ? b.total_amount.toLocaleString('vi-VN') + 'đ' : '—');
+    var tour = adminBkGetTourName(b);
+    var date = adminBkGetDepartureDate(b);
+    var total = adminBkGetCalculatedTotal(b);
     var stRaw = b.status;
+    var st = adminBkNormalizeBookingStatus(stRaw);
+    var paymentStatus = adminBkGetPaymentStatus(b);
     var badge = statusMap[stRaw] || statusMap['upcoming'];
-    var canConfirm = stRaw === 0 || stRaw === 'upcoming';
-    var canComplete = stRaw === 1 || stRaw === 'confirmed';
-    var canCancel = stRaw !== 3 && stRaw !== 'cancelled' && stRaw !== 2 && stRaw !== 'completed';
+    var canConfirm = st === 0;
+    var canComplete = st === 1;
+    var canCancel = st !== 2 && st !== 3;
+    var canConfirmRefund = st === 3 && paymentStatus === 4;
 
     var actions = '<div style="display:flex;gap:5px;flex-wrap:wrap">';
-    if (canConfirm) actions += '<button class="admin-act-btn admin-act-btn-green" data-id="' + id + '" data-status="1" onclick="adminBkUpdateStatus(this)">✓ Xác nhận</button>';
-    if (canComplete) actions += '<button class="admin-act-btn" data-id="' + id + '" data-status="2" onclick="adminBkUpdateStatus(this)">✅ Hoàn thành</button>';
-    if (canCancel) actions += '<button class="admin-act-btn admin-act-btn-red" data-id="' + id + '" data-status="3" onclick="adminBkCancel(this)">✕ Hủy</button>';
+    if (canConfirm) actions += '<button class="admin-act-btn admin-act-btn-green" data-id="' + id + '" data-status="1" onclick="event.stopPropagation(); adminBkUpdateStatus(this)">✓ Xác nhận</button>';
+    if (canComplete) actions += '<button class="admin-act-btn" data-id="' + id + '" data-status="2" onclick="event.stopPropagation(); adminBkUpdateStatus(this)">✅ Hoàn thành</button>';
+    if (canCancel) actions += '<button class="admin-act-btn admin-act-btn-red" data-id="' + id + '" data-status="3" onclick="event.stopPropagation(); adminBkCancel(this)">✕ Hủy</button>';
+    if (canConfirmRefund) actions += '<button class="admin-act-btn" data-id="' + id + '" onclick="event.stopPropagation(); adminBkConfirmRefund(this)">💸 Đã hoàn tiền</button>';
     actions += '</div>';
 
-    return '<tr>' +
+    return '<tr data-id="' + adminBkEscapeHtml(id) + '" onclick="adminOpenBookingDetail(this.dataset.id)" style="cursor:pointer">' +
       '<td style="font-weight:700;color:#2d8a4e;font-size:0.8rem">' + code + '</td>' +
       '<td style="font-size:0.8rem;font-weight:600">' + user + '</td>' +
       '<td style="font-size:0.78rem;color:#555;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + tour + '</td>' +
@@ -2031,12 +2556,14 @@ async function adminBkRender() {
 
 function adminBkPagination(total, footer) {
   var totalPages = Math.max(1, Math.ceil(total / ADMIN_BK_PER));
+  var from = total ? ((ADMIN_BK_PAGE - 1) * ADMIN_BK_PER + 1) : 0;
+  var to = total ? Math.min(ADMIN_BK_PAGE * ADMIN_BK_PER, total) : 0;
   var pages = '';
   for (var p = 1; p <= Math.min(totalPages, 5); p++) {
     pages += '<button class="admin-page-btn' + (p === ADMIN_BK_PAGE ? ' active' : '') + '" onclick="ADMIN_BK_PAGE=' + p + ';adminBkRender()">' + p + '</button>';
   }
   footer.innerHTML =
-    '<span style="font-size:0.75rem;color:#aaa">Tổng ' + total + ' đơn hàng</span>' +
+    '<span style="font-size:0.75rem;color:#aaa">Hiển thị ' + from + ' - ' + to + ' / ' + total + ' đơn hàng</span>' +
     '<div class="admin-pagination">' +
     '<button class="admin-page-btn text" onclick="if(ADMIN_BK_PAGE>1){ADMIN_BK_PAGE--;adminBkRender()}">Trước</button>' +
     pages +
@@ -2049,34 +2576,95 @@ async function adminBkUpdateStatus(btn) {
   var id = btn.dataset.id;
   var status = parseInt(btn.dataset.status);
   var labels = { 1: 'xác nhận', 2: 'hoàn thành' };
-  var bookingConfirmed = await adminOpenConfirmModal('Xác nhận ' + (labels[status] || 'cập nhật') + ' đơn hàng này?', 'Xác nhận đơn hàng');
+  var buttonLabel = status === 2 ? 'Hoàn thành tour' : 'Xác nhận đơn hàng';
+  var bookingConfirmed = await adminOpenConfirmModal('Xác nhận ' + (labels[status] || 'cập nhật') + ' đơn hàng này?', buttonLabel);
   if (!bookingConfirmed) return;
   btn.disabled = true; btn.textContent = '...';
 
   try {
-    var res = await apiAdminUpdateBooking(id, status);
-    if (res && res.ok) { showToast('✅ Đã cập nhật trạng thái đơn hàng'); adminBkRender(); return; }
-  } catch (e) { }
+    var res = await apiAdminUpdateBookingStatus(id, status);
+    if (res && res.ok) {
+      var updatedBooking = res.data && res.data.result && res.data.result.booking
+        ? res.data.result.booking
+        : (res.data && res.data.booking ? res.data.booking : null);
+      if (updatedBooking) adminBkRememberBooking(updatedBooking);
+      if (status === 2) {
+        showToast('✅ Đã đánh dấu tour hoàn thành');
+      } else {
+        showToast('✅ Đã xác nhận đơn hàng');
+      }
+      adminBkRender();
+      return;
+    }
 
-  // Fallback local
-  adminBkUpdateLocal(id, status);
-  showToast('✅ Đã cập nhật trạng thái');
+    showToast('❌ ' + adminBkExtractStatusErrorMessage(res, status === 2 ? 'Không thể đánh dấu tour hoàn thành' : 'Không thể xác nhận đơn hàng'));
+  } catch (e) {
+    showToast('❌ Không thể kết nối server');
+  }
+
+  btn.disabled = false;
+  btn.textContent = status === 2 ? '✅ Hoàn thành' : '✓ Xác nhận';
   adminBkRender();
 }
 
 async function adminBkCancel(btn) {
   var id = btn.dataset.id;
-  var reason = prompt('Lý do hủy (bắt buộc):');
+  var reason = await adminBkOpenCancelModal();
   if (!reason) { showToast('⚠️ Vui lòng nhập lý do hủy'); return; }
   btn.disabled = true; btn.textContent = '...';
 
   try {
-    var res = await apiAdminUpdateBooking(id, 3, reason);
-    if (res && res.ok) { showToast('✅ Đã hủy đơn hàng'); adminBkRender(); return; }
-  } catch (e) { }
+    var res = await apiAdminUpdateBookingStatus(id, 3, reason);
+    if (res && res.ok) {
+      var cancelledBooking = res.data && res.data.result && res.data.result.booking
+        ? res.data.result.booking
+        : (res.data && res.data.booking ? res.data.booking : null);
+      if (cancelledBooking) adminBkRememberBooking(cancelledBooking);
+      showToast('✅ Đã hủy đơn hàng');
+      adminBkRender();
+      return;
+    }
 
-  adminBkUpdateLocal(id, 3);
-  showToast('✅ Đã hủy đơn hàng');
+    showToast('❌ ' + adminBkExtractStatusErrorMessage(res, 'Không thể hủy đơn hàng'));
+  } catch (e) {
+    showToast('❌ Không thể kết nối server');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✕ Hủy';
+  adminBkRender();
+}
+
+async function adminBkConfirmRefund(btn) {
+  var id = btn.dataset.id;
+  var confirmed = await adminOpenConfirmModal(
+    'Xác nhận rằng booking này đã được hoàn tiền thủ công?',
+    'Đã hoàn tiền'
+  );
+  if (!confirmed) return;
+
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    var res = await apiAdminConfirmBookingRefund(id);
+    if (res && res.ok) {
+      var refundedBooking = res.data && res.data.result && res.data.result.booking
+        ? res.data.result.booking
+        : (res.data && res.data.booking ? res.data.booking : null);
+      if (refundedBooking) adminBkRememberBooking(refundedBooking);
+      showToast('✅ Đã cập nhật trạng thái hoàn tiền');
+      adminBkRender();
+      return;
+    }
+
+    showToast('❌ ' + adminBkExtractStatusErrorMessage(res, 'Không thể xác nhận hoàn tiền'));
+  } catch (e) {
+    showToast('❌ Không thể kết nối server');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '💸 Đã hoàn tiền';
   adminBkRender();
 }
 

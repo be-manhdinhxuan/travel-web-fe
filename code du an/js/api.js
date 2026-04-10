@@ -560,6 +560,11 @@ async function apiAdminUpdateBookingStatus(id, status, cancelled_reason = "") {
   return apiCall("PATCH", "/bookings/" + id + "/status", body, true);
 }
 
+// Admin/Employee — PATCH /bookings/:id/refund
+async function apiAdminConfirmBookingRefund(id) {
+  return apiCall("PATCH", "/bookings/" + id + "/refund", { status: 3 }, true);
+}
+
 // ============================================================
 // PAYMENTS
 // ============================================================
@@ -713,6 +718,7 @@ window.apiCancelBooking = apiCancelBooking;
 window.apiAdminGetBookings = apiAdminGetBookings;
 window.apiAdminGetBooking = apiAdminGetBooking;
 window.apiAdminUpdateBookingStatus = apiAdminUpdateBookingStatus;
+window.apiAdminConfirmBookingRefund = apiAdminConfirmBookingRefund;
 
 // Payments
 window.apiCreateMomoPayment = apiCreateMomoPayment;

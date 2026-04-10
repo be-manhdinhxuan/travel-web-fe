@@ -758,23 +758,24 @@
                   </select>
                 </div>
               </div>
-            </div>
-            <div class="admin-table-wrap">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>STT</th>
-                    <th>Họ tên</th>
-                    <th>Email</th>
-                    <th>SĐT</th>
-                    <th>Vai trò</th>
-                    <th>Trạng thái</th>
-                    <th>Hành động</th>
-                  </tr>
-                </thead>
-                <tbody id="usersTableBody"></tbody>
-              </table>
-              <div class="admin-table-footer" id="usersTableFooter"></div>
+
+              <div class="admin-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>STT</th>
+                      <th>Họ tên</th>
+                      <th>Email</th>
+                      <th>SĐT</th>
+                      <th>Vai trò</th>
+                      <th>Trạng thái</th>
+                      <th>Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTableBody"></tbody>
+                </table>
+                <div class="admin-table-footer" id="usersTableFooter"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -785,40 +786,50 @@
           <div class="admin-topbar">
             <h1 class="admin-page-title">Quản lý Đơn hàng</h1>
             <div class="admin-topbar-actions">
-              <div class="admin-search-bar">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input type="text" id="adminBkSearch" placeholder="Mã booking, tên khách..." oninput="adminBkRender()">
-              </div>
-              <select id="adminBkStatus" onchange="adminBkRender()" class="promo-filter-select">
-                <option value="">Tất cả trạng thái</option>
-                <option value="0">Chờ thanh toán</option>
-                <option value="1">Đã xác nhận</option>
-                <option value="2">Hoàn thành</option>
-                <option value="3">Đã hủy</option>
-              </select>
             </div>
           </div>
           <div class="admin-content">
-            <div class="admin-table-wrap">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>MÃ ĐẶT</th>
-                    <th>KHÁCH HÀNG</th>
-                    <th>TOUR</th>
-                    <th>NGÀY ĐI</th>
-                    <th>TỔNG TIỀN</th>
-                    <th>TRẠNG THÁI</th>
-                    <th>HÀNH ĐỘNG</th>
-                  </tr>
-                </thead>
-                <tbody id="adminBkBody"></tbody>
-              </table>
-              <div class="admin-table-footer" id="adminBkFooter"></div>
+            <div class="admin-section">
+              <div class="admin-section-head">
+                <div>
+                  <div class="admin-section-title">Danh sách đơn hàng</div>
+                </div>
+                <div class="admin-topbar-actions" style="flex-wrap:wrap;justify-content:flex-end;gap:10px">
+                  <div class="admin-search-bar" style="width:280px">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input type="text" id="adminBkSearch" placeholder="Mã booking, tên khách..."
+                      oninput="adminBkRender()">
+                  </div>
+                  <select id="adminBkStatus" onchange="adminBkRender()" class="promo-filter-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="0">Chờ thanh toán</option>
+                    <option value="1">Đã xác nhận</option>
+                    <option value="2">Hoàn thành</option>
+                    <option value="3">Đã hủy</option>
+                  </select>
+                </div>
+              </div>
+              <div class="admin-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>MÃ ĐẶT</th>
+                      <th>KHÁCH HÀNG</th>
+                      <th>TOUR</th>
+                      <th>NGÀY ĐI</th>
+                      <th>TỔNG TIỀN</th>
+                      <th>TRẠNG THÁI</th>
+                      <th>HÀNH ĐỘNG</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminBkBody"></tbody>
+                </table>
+                <div class="admin-table-footer" id="adminBkFooter"></div>
+              </div>
             </div>
           </div>
         </div>
