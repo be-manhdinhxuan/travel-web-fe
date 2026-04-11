@@ -1170,6 +1170,9 @@ switchTab = function (name) {
 // ============================================================
 // THỐNG KÊ
 // ============================================================
+var statsRevenueChart = null;
+var statsBookingChart = null;
+
 function statsPeriod(btn, days) {
   document.querySelectorAll('.stats-period').forEach(function (b) { b.classList.remove('active'); });
   btn.classList.add('active');
@@ -2742,7 +2745,7 @@ async function adminLoadStats(period) {
   STATS_PERIOD = period || 'month';
 
   // Map period button value sang API param
-  var periodMap = { '30': 'month', '90': 'month', '365': 'year', 'today': 'today', 'week': 'week', 'month': 'month', 'year': 'year' };
+  var periodMap = { 'today': 'today', 'week': 'week', 'month': 'month', 'year': 'year' };
   var apiPeriod = periodMap[period] || 'month';
 
   await Promise.all([
@@ -2758,31 +2761,45 @@ async function adminLoadStatsOverview(period) {
     var res = await apiGetStatsOverview(period);
     if (res && res.ok && res.data.result) {
       var r = res.data.result;
+      var totalRevenue = Number(r.revenue ?? r.total_revenue ?? 0) || 0;
+      var refunded = Number(r.refund ?? r.total_refunded ?? r.total_refund ?? r.refunded_amount ?? r.refund_amount ?? 0) || 0;
+      var netRevenue = Number(r.net_revenue ?? (totalRevenue - refunded)) || 0;
 
       // Doanh thu
-      var rev = r.total_revenue || 0;
       var el = document.getElementById('statRevenue');
-      if (el) el.textContent = rev.toLocaleString('vi-VN') + 'đ';
+      if (el) el.textContent = totalRevenue.toLocaleString('vi-VN') + 'đ';
+
+      var refundEl = document.getElementById('statRefunded');
+      if (refundEl) refundEl.textContent = refunded.toLocaleString('vi-VN') + 'đ';
+
+      var netRevenueEl = document.getElementById('statNetRevenue');
+      if (netRevenueEl) netRevenueEl.textContent = netRevenue.toLocaleString('vi-VN') + 'đ';
 
       // Đơn hàng
+      var totalBookings = Number(r.bookings ?? r.total_bookings ?? 0) || 0;
       var bk = document.getElementById('statTotalBookings');
-      if (bk) bk.textContent = (r.total_bookings || 0).toLocaleString('vi-VN');
+      if (bk) bk.textContent = totalBookings.toLocaleString('vi-VN');
 
-      // Khách mới → hiện vào statVisitors
-      var vis = document.getElementById('statVisitors');
-      if (vis) vis.textContent = (r.new_users || 0).toLocaleString('vi-VN');
+      // Người dùng mới
+      var newUsers = Number(r.new_users || 0) || 0;
+      var userEl = document.getElementById('statNewUsers');
+      if (userEl) userEl.textContent = newUsers.toLocaleString('vi-VN');
 
-      // So sánh kỳ trước
-      if (r.comparison_with_previous) {
-        var cmp = r.comparison_with_previous;
-        adminSetChange('statRevenue', cmp.revenue_change);
-        adminSetChange('statTotalBookings', cmp.bookings_change);
-        adminSetChange('statVisitors', cmp.users_change);
+      var cancelRate = Number(r.cancel_rate ?? r.cancellation_rate ?? 0) || 0;
+      var cancelRateEl = document.getElementById('statCancelRate');
+      if (cancelRateEl) {
+        cancelRateEl.textContent = cancelRate.toLocaleString('vi-VN') + '%';
+        adminSetCancelRateTone(cancelRateEl, cancelRate);
       }
 
-      // Donut chart tổng đặt tour
-      var donut = document.getElementById('statsDonutVal');
-      if (donut) donut.textContent = (r.total_bookings || 0).toLocaleString('vi-VN');
+      adminApplyOverviewBadgeRules({
+        revenue: totalRevenue,
+        refund: refunded,
+        net_revenue: netRevenue,
+        bookings: totalBookings,
+        new_users: newUsers,
+        cancel_rate: cancelRate
+      });
 
       return;
     }
@@ -2793,6 +2810,25 @@ async function adminLoadStatsOverview(period) {
 }
 
 function adminSetChange(kpiId, pct) {
+  var statusMap = {
+    ok: 'OK',
+    low: 'LOW',
+    warning: 'WARNING',
+    danger: 'DANGER',
+    empty: 'EMPTY'
+  };
+  if (typeof pct === 'string') {
+    var cardS = document.getElementById(kpiId)?.closest('.stats-kpi-card');
+    if (!cardS) return;
+    var badgeS = cardS.querySelector('.stats-kpi-change');
+    if (!badgeS) return;
+    var status = String(pct || 'empty').toLowerCase();
+    if (!statusMap[status]) status = 'empty';
+    badgeS.textContent = statusMap[status];
+    badgeS.className = 'stats-kpi-change ' + status;
+    return;
+  }
+
   var card = document.getElementById(kpiId)?.closest('.stats-kpi-card');
   if (!card) return;
   var badge = card.querySelector('.stats-kpi-change');
@@ -2803,12 +2839,43 @@ function adminSetChange(kpiId, pct) {
   badge.className = 'stats-kpi-change ' + (pct >= 0 ? 'up' : 'down');
 }
 
+function adminApplyOverviewBadgeRules(data) {
+  var d = data || {};
+  var rules = {
+    revenue: d.revenue === 0 ? 'empty' : 'ok',
+    refund: d.refund > 0 ? 'warning' : 'ok',
+    net: d.net_revenue < 0 ? 'danger' : 'ok',
+    bookings: d.bookings === 0 ? 'empty' : (d.bookings < 3 ? 'low' : 'ok'),
+    users: d.new_users === 0 ? 'low' : 'ok',
+    cancel: d.cancel_rate > 30 ? 'danger' : (d.cancel_rate > 15 ? 'warning' : 'ok')
+  };
+
+  adminSetChange('statRevenue', rules.revenue);
+  adminSetChange('statRefunded', rules.refund);
+  adminSetChange('statNetRevenue', rules.net);
+  adminSetChange('statTotalBookings', rules.bookings);
+  adminSetChange('statNewUsers', rules.users);
+  adminSetChange('statCancelRate', rules.cancel);
+}
+
+function adminSetCancelRateTone(el, cancelRate) {
+  if (!el) return;
+  var rate = Number(cancelRate) || 0;
+  el.style.fontWeight = '800';
+  if (rate < 20) el.style.color = '#2d8a4e';
+  else if (rate <= 40) el.style.color = '#c9963a';
+  else el.style.color = '#dc2626';
+}
+
 // GET /api/admin/stats/revenue
 async function adminLoadStatsRevenue(period) {
   try {
     var res = await apiGetStatsRevenue(period, new Date().getFullYear());
-    if (res && res.ok && res.data.result && res.data.result.chart_result) {
-      adminDrawRevenueChart(res.data.result.chart_result);
+    var result = (res && res.ok && res.data && res.data.result) ? res.data.result : null;
+    if (result && (Array.isArray(result.chart_data) || Array.isArray(result.chart_result))) {
+      var chartData = result.chart_data || result.chart_result;
+      adminDrawRevenueChart(chartData);
+      adminDrawBookingChart(chartData);
       return;
     }
   } catch (e) { }
@@ -2816,51 +2883,267 @@ async function adminLoadStatsRevenue(period) {
   // Fallback: tính từ localStorage bookings
   var allBks = adminGetAllBookingsLocal();
   if (allBks.length) adminDrawRevenueChartLocal(allBks);
+  else adminDrawRevenueChart([]);
 }
 
 function adminDrawRevenueChart(data) {
-  var card = document.querySelector('.stats-chart-card');
-  if (!card) return;
+  var canvas = document.getElementById('statsRevenueChart');
+  var empty = document.getElementById('statsRevenueEmpty');
+  var meta = document.getElementById('statsRevenueMeta');
+  if (!canvas) return;
 
-  var maxRev = Math.max(...data.map(function (d) { return d.revenue || 0; }), 1);
+  var raw = Array.isArray(data) ? data : [];
+  var series = raw.map(function (item, idx) {
+    return {
+      date: item.date || item.period || ('Mốc ' + (idx + 1)),
+      revenue: Number(item.revenue || 0) || 0,
+      refunds: Number(item.refunds || item.refund || 0) || 0,
+      net_revenue: Number(item.net_revenue ?? item.revenue ?? 0) || 0,
+      bookings: Number(item.bookings || 0) || 0
+    };
+  });
 
-  var barsHtml = data.map(function (d) {
-    var h = Math.round((d.revenue / maxRev) * 100);
-    return '<div class="stats-bar-wrap">' +
-      '<div class="stats-bar-tooltip">' + (d.revenue || 0).toLocaleString('vi-VN') + 'đ<br>' + (d.bookings || 0) + ' đơn</div>' +
-      '<div class="stats-bar" style="height:' + Math.max(h, 2) + '%"></div>' +
-      '<div class="stats-bar-label">' + (d.date || '').slice(5) + '</div>' +
-      '</div>';
-  }).join('');
+  series.sort(function (a, b) {
+    return String(a.date).localeCompare(String(b.date));
+  });
 
-  card.innerHTML = '<div class="stats-chart-header"><span class="stats-card-title">Tăng trưởng doanh thu</span></div>' +
-    '<div class="stats-bar-chart">' + barsHtml + '</div>';
+  var labels = series.map(function (item) { return dashFormatShortDateLabel(item.date); });
+  var revenueData = series.map(function (item) { return item.revenue; });
+  var refundData = series.map(function (item) { return item.refunds; });
+  var netData = series.map(function (item) { return item.net_revenue; });
+
+  if (meta) meta.textContent = labels.length ? (labels[0] + ' → ' + labels[labels.length - 1]) : 'Chưa có dữ liệu';
+  if (empty) empty.style.display = series.length ? 'none' : 'flex';
+
+  if (statsRevenueChart) {
+    statsRevenueChart.destroy();
+    statsRevenueChart = null;
+  }
+
+  if (!series.length) return;
+
+  if (meta) meta.textContent = labels[0] + ' → ' + labels[labels.length - 1];
+
+  statsRevenueChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Doanh thu',
+          data: revenueData,
+          tension: 0.35,
+          borderWidth: 3,
+          borderColor: '#2d8a4e',
+          pointBackgroundColor: '#2d8a4e',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          backgroundColor: 'rgba(45, 138, 78, 0.12)'
+        },
+        {
+          label: 'Hoàn tiền',
+          data: refundData,
+          tension: 0.35,
+          borderWidth: 2,
+          borderColor: '#dc2626',
+          pointBackgroundColor: '#dc2626',
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          fill: false
+        },
+        {
+          label: 'Doanh thu ròng',
+          data: netData,
+          tension: 0.35,
+          borderWidth: 3,
+          borderColor: '#111827',
+          pointBackgroundColor: function (ctx) {
+            var y = ctx.raw;
+            return y < 0 ? '#dc2626' : '#111827';
+          },
+          pointBorderColor: function (ctx) {
+            var y = ctx.raw;
+            return y < 0 ? '#dc2626' : '#111827';
+          },
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function (ctx) {
+              return ctx.raw.toLocaleString('vi-VN') + 'đ';
+            },
+            afterBody: function (items) {
+              if (!items || !items.length) return '';
+              var i = items[0].dataIndex;
+              var refunds = series[i] ? series[i].refunds : 0;
+              var bookings = series[i] ? series[i].bookings : 0;
+              return [
+                'Hoàn tiền: ' + refunds.toLocaleString('vi-VN') + 'đ',
+                'Bookings: ' + bookings.toLocaleString('vi-VN')
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        y: { ticks: { callback: function (value) { return value.toLocaleString('vi-VN'); } } }
+      }
+    }
+  });
 }
 
 function adminDrawRevenueChartLocal(bookings) {
-  // Nhóm theo tháng
+  var local = adminBuildLocalStatsSeries(bookings || []);
+  if (local.revenueSeries.length) adminDrawRevenueChart(local.revenueSeries);
+  if (local.bookingChart.labels.length) adminDrawBookingChart(local.bookingChart);
+}
+
+function adminDrawBookingChart(chartData) {
+  var canvas = document.getElementById('statsBookingChart');
+  var empty = document.getElementById('statsBookingEmpty');
+  var meta = document.getElementById('statsBookingMeta');
+  if (!canvas) return;
+
+  var raw = [];
+  if (Array.isArray(chartData)) raw = chartData;
+  else if (chartData && Array.isArray(chartData.chart_data)) raw = chartData.chart_data;
+  else if (chartData && Array.isArray(chartData.chart_result)) raw = chartData.chart_result;
+
+  if (!raw.length && chartData && Array.isArray(chartData.labels)) {
+    raw = chartData.labels.map(function (label, idx) {
+      return {
+        date: label,
+        bookings: Number((chartData.bookings || [])[idx] || 0) || 0,
+        cancelled: Number((chartData.cancelled || [])[idx] || 0) || 0
+      };
+    });
+  }
+
+  var series = raw.map(function (item, idx) {
+    return {
+      date: item.date || item.period || ('Mốc ' + (idx + 1)),
+      bookings: Number(item.bookings || 0) || 0,
+      cancelled: Number(item.cancelled || 0) || 0
+    };
+  });
+
+  series.sort(function (a, b) {
+    return String(a.date).localeCompare(String(b.date));
+  });
+
+  var labels = series.map(function (item) { return dashFormatShortDateLabel(item.date); });
+  var bookings = series.map(function (item) { return item.bookings; });
+  var cancelled = series.map(function (item) { return item.cancelled; });
+  var hasData = labels.length > 0 && (bookings.some(function (value) { return value > 0; }) || cancelled.some(function (value) { return value > 0; }));
+
+  if (meta) meta.textContent = hasData ? (labels[0] + ' → ' + labels[labels.length - 1]) : 'Chưa có dữ liệu';
+  if (empty) empty.style.display = hasData ? 'none' : 'flex';
+
+  if (statsBookingChart) {
+    statsBookingChart.destroy();
+    statsBookingChart = null;
+  }
+
+  if (!hasData) return;
+
+  statsBookingChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Thành công',
+          data: bookings,
+          backgroundColor: '#3a7abf',
+          borderRadius: 8
+        },
+        {
+          label: 'Đã hủy',
+          data: cancelled,
+          backgroundColor: '#dc2626',
+          borderRadius: 8
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          stacked: false
+        },
+        y: { beginAtZero: true, ticks: { precision: 0 } }
+      },
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            afterBody: function (items) {
+              if (!items || !items.length) return '';
+              var index = items[0].dataIndex;
+              var total = dashNumber(bookings[index], 0);
+              var cancel = dashNumber(cancelled[index], 0);
+              var rate = total > 0 ? (cancel / total) * 100 : 0;
+              return 'Tỷ lệ huỷ: ' + rate.toFixed(1) + '%';
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function adminBuildLocalStatsSeries(bookings) {
   var byMonth = {};
   bookings.forEach(function (b) {
-    if (b.status === 'cancelled' || b.status === 3) return; // bỏ qua đã hủy
     var d = (b.createdAt || b.date || '').slice(0, 7);
     if (!d) return;
-    if (!byMonth[d]) byMonth[d] = { date: d, revenue: 0, bookings: 0 };
+    if (!byMonth[d]) byMonth[d] = { date: d, revenue: 0, bookings: 0, cancelled: 0 };
     var price = parseInt(String(b.total || b.price || '0').replace(/[^0-9]/g, '')) || 0;
+    var isCancelled = b.status === 'cancelled' || b.status === 3;
+    if (isCancelled) {
+      byMonth[d].cancelled += 1;
+      return;
+    }
     byMonth[d].revenue += price;
     byMonth[d].bookings += 1;
   });
+
   var data = Object.values(byMonth || {}).sort(function (a, b) { return a.date.localeCompare(b.date); }).slice(-12);
-  if (data.length) adminDrawRevenueChart(data);
+  return {
+    revenueSeries: data.map(function (item) {
+      return { date: item.date, revenue: item.revenue, bookings: item.bookings };
+    }),
+    bookingChart: {
+      labels: data.map(function (item) { return item.date; }),
+      revenues: data.map(function (item) { return item.revenue; }),
+      bookings: data.map(function (item) { return item.bookings; }),
+      cancelled: data.map(function (item) { return item.cancelled; })
+    }
+  };
 }
 
 // GET /api/admin/stats/top-tours
 async function adminLoadTopTours(period) {
   var listEl = document.getElementById('statsToursList');
+  var metaEl = document.getElementById('statsTopToursMeta');
   if (!listEl) return;
+
+  var topToursPeriod = period === 'today' ? 'week' : period;
 
   var tours = [];
   try {
-    var res = await apiGetTopTours(period, 10);
+    var res = await apiGetTopTours(topToursPeriod, 10);
     if (res && res.ok && res.data.result && res.data.result.tours) {
       tours = res.data.result.tours;
     }
@@ -2882,21 +3165,23 @@ async function adminLoadTopTours(period) {
 
   if (!tours.length) {
     listEl.innerHTML = '<div class="stats-tours-empty"><p>Chưa có dữ liệu</p></div>';
+    if (metaEl) metaEl.textContent = 'Chưa có dữ liệu';
     return;
   }
 
-  var maxBookings = Math.max(...tours.map(function (t) { return t.booking_count || 0; }), 1);
+  if (metaEl) metaEl.textContent = 'Hiển thị ' + tours.length + ' tour';
+
   listEl.innerHTML = tours.map(function (t, i) {
-    var pct = Math.round(((t.booking_count || 0) / maxBookings) * 100);
+    var pctVal = Number(t.percent);
+    var pctText = Number.isFinite(pctVal)
+      ? (pctVal % 1 === 0 ? pctVal.toFixed(0) : pctVal.toFixed(2)) + '%'
+      : '—';
     return '<div class="stats-tour-row">' +
       '<div class="stats-tour-rank">' + (i + 1) + '</div>' +
-      '<div class="stats-tour-name">' +
-      '<div style="font-weight:600;font-size:0.8rem;color:#1a1a1a;margin-bottom:3px">' + (t.name || t.tour_id || '—') + '</div>' +
-      '<div class="stats-rb-track"><div class="stats-rb-fill" style="width:' + pct + '%;background:#2d8a4e"></div></div>' +
-      '</div>' +
+      '<div class="stats-tour-name">' + (t.name || t.tour_id || '—') + '</div>' +
       '<div class="stats-tour-stat">' + (t.booking_count || 0) + '</div>' +
       '<div class="stats-tour-stat" style="color:#2d8a4e">' + (t.revenue || 0).toLocaleString('vi-VN') + 'đ</div>' +
-      '<div class="stats-tour-stat">' + pct + '%</div>' +
+      '<div class="stats-tour-stat">' + pctText + '</div>' +
       '</div>';
   }).join('');
 }
@@ -2916,36 +3201,86 @@ function adminGetAllBookingsLocal() {
   return all;
 }
 
+function adminGetLocalUserCount() {
+  try {
+    var db = JSON.parse(localStorage.getItem('vt_userdb') || sessionStorage.getItem('vt_userdb') || '[]');
+    return Array.isArray(db) ? db.length : 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
 // Fallback stats từ localStorage
 function adminLoadStatsFallback() {
   var all = adminGetAllBookingsLocal();
+  var users = adminGetLocalUserCount();
   // Chỉ tính booking chưa hủy
   var active = all.filter(function (b) { return b.status !== 'cancelled' && b.status !== 3; });
-  var revenue = 0;
+  var grossRevenue = 0;
+  var refunded = 0;
   active.forEach(function (b) {
-    revenue += parseInt(String(b.total || b.price || '0').replace(/[^0-9]/g, '')) || 0;
+    grossRevenue += parseInt(String(b.total || b.price || '0').replace(/[^0-9]/g, '')) || 0;
   });
+  all.forEach(function (b) {
+    refunded += parseInt(String(b.refund_amount || b.refund || '0').replace(/[^0-9]/g, '')) || 0;
+  });
+  var netRevenue = grossRevenue - refunded;
+  var cancelled = all.length - active.length;
+  var cancelRate = all.length ? (cancelled / all.length) * 100 : 0;
   var revEl = document.getElementById('statRevenue');
+  var refundEl = document.getElementById('statRefunded');
+  var netRevenueEl = document.getElementById('statNetRevenue');
   var bkEl = document.getElementById('statTotalBookings');
-  var donut = document.getElementById('statsDonutVal');
-  if (revEl) revEl.textContent = revenue.toLocaleString('vi-VN') + 'đ';
+  var userEl = document.getElementById('statNewUsers');
+  var cancelRateEl = document.getElementById('statCancelRate');
+  if (revEl) revEl.textContent = grossRevenue.toLocaleString('vi-VN') + 'đ';
+  if (refundEl) refundEl.textContent = refunded.toLocaleString('vi-VN') + 'đ';
+  if (netRevenueEl) netRevenueEl.textContent = netRevenue.toLocaleString('vi-VN') + 'đ';
   if (bkEl) bkEl.textContent = active.length.toLocaleString('vi-VN');
-  if (donut) donut.textContent = active.length;
+  if (userEl) userEl.textContent = users.toLocaleString('vi-VN');
+  if (cancelRateEl) {
+    cancelRateEl.textContent = cancelRate.toFixed(1) + '%';
+    adminSetCancelRateTone(cancelRateEl, cancelRate);
+  }
+
+  adminApplyOverviewBadgeRules({
+    revenue: grossRevenue,
+    refund: refunded,
+    net_revenue: netRevenue,
+    bookings: active.length,
+    new_users: users,
+    cancel_rate: cancelRate
+  });
+
+  var localSeries = adminBuildLocalStatsSeries(all);
+  if (localSeries.revenueSeries.length) adminDrawRevenueChart(localSeries.revenueSeries);
+  else adminDrawRevenueChart([]);
+  if (localSeries.bookingChart.labels.length) adminDrawBookingChart(localSeries.bookingChart);
+  else adminDrawBookingChart({ labels: [], revenues: [], bookings: [], cancelled: [] });
 }
 
 // Period buttons
 function statsPeriod(btn, val) {
-  document.querySelectorAll('.stats-period').forEach(function (b) { b.classList.remove('active'); });
-  btn.classList.add('active');
-  var periodMap = { '30': 'month', '90': 'month', '365': 'year' };
+  statsSetActivePeriod(val);
+  var periodMap = { 'today': 'today', 'week': 'week', 'month': 'month', 'year': 'year' };
   adminLoadStats(periodMap[val] || val);
+}
+
+function statsSetActivePeriod(period) {
+  var buttons = document.querySelectorAll('#tab-stats .stats-period');
+  buttons.forEach(function (b) {
+    b.classList.toggle('active', b.getAttribute('data-period') === period);
+  });
 }
 
 // Override switchTab để load stats khi mở tab
 var _origSwitchTabStats = switchTab;
 switchTab = function (name, btn) {
   _origSwitchTabStats(name, btn);
-  if (name === 'stats') adminLoadStats('month');
+  if (name === 'stats') {
+    statsSetActivePeriod('today');
+    adminLoadStats('today');
+  }
 };
 
 function dashNormalizeChart(chart) {

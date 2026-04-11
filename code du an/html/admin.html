@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
   <head>
@@ -835,18 +835,23 @@
         </div>
         <!-- ===== THỐNG KÊ ===== -->
         <div class="admin-tab" id="tab-stats" style="display:none">
-          <div class="admin-topbar">
+          <div class="admin-topbar stats-topbar">
             <div>
-              <div class="stats-breadcrumb">ADMIN › BÁO CÁO</div>
-              <h1 class="admin-page-title">Tổng quan Phân tích</h1>
-              <p class="admin-page-sub">Theo dõi hiệu quả hoạt động thực tế của VietnamTravel.</p>
+              <h1 class="admin-page-title">Thống kê</h1>
             </div>
-            <div class="stats-period-btns"><button class="stats-period active" onclick="statsPeriod(this,'30')">30
-                Ngày</button><button class="stats-period" onclick="statsPeriod(this,'90')">90 Ngày</button><button
-                class="stats-period" onclick="statsPeriod(this,'365')">12 Tháng</button></div>
+            <div class="stats-period-btns stats-filter-group">
+              <button class="stats-period active" type="button" data-period="today"
+                onclick="statsPeriod(this,'today')">Hôm nay</button>
+              <button class="stats-period" type="button" data-period="week"
+                onclick="statsPeriod(this,'week')">Tuần</button>
+              <button class="stats-period" type="button" data-period="month"
+                onclick="statsPeriod(this,'month')">Tháng</button>
+              <button class="stats-period" type="button" data-period="year"
+                onclick="statsPeriod(this,'year')">Năm</button>
+            </div>
           </div>
-          <div class="admin-content">
-            <div class="stats-kpi-grid">
+          <div class="admin-content stats-content">
+            <div class="stats-kpi-grid stats-kpi-grid--summary">
               <div class="stats-kpi-card">
                 <div class="stats-kpi-top">
                   <div class="stats-kpi-icon" style="background:#fff0e8;color:#e67e00"><svg width="16" height="16"
@@ -854,10 +859,35 @@
                       stroke-linejoin="round">
                       <line x1="12" y1="1" x2="12" y2="23" />
                       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg></div><span class="stats-kpi-change neutral">—</span>
+                    </svg></div>
                 </div>
                 <div class="stats-kpi-label">Tổng doanh thu</div>
                 <div class="stats-kpi-val" id="statRevenue">0đ</div>
+              </div>
+              <div class="stats-kpi-card">
+                <div class="stats-kpi-top">
+                  <div class="stats-kpi-icon" style="background:#ffe8e8;color:#dc2626"><svg width="16" height="16"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                      <polyline points="17 6 23 6 23 12" />
+                    </svg></div>
+                </div>
+                <div class="stats-kpi-label">Hoàn tiền</div>
+                <div class="stats-kpi-val" id="statRefunded">0đ</div>
+              </div>
+              <div class="stats-kpi-card">
+                <div class="stats-kpi-top">
+                  <div class="stats-kpi-icon" style="background:#e8f5ee;color:#2d8a4e"><svg width="16" height="16"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <path d="M8 13h8" />
+                      <path d="M8 17h5" />
+                    </svg></div>
+                </div>
+                <div class="stats-kpi-label">Doanh thu ròng</div>
+                <div class="stats-kpi-val" id="statNetRevenue">0đ</div>
               </div>
               <div class="stats-kpi-card">
                 <div class="stats-kpi-top">
@@ -866,22 +896,10 @@
                       stroke-linejoin="round">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                       <polyline points="14 2 14 8 20 8" />
-                    </svg></div><span class="stats-kpi-change neutral">—</span>
+                    </svg></div>
                 </div>
-                <div class="stats-kpi-label">Tổng lượt đặt tour</div>
+                <div class="stats-kpi-label">Tổng booking</div>
                 <div class="stats-kpi-val" id="statTotalBookings">0</div>
-              </div>
-              <div class="stats-kpi-card">
-                <div class="stats-kpi-top">
-                  <div class="stats-kpi-icon" style="background:#fffbe8;color:#c9963a"><svg width="16" height="16"
-                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                      stroke-linejoin="round">
-                      <polygon
-                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg></div><span class="stats-kpi-change neutral">Ổn định</span>
-                </div>
-                <div class="stats-kpi-label">Đánh giá trung bình</div>
-                <div class="stats-kpi-val" id="statRating">— / 5.0</div>
               </div>
               <div class="stats-kpi-card">
                 <div class="stats-kpi-top">
@@ -890,48 +908,75 @@
                       stroke-linejoin="round">
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                       <circle cx="9" cy="7" r="4" />
-                    </svg></div><span class="stats-kpi-change neutral">—</span>
+                    </svg></div>
                 </div>
-                <div class="stats-kpi-label">Khách truy cập</div>
-                <div class="stats-kpi-val" id="statVisitors">0</div>
+                <div class="stats-kpi-label">Người dùng mới</div>
+                <div class="stats-kpi-val" id="statNewUsers">0</div>
+              </div>
+              <div class="stats-kpi-card">
+                <div class="stats-kpi-top">
+                  <div class="stats-kpi-icon" style="background:#f0e8ff;color:#7b1fa2"><svg width="16" height="16"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <path d="M4 4h16" />
+                    </svg></div>
+                </div>
+                <div class="stats-kpi-label">Tỷ lệ hủy</div>
+                <div class="stats-kpi-val" id="statCancelRate">0%</div>
               </div>
             </div>
-            <div class="stats-row2">
-              <div class="stats-chart-card">
-                <div class="stats-chart-header"><span class="stats-card-title">Tăng trưởng doanh thu</span></div>
-                <div class="stats-chart-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd"
-                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="20" x2="18" y2="10" />
-                    <line x1="12" y1="20" x2="12" y2="4" />
-                    <line x1="6" y1="20" x2="6" y2="14" />
+
+            <div class="stats-chart-card stats-chart-card--wide stats-revenue-card">
+              <div class="stats-chart-header">
+                <span class="stats-card-title">Biểu đồ doanh thu</span>
+                <span class="admin-section-sub" id="statsRevenueMeta">Đang tải dữ liệu...</span>
+              </div>
+              <div class="chart-container" id="statsRevenueChartWrap">
+                <canvas id="statsRevenueChart"></canvas>
+              </div>
+              <div class="stats-chart-empty" id="statsRevenueEmpty" style="display:none">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+                <p>Chưa có dữ liệu doanh thu</p><span>Dữ liệu sẽ hiển thị sau khi có đơn đặt tour đầu tiên</span>
+              </div>
+            </div>
+
+            <div class="stats-bottom-grid">
+              <div class="stats-chart-card stats-booking-chart-card">
+                <div class="stats-chart-header">
+                  <span class="stats-card-title">Booking vs Huỷ</span>
+                  <span class="admin-section-sub" id="statsBookingMeta">Đang tải dữ liệu...</span>
+                </div>
+                <div class="chart-container" id="statsBookingChartWrap">
+                  <canvas id="statsBookingChart"></canvas>
+                </div>
+                <div class="stats-chart-empty" id="statsBookingEmpty" style="display:none">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
                   </svg>
-                  <p>Chưa có dữ liệu doanh thu</p><span>Dữ liệu sẽ hiển thị sau khi có đơn đặt tour đầu tiên</span>
+                  <p>Chưa có dữ liệu booking</p><span>Biểu đồ sẽ hiển thị khi có đơn đặt tour</span>
                 </div>
               </div>
-              <div class="stats-source-card">
-                <div class="stats-card-title" style="margin-bottom:20px">Nguồn đặt tour</div>
-                <div class="stats-donut-wrap"><svg class="stats-donut" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="#f0f0f0" stroke-width="14" />
-                  </svg>
-                  <div class="stats-donut-center">
-                    <div class="stats-donut-val" id="statsDonutVal">0</div>
-                    <div class="stats-donut-lbl">TỔNG ĐẶT TOUR</div>
+              <div class="stats-tours-card">
+                <div class="stats-chart-header">
+                  <div style="display:flex;flex-direction:column;gap:3px">
+                    <span class="stats-card-title">Top tours</span>
                   </div>
                 </div>
-                <div class="stats-source-list">
-                  <div class="stats-source-row"><span class="stats-source-dot" style="background:#3a7abf"></span><span
-                      class="stats-source-name">Ứng dụng di động</span><span class="stats-source-pct">—</span></div>
-                  <div class="stats-source-row"><span class="stats-source-dot" style="background:#2d8a4e"></span><span
-                      class="stats-source-name">Trang web</span><span class="stats-source-pct">—</span></div>
+                <div class="stats-tours-head">
+                  <span>STT</span>
+                  <span>TÊN TOUR</span>
+                  <span>LƯỢT ĐẶT</span>
+                  <span>DOANH THU</span>
+                  <span>% DOANH THU</span>
                 </div>
-              </div>
-            </div>
-            <div class="stats-row3">
-              <div class="stats-tours-card">
-                <div class="stats-chart-header"><span class="stats-card-title">Tour hiệu quả nhất</span><a href="#"
-                    class="promo-view-all" onclick="switchTab('tours');return false">Xem tất cả</a></div>
-                <div class="stats-tours-head"><span>TÊN TOUR</span><span>LƯỢT ĐẶT</span><span>DOANH
-                    THU</span><span>CHUYỂN ĐỔI</span></div>
                 <div id="statsToursList">
                   <div class="stats-tours-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"
                       stroke="#ddd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -940,29 +985,6 @@
                       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10z" />
                     </svg>
                     <p>Chưa có dữ liệu</p>
-                  </div>
-                </div>
-              </div>
-              <div class="stats-rating-card">
-                <div class="stats-card-title" style="margin-bottom:16px">Sự hài lòng của khách hàng</div>
-                <div class="stats-rating-big">—</div>
-                <div class="stats-rating-stars">☆☆☆☆☆</div>
-                <div class="stats-rating-sub">DỰA TRÊN <span id="statsRatingCount">0</span> ĐÁNH GIÁ</div>
-                <div class="stats-rating-bars">
-                  <div class="stats-rb-row"><span>5</span>
-                    <div class="stats-rb-track">
-                      <div class="stats-rb-fill" style="width:0%;background:#2d8a4e"></div>
-                    </div><span>0%</span>
-                  </div>
-                  <div class="stats-rb-row"><span>4</span>
-                    <div class="stats-rb-track">
-                      <div class="stats-rb-fill" style="width:0%;background:#e67e00"></div>
-                    </div><span>0%</span>
-                  </div>
-                  <div class="stats-rb-row"><span>3</span>
-                    <div class="stats-rb-track">
-                      <div class="stats-rb-fill" style="width:0%;background:#e0e0e0"></div>
-                    </div><span>0%</span>
                   </div>
                 </div>
               </div>
