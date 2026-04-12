@@ -341,82 +341,33 @@
             <div>
               <h1 class="admin-page-title">Dashboard</h1>
             </div>
-            <div class="dash-period-switch" id="dashPeriodSwitch">
-              <button class="stats-period active" type="button" data-period="today"
-                onclick="dashSetPeriod('today', this)">Ngày</button>
-              <button class="stats-period" type="button" data-period="week"
-                onclick="dashSetPeriod('week', this)">Tuần</button>
-              <button class="stats-period" type="button" data-period="month"
-                onclick="dashSetPeriod('month', this)">Tháng</button>
-              <button class="stats-period" type="button" data-period="year"
-                onclick="dashSetPeriod('year', this)">Năm</button>
-            </div>
           </div>
-          <div class="admin-content">
-            <div class="stats-kpi-grid">
-              <div class="stats-kpi-card">
-                <div class="stats-kpi-top">
-                  <div class="stats-kpi-icon" style="background:#fff0e8;color:#e67e00">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <line x1="12" y1="1" x2="12" y2="23" />
-                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
-                  </div>
-                  <span class="stats-kpi-change neutral" id="dashKpiPeriod">Hôm nay</span>
-                </div>
-                <div class="stats-kpi-label">Doanh thu</div>
-                <div class="stats-kpi-val" id="dashKpiRevenue">0đ</div>
+          <div class="admin-content dash-layout-v2">
+            <div class="stats-chart-card dash-alerts-card" id="dashTodayInsightsCard">
+              <div class="stats-chart-header">
+                <span class="stats-card-title" id="dashTodayTitle">Thông báo</span>
               </div>
-              <div class="stats-kpi-card">
-                <div class="stats-kpi-top">
-                  <div class="stats-kpi-icon" style="background:#e8f5ee;color:#2d8a4e">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                    </svg>
-                  </div>
-                  <span class="stats-kpi-change neutral" id="dashKpiBookingsTrend">—</span>
-                </div>
-                <div class="stats-kpi-label">Lượt đặt tour</div>
-                <div class="stats-kpi-val" id="dashKpiBookings">0</div>
+              <div class="today-summary" id="dashTodaySummaryBody"></div>
+            </div>
+
+            <div class="dash-kpi-quick-grid" id="dashKpiQuickGrid">
+              <div class="stats-kpi-card dash-kpi-quick-card">
+                <div class="stats-kpi-label">💰 Doanh thu</div>
+                <div class="stats-kpi-val" id="dashKpiRevenueToday">0</div>
               </div>
-              <div class="stats-kpi-card">
-                <div class="stats-kpi-top">
-                  <div class="stats-kpi-icon" style="background:#e8f0ff;color:#3a7abf">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                    </svg>
-                  </div>
-                  <span class="stats-kpi-change neutral" id="dashKpiUsersTrend">—</span>
-                </div>
-                <div class="stats-kpi-label">Người dùng mới</div>
-                <div class="stats-kpi-val" id="dashKpiUsers">0</div>
+              <div class="stats-kpi-card dash-kpi-quick-card">
+                <div class="stats-kpi-label">📦 Booking</div>
+                <div class="stats-kpi-val" id="dashKpiBookingsToday">0</div>
               </div>
-              <div class="stats-kpi-card">
-                <div class="stats-kpi-top">
-                  <div class="stats-kpi-icon" style="background:#f0e8ff;color:#7b1fa2">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                      <polyline points="17 6 23 6 23 12" />
-                    </svg>
-                  </div>
-                  <span class="stats-kpi-change neutral" id="dashKpiCancelRateTrend">—</span>
-                </div>
-                <div class="stats-kpi-label">Tỷ lệ hủy</div>
-                <div class="stats-kpi-val" id="dashKpiCancelRate">0%</div>
-                <div class="admin-section-sub" style="margin-top:6px">Đơn đã hủy: <span
-                    id="dashKpiCancelledBookings">0</span></div>
+              <div class="stats-kpi-card dash-kpi-quick-card">
+                <div class="stats-kpi-label">📉 Tỷ lệ huỷ (%)</div>
+                <div class="stats-kpi-val" id="dashKpiCancelledToday">0%</div>
               </div>
             </div>
 
-            <div class="stats-chart-card" id="dashRevenueChartCard">
+            <div class="stats-chart-card dash-mini-trend-card" id="dashRevenueChartCard">
               <div class="stats-chart-header">
-                <span class="stats-card-title">Doanh thu theo thời gian</span>
+                <span class="stats-card-title">📈 Doanh thu 7 ngày</span>
                 <span class="admin-section-sub" id="dashRevenueChartMeta">Đang tải dữ liệu...</span>
               </div>
               <div class="chart-container">
@@ -424,46 +375,30 @@
               </div>
             </div>
 
-            <div class="stats-chart-card" id="dashTodayInsightsCard" style="display:none">
-              <div class="stats-chart-header">
-                <span class="stats-card-title" id="dashTodayTitle">Tổng quan hôm nay</span>
-                <span class="admin-section-sub"></span>
-              </div>
-              <div class="today-summary" id="dashTodaySummaryBody"></div>
-            </div>
-
             <div class="dash-row2" id="dashRow2">
-              <div class="stats-chart-card" id="dashBookingChartCard">
-                <div class="stats-chart-header">
-                  <span class="stats-card-title">Booking vs Huỷ</span>
-                  <span class="admin-section-sub" id="dashBookingCancelMeta">Đang tải dữ liệu...</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="dashBookingCancelChart"></canvas>
-                </div>
-              </div>
-
               <div class="stats-chart-card" id="dashTopToursCard">
                 <div class="stats-chart-header">
-                  <span class="stats-card-title">Top tour được đặt nhiều nhất</span>
-                  <span class="admin-section-sub" id="dashTopToursMeta">Theo kỳ đã chọn</span>
+                  <span class="stats-card-title">🥇 Tour doanh thu cao nhất</span>
+                  <span class="admin-section-sub" id="dashTopToursMeta">Tuần này</span>
                 </div>
-                <div class="admin-table-wrap" style="box-shadow:none;border-radius:0">
-                  <table class="admin-table">
-                    <thead>
-                      <tr>
-                        <th>STT</th>
-                        <th>Tên tour</th>
-                        <th>Lượt đặt</th>
-                        <th>Doanh thu</th>
-                      </tr>
-                    </thead>
-                    <tbody id="dashTopToursBody">
-                      <tr>
-                        <td colspan="4" style="text-align:center;color:#aaa;padding:24px">Đang tải dữ liệu...</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div class="dash-top-tour-mini" id="dashTopToursBody">
+                  <div class="dash-top-tour-name">Đang tải...</div>
+                  <div class="dash-top-tour-stat">💰 0</div>
+                  <div class="dash-top-tour-stat">📦 0 booking</div>
+                  <div class="dash-top-tour-stat">📊 0%</div>
+                </div>
+              </div>
+
+              <div class="stats-chart-card" id="dashTopBookedCard">
+                <div class="stats-chart-header">
+                  <span class="stats-card-title">🔥 Tour được đặt nhiều nhất</span>
+                  <span class="admin-section-sub" id="dashTopBookedMeta">Tuần này</span>
+                </div>
+                <div class="dash-top-tour-mini" id="dashTopBookedBody">
+                  <div class="dash-top-tour-name">Đang tải...</div>
+                  <div class="dash-top-tour-stat">💰 0</div>
+                  <div class="dash-top-tour-stat">📦 0 booking</div>
+                  <div class="dash-top-tour-stat">📊 0%</div>
                 </div>
               </div>
             </div>
