@@ -24,6 +24,481 @@ function switchTab(name) {
   if (name === 'tours') adminRenderPromoPreview();
   if (name === 'users') renderUsersTable();
   if (name === 'dashboard') adminUpdateDashStats();
+  if (name === 'settings') adminSettingsInit();
+}
+
+// ===== SETTINGS (ADMIN/EMPLOYEE) =====
+var ADMIN_SETTINGS_LOADING = false;
+var ADMIN_PENDING_AVATAR_FILE = null;
+var ADMIN_PENDING_AVATAR_PREVIEW = '';
+
+function adminSettingsLoadUser() {
+  try {
+    return JSON.parse(localStorage.getItem('vt_user') || sessionStorage.getItem('vt_user') || 'null');
+  } catch (_) {
+    return null;
+  }
+}
+
+function adminSettingsSaveUser(user) {
+  if (!user || typeof user !== 'object') return;
+  localStorage.setItem('vt_user', JSON.stringify(user));
+}
+
+function adminSettingsFill(user) {
+  var setValue = function (id, value) {
+    var el = document.getElementById(id);
+    if (el) el.value = value || '';
+  };
+
+  setValue('adminInfoName', user?.name || user?.full_name || '');
+  setValue('adminInfoEmail', user?.email || '');
+  setValue('adminInfoPhone', user?.phone || '');
+  setValue('adminInfoDob', user?.dob ? String(user.dob).slice(0, 10) : '');
+  setValue('adminInfoAddress', user?.address || '');
+
+  adminSettingsRenderAvatar(user || {});
+}
+
+function adminSettingsRenderAvatar(user) {
+  var name = String(user?.name || user?.full_name || 'Admin').trim();
+  var email = String(user?.email || '').trim();
+  var avatar = String(user?.avatar || '').trim();
+  var initial = (name || 'A').charAt(0).toUpperCase();
+
+  var cardAvatar = document.getElementById('adminSettingsAvatar');
+  var cardInitial = document.getElementById('adminSettingsAvatarInitial');
+  var cardName = document.getElementById('adminSettingsName');
+  var cardEmail = document.getElementById('adminSettingsEmail');
+  var sideAvatar = document.getElementById('sideUserAvatar');
+
+  if (cardName) cardName.textContent = name || '—';
+  if (cardEmail) cardEmail.textContent = email || '—';
+
+  if (avatar) {
+    if (cardAvatar) {
+      cardAvatar.style.backgroundImage = 'url(' + avatar + ')';
+      cardAvatar.style.backgroundSize = 'cover';
+      cardAvatar.style.backgroundPosition = 'center';
+      cardAvatar.style.backgroundRepeat = 'no-repeat';
+    }
+    if (cardInitial) cardInitial.style.display = 'none';
+
+    if (sideAvatar) {
+      sideAvatar.style.backgroundImage = 'url(' + avatar + ')';
+      sideAvatar.style.backgroundSize = 'cover';
+      sideAvatar.style.backgroundPosition = 'center';
+      sideAvatar.style.backgroundRepeat = 'no-repeat';
+      sideAvatar.textContent = '';
+    }
+    return;
+  }
+
+  if (cardAvatar) {
+    cardAvatar.style.backgroundImage = '';
+    cardAvatar.style.background = 'linear-gradient(135deg, #2d8a4e, #3aaa62)';
+  }
+  if (cardInitial) {
+    cardInitial.style.display = '';
+    cardInitial.textContent = initial;
+  }
+
+  if (sideAvatar) {
+    sideAvatar.style.backgroundImage = '';
+    sideAvatar.textContent = initial;
+  }
+}
+
+function adminSetAvatarSaveButton(enabled, text) {
+  var btn = document.getElementById('adminAvatarSaveBtn');
+  if (!btn) return;
+  btn.disabled = !enabled;
+  btn.textContent = text || 'Lưu ảnh đại diện';
+}
+
+function adminChangeAvatar(input) {
+  if (!input || !input.files || !input.files[0]) return;
+
+  ADMIN_PENDING_AVATAR_FILE = input.files[0];
+
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    ADMIN_PENDING_AVATAR_PREVIEW = e.target.result || '';
+
+    var cardAvatar = document.getElementById('adminSettingsAvatar');
+    var cardInitial = document.getElementById('adminSettingsAvatarInitial');
+    if (cardAvatar && ADMIN_PENDING_AVATAR_PREVIEW) {
+      cardAvatar.style.backgroundImage = 'url(' + ADMIN_PENDING_AVATAR_PREVIEW + ')';
+      cardAvatar.style.backgroundSize = 'cover';
+      cardAvatar.style.backgroundPosition = 'center';
+      cardAvatar.style.backgroundRepeat = 'no-repeat';
+    }
+    if (cardInitial) cardInitial.style.display = 'none';
+
+    adminSetAvatarSaveButton(true);
+  };
+  reader.readAsDataURL(ADMIN_PENDING_AVATAR_FILE);
+}
+
+async function adminSaveAvatarChanges() {
+  if (!ADMIN_PENDING_AVATAR_FILE) {
+    showToast('⚠️ Chưa có ảnh đại diện mới để lưu');
+    return;
+  }
+
+  adminSetAvatarSaveButton(false, 'Đang lưu...');
+
+  try {
+    var res = await apiUpdateAvatar(ADMIN_PENDING_AVATAR_FILE);
+    if (!(res && res.ok)) {
+      showToast('❌ Cập nhật ảnh đại diện thất bại');
+      adminSetAvatarSaveButton(true);
+      return;
+    }
+
+    var user = adminSettingsLoadUser() || {};
+    user.avatar = res?.data?.result?.avatar_url || ADMIN_PENDING_AVATAR_PREVIEW || user.avatar || '';
+    adminSettingsSaveUser(user);
+    adminSettingsRenderAvatar(user);
+
+    ADMIN_PENDING_AVATAR_FILE = null;
+    ADMIN_PENDING_AVATAR_PREVIEW = '';
+    var input = document.getElementById('adminAvatarInput');
+    if (input) input.value = '';
+
+    adminSetAvatarSaveButton(false);
+    showToast('✅ Đã cập nhật ảnh đại diện');
+  } catch (_) {
+    showToast('❌ Không thể kết nối máy chủ');
+    adminSetAvatarSaveButton(true);
+  }
+}
+
+async function adminSettingsInit() {
+  if (ADMIN_SETTINGS_LOADING) return;
+  ADMIN_SETTINGS_LOADING = true;
+
+  var user = adminSettingsLoadUser();
+  if (user) adminSettingsFill(user);
+
+  try {
+    var res = await apiGetMe();
+    if (res && res.ok) {
+      var me = res?.data?.result?.user || res?.data?.result || {};
+      var merged = {
+        ...(user || {}),
+        name: me.full_name || me.name || user?.name || '',
+        full_name: me.full_name || me.name || user?.full_name || '',
+        email: me.email || user?.email || '',
+        phone: me.phone || user?.phone || '',
+        dob: me.date_of_birth ? String(me.date_of_birth).slice(0, 10) : (user?.dob || ''),
+        address: me.address || user?.address || '',
+        avatar: me.avatar || user?.avatar || ''
+      };
+      adminSettingsSaveUser(merged);
+      adminSettingsFill(merged);
+    }
+  } catch (e) { }
+
+  adminCheckPwdStrength('');
+  adminSetAvatarSaveButton(false);
+  ADMIN_SETTINGS_LOADING = false;
+}
+
+function adminValidateFullName(fullName) {
+  var val = String(fullName || '').trim();
+  if (!val) return 'Tên là bắt buộc';
+  if (val.length < 2 || val.length > 100) return 'Độ dài tên phải từ 2 đến 100 ký tự';
+  if (!/^[\p{L}\s]+$/u.test(val)) return 'Tên chỉ có thể chứa chữ cái và khoảng trắng';
+  return '';
+}
+
+function adminValidatePhone(phone) {
+  var val = String(phone || '').trim();
+  if (!val) return '';
+  if (!/^(?:\+84|0)\d{9,10}$/.test(val)) return 'Số điện thoại không hợp lệ';
+  return '';
+}
+
+function adminValidateAddress(address) {
+  var val = String(address || '').trim();
+  if (!val) return '';
+  if (val.length < 5 || val.length > 300) return 'Độ dài địa chỉ phải từ 5 đến 300 ký tự';
+  return '';
+}
+
+function adminTranslateValidationMessage(msg) {
+  if (!msg || typeof msg !== 'string') return 'Cập nhật thông tin thất bại';
+
+  var map = {
+    'Name is required': 'Tên là bắt buộc',
+    'Name must be a string': 'Tên phải là một chuỗi',
+    'Name length must be from 2 to 100': 'Độ dài tên phải từ 2 đến 100 ký tự',
+    'Name can only contain letters and spaces': 'Tên chỉ có thể chứa chữ cái và khoảng trắng',
+    'Phone must be string': 'Số điện thoại phải là một chuỗi',
+    'Phone is invalid': 'Số điện thoại không hợp lệ',
+    'Phone is invalid or existed': 'Số điện thoại không hợp lệ hoặc đã tồn tại',
+    'Address must be string': 'Địa chỉ phải là một chuỗi',
+    'Address length must be from 5 to 300': 'Độ dài địa chỉ phải từ 5 đến 300 ký tự',
+    'Validation error': 'Dữ liệu không hợp lệ'
+  };
+
+  return map[msg] || msg;
+}
+
+function adminExtractApiErrorMessage(res, preferredFields) {
+  if (!res) return 'Cập nhật thông tin thất bại';
+
+  var errors = res?.data?.errors;
+  if (errors && typeof errors === 'object') {
+    var fieldOrder = Array.isArray(preferredFields)
+      ? preferredFields
+      : preferredFields
+        ? [preferredFields]
+        : [];
+
+    for (var i = 0; i < fieldOrder.length; i++) {
+      var field = fieldOrder[i];
+      if (errors[field]?.msg) {
+        return adminTranslateValidationMessage(errors[field].msg);
+      }
+    }
+
+    var firstError = Object.values(errors)[0];
+    if (firstError?.msg) {
+      return adminTranslateValidationMessage(firstError.msg);
+    }
+  }
+
+  return adminTranslateValidationMessage(res?.data?.message || 'Cập nhật thông tin thất bại');
+}
+
+async function adminSaveMyProfile() {
+  var user = adminSettingsLoadUser();
+  if (!user) {
+    showToast('⚠️ Phiên đăng nhập không hợp lệ');
+    return;
+  }
+
+  var saveBtn = document.getElementById('adminInfoSaveBtn');
+  var okEl = document.getElementById('adminInfoSuccess');
+  if (okEl) okEl.style.display = 'none';
+
+  var name = String(document.getElementById('adminInfoName')?.value || '').trim();
+  var phone = String(document.getElementById('adminInfoPhone')?.value || '').trim();
+  var dob = String(document.getElementById('adminInfoDob')?.value || '');
+  var address = String(document.getElementById('adminInfoAddress')?.value || '').trim();
+
+  var currentName = String(user.name || user.full_name || '').trim();
+  var currentPhone = String(user.phone || '').trim();
+  var currentDob = String(user.dob || '').slice(0, 10);
+  var currentAddress = String(user.address || '').trim();
+
+  var dobISO = undefined;
+  if (dob && dob !== currentDob) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
+      showToast('⚠️ Ngày sinh không hợp lệ');
+      return;
+    }
+    dobISO = dob + 'T00:00:00.000Z';
+  }
+
+  var nameErr = adminValidateFullName(name);
+  if (nameErr) return showToast('⚠️ ' + nameErr);
+  var phoneErr = adminValidatePhone(phone);
+  if (phoneErr) return showToast('⚠️ ' + phoneErr);
+  var addressErr = adminValidateAddress(address);
+  if (addressErr) return showToast('⚠️ ' + addressErr);
+
+  var payload = {};
+  if (name !== currentName) payload.full_name = name;
+  if (dobISO) payload.date_of_birth = dobISO;
+  if (phone !== currentPhone) payload.phone = phone;
+  if (address !== currentAddress) {
+    if (address) payload.address = address;
+  }
+
+  if (!Object.keys(payload).length) {
+    showToast('⚠️ Không có thay đổi để lưu');
+    return;
+  }
+
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Đang lưu...';
+  }
+
+  try {
+    var res = await apiUpdateMe(payload);
+    if (!(res && res.ok)) {
+      var errorMsg = adminExtractApiErrorMessage(res, ['full_name', 'phone', 'address', 'date_of_birth']);
+      showToast('❌ ' + errorMsg);
+      return;
+    }
+
+    var nextUser = {
+      ...user,
+      name: payload.full_name !== undefined ? name : currentName,
+      full_name: payload.full_name !== undefined ? name : (user.full_name || currentName),
+      phone: payload.phone !== undefined ? phone : currentPhone,
+      address: payload.address !== undefined ? address : currentAddress,
+      dob: payload.date_of_birth !== undefined ? dob : currentDob,
+    };
+    adminSettingsSaveUser(nextUser);
+    adminSettingsRenderAvatar(nextUser);
+
+    var sideName = document.getElementById('sideUserName');
+    if (sideName) sideName.textContent = nextUser.name || 'Admin';
+
+    if (okEl) {
+      okEl.style.display = 'inline-flex';
+      setTimeout(function () { okEl.style.display = 'none'; }, 2600);
+    }
+    showToast('✅ Đã lưu thông tin cá nhân');
+  } catch (e) {
+    showToast('❌ Không thể kết nối máy chủ');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Lưu thay đổi';
+    }
+  }
+}
+
+function adminTogglePwd(inputId, btn) {
+  var input = document.getElementById(inputId);
+  if (!input) return;
+
+  input.type = input.type === 'password' ? 'text' : 'password';
+
+  if (!btn) return;
+  var svg = btn.querySelector('svg');
+  if (!svg) return;
+
+  var isHidden = input.type === 'password';
+  svg.setAttribute('viewBox', '0 0 20 20');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('width', '16');
+  svg.setAttribute('height', '16');
+
+  if (isHidden) {
+    svg.innerHTML =
+      '<path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />' +
+      '<circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />';
+    btn.setAttribute('aria-label', 'Hiện mật khẩu');
+  } else {
+    svg.innerHTML =
+      '<path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />' +
+      '<circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />' +
+      '<path d="M3 17L17 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />';
+    btn.setAttribute('aria-label', 'Ẩn mật khẩu');
+  }
+}
+
+function adminGetPasswordRequirementStatus(value) {
+  var v = String(value || '');
+  return {
+    length: v.length >= 6 && v.length <= 50,
+    lower: /[a-z]/.test(v),
+    upper: /[A-Z]/.test(v),
+    symbol: /[^A-Za-z0-9]/.test(v)
+  };
+}
+
+function adminCheckPwdStrength(value) {
+  var status = adminGetPasswordRequirementStatus(value);
+  var map = {
+    adminPwdRuleLength: status.length,
+    adminPwdRuleLower: status.lower,
+    adminPwdRuleUpper: status.upper,
+    adminPwdRuleSymbol: status.symbol
+  };
+  Object.keys(map).forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('ok', !!map[id]);
+  });
+}
+
+function adminShowPwdErr(message) {
+  var errEl = document.getElementById('adminPwdError');
+  if (!errEl) return;
+  errEl.textContent = message;
+  errEl.style.display = 'block';
+}
+
+function adminExtractChangePasswordErrorMessage(res) {
+  if (!res) return 'Đổi mật khẩu thất bại.';
+  var status = Number(res.status || 0);
+  var message = String(res?.data?.message || '').trim();
+  var upperMessage = message.toUpperCase();
+
+  if (status === 401 || upperMessage.includes('PASSWORD_IS_INCORRECT')) return 'Mật khẩu hiện tại không đúng.';
+  if (status === 404 || upperMessage.includes('USER_NOT_FOUND')) return 'Không tìm thấy tài khoản người dùng.';
+  if (status === 400 || upperMessage.includes('NEW_PASSWORD_MUST_BE_DIFFERENT')) return 'Mật khẩu mới phải khác mật khẩu hiện tại.';
+  return message || 'Đổi mật khẩu thất bại. Vui lòng thử lại.';
+}
+
+async function adminChangePassword() {
+  var currentPassword = document.getElementById('adminPwdCurrent')?.value || '';
+  var newPassword = document.getElementById('adminPwdNew')?.value || '';
+  var confirmPassword = document.getElementById('adminPwdConfirm')?.value || '';
+
+  var okEl = document.getElementById('adminPwdSuccess');
+  var errEl = document.getElementById('adminPwdError');
+  var saveBtn = document.getElementById('adminPwdSaveBtn');
+  if (okEl) okEl.style.display = 'none';
+  if (errEl) errEl.style.display = 'none';
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return adminShowPwdErr('Vui lòng điền đầy đủ tất cả các trường.');
+  }
+
+  var req = adminGetPasswordRequirementStatus(newPassword);
+  if (!(req.length && req.lower && req.upper && req.symbol)) {
+    return adminShowPwdErr('Mật khẩu mới chưa đủ mạnh (6-50 ký tự, gồm chữ thường, chữ hoa và ký tự đặc biệt).');
+  }
+
+  if (newPassword === currentPassword) {
+    return adminShowPwdErr('Mật khẩu mới phải khác mật khẩu hiện tại.');
+  }
+
+  if (newPassword !== confirmPassword) {
+    return adminShowPwdErr('Mật khẩu xác nhận không khớp.');
+  }
+
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Đang cập nhật...';
+  }
+
+  try {
+    var res = await apiChangePassword(currentPassword, newPassword, confirmPassword);
+    if (!(res && res.ok)) {
+      return adminShowPwdErr(adminExtractChangePasswordErrorMessage(res));
+    }
+  } catch (_) {
+    return adminShowPwdErr('Không thể kết nối máy chủ.');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Đổi mật khẩu';
+    }
+  }
+
+  ['adminPwdCurrent', 'adminPwdNew', 'adminPwdConfirm'].forEach(function (id) {
+    var input = document.getElementById(id);
+    if (input) input.value = '';
+  });
+  adminCheckPwdStrength('');
+
+  if (okEl) okEl.style.display = 'inline-flex';
+  showToast('✅ Đổi mật khẩu thành công. Vui lòng đăng nhập lại.');
+
+  setTimeout(function () {
+    apiLogoutLocal();
+    window.location.href = 'dang-nhap.html';
+  }, 1200);
 }
 
 // ===== DASHBOARD STATS =====
@@ -320,6 +795,24 @@ function adminOpenConfirmModal(message, title) {
     ADMIN_GLOBAL_CONFIRM_RESOLVE = resolve;
   });
 }
+
+function adminPerformLogout() {
+  if (typeof apiLogoutLocal === 'function') {
+    apiLogoutLocal();
+  } else {
+    localStorage.removeItem('vt_access_token');
+    sessionStorage.removeItem('vt_access_token');
+    localStorage.removeItem('vt_user');
+    sessionStorage.removeItem('vt_user');
+  }
+  window.location.href = 'dang-nhap.html';
+}
+
+window.doLogout = async function () {
+  var accepted = await adminOpenConfirmModal('Bạn có chắc chắn muốn đăng xuất khỏi tài khoản này không?', 'Xác nhận đăng xuất');
+  if (!accepted) return;
+  adminPerformLogout();
+};
 
 // PATCH /api/users/:id/role
 async function adminSetRole(id, role, btn) {

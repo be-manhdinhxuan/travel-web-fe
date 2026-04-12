@@ -58,8 +58,8 @@
           <div class="user-dropdown-email" id="dropEmail">—</div>
         </div>
 
-        <a class="user-dropdown-item" href="ca-nhan.html">Hồ sơ cá nhân</a>
-        <a class="user-dropdown-item" id="adminMenuBtn" href="admin.html" style="display:none">⚙️ Quản trị Admin</a>
+        <a class="user-dropdown-item" id="profileMenuBtn" href="ca-nhan.html">Hồ sơ cá nhân</a>
+        <a class="user-dropdown-item" id="adminMenuBtn" href="admin.html" style="display:none">Quản trị Admin</a>
         <a class="user-dropdown-item logout-item" onclick="doLogout()">Đăng xuất</a>
       </div>
     </div>
@@ -273,6 +273,8 @@
 
     const navGuest = document.getElementById('navGuest');
     const navUser = document.getElementById('navUser');
+    const profileMenuBtn = document.getElementById('profileMenuBtn');
+    const adminMenuBtn = document.getElementById('adminMenuBtn');
 
     if (!user || !token) {
       navGuest.style.display = 'flex';
@@ -305,8 +307,13 @@
     }
 
     // admin menu
-    if (user.role === ROLE.ADMIN) {
-      document.getElementById('adminMenuBtn').style.display = 'block';
+    const isAdminRole = Number(user.role) === Number(ROLE.ADMIN) || String(user.role || '').toLowerCase() === 'admin';
+    if (isAdminRole) {
+      if (adminMenuBtn) adminMenuBtn.style.display = 'block';
+      if (profileMenuBtn) profileMenuBtn.style.display = 'none';
+    } else {
+      if (adminMenuBtn) adminMenuBtn.style.display = 'none';
+      if (profileMenuBtn) profileMenuBtn.style.display = 'block';
     }
   }
 

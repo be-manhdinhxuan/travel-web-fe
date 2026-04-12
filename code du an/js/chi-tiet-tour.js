@@ -14,6 +14,26 @@ const HIGHLIGHT_ICON = `
   <circle cx="19" cy="5" r="2" fill="currentColor" opacity="0.65"/>
 </svg>`;
 
+function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem('vt_user') || sessionStorage.getItem('vt_user') || 'null');
+  } catch {
+    return null;
+  }
+}
+
+function isAdminOrStaffRole(role) {
+  var numRole = Number(role);
+  if (numRole === 1 || numRole === 2) return true;
+  var r = String(role || '').trim().toLowerCase();
+  return r === 'admin' || r === 'staff' || r === 'employee' || r === 'nhanvien' || r === 'nhan_vien' || r === 'nhân viên';
+}
+
+function isAdminOrStaffUser() {
+  var user = getStoredUser();
+  return isAdminOrStaffRole(user?.role);
+}
+
 // INIT
 window.addEventListener('DOMContentLoaded', async () => {
 
@@ -209,6 +229,11 @@ function updateSummary() {
 
 // GO TO BOOKING
 async function goToBooking() {
+  if (isAdminOrStaffUser()) {
+    showToast('⚠️ Tài khoản admin/nhân viên không thể đặt tour');
+    return;
+  }
+
   if (!selectedSchedule) {
     showToast('⚠️ Vui lòng chọn lịch khởi hành');
     return;
@@ -406,9 +431,15 @@ function updateBookButtonState() {
 
   const slots = getAvailableSlots();
   const pax = totalGuests();
-  const blocked = !selectedSchedule || slots <= 0 || pax > slots;
+  const blockedByRole = isAdminOrStaffUser();
+  const blocked = blockedByRole || !selectedSchedule || slots <= 0 || pax > slots;
 
   btn.disabled = blocked;
+  if (blockedByRole) {
+    btn.textContent = 'Không khả dụng cho admin/nhân viên';
+    return;
+  }
+
   btn.textContent = blocked ? 'Không đủ chỗ' : 'Đặt tour ngay';
 }
 

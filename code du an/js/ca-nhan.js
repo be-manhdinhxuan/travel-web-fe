@@ -435,7 +435,7 @@ async function saveInfo() {
       showToast('⚠️ ' + phoneError);
       return;
     }
-    if (phone) payload.phone = phone;
+    payload.phone = phone;
   }
 
   if (address !== originalAddress) {
