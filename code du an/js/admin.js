@@ -521,6 +521,22 @@ function adminNormalizeUserRole(role) {
   return 0;
 }
 
+function adminGetCurrentUserRole() {
+  var u = null;
+  try {
+    u = JSON.parse(localStorage.getItem('vt_user') || sessionStorage.getItem('vt_user') || 'null');
+  } catch (e) { u = null; }
+  return adminNormalizeUserRole((u && u.role) || 0);
+}
+
+function adminCanDeleteTours() {
+  return adminGetCurrentUserRole() !== 2;
+}
+
+function adminCanCreateTours() {
+  return adminGetCurrentUserRole() !== 2;
+}
+
 function adminNormalizeUserStatus(status, locked) {
   if (locked === true) return 1;
   if (status === 1 || status === '1' || status === 'banned' || status === 'locked' || status === true) return 1;
@@ -610,8 +626,10 @@ async function renderUsersTable() {
   var tbody = document.getElementById('usersTableBody');
   var footer = document.getElementById('usersTableFooter');
   if (!tbody) return;
+  var isEmployeeView = adminGetCurrentUserRole() === 2;
+  var colCount = isEmployeeView ? 6 : 7;
 
-  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:32px">Đang tải...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="' + colCount + '" style="text-align:center;color:#aaa;padding:32px">Đang tải...</td></tr>';
 
   var users = [];
   var apiLoaded = false;
@@ -650,7 +668,7 @@ async function renderUsersTable() {
   }
 
   if (!users.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:32px">Chưa có người dùng nào</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="' + colCount + '" style="text-align:center;color:#aaa;padding:32px">Chưa có người dùng nào</td></tr>';
     return;
   }
 
@@ -693,7 +711,7 @@ async function renderUsersTable() {
       : '<span class="admin-badge-active">✅ Hoạt động</span>';
 
     var actionHtml = '<span style="font-size:0.75rem;color:#aaa">—</span>';
-    if (!isAdmin && !isSelf) {
+    if (!isEmployeeView && !isAdmin && !isSelf) {
       var nextRole = isEmployee ? 0 : 2;
       var roleBtnLabel = isEmployee ? '→ Người dùng' : '→ Nhân viên';
       var roleBtn = '<button class="admin-act-btn" data-id="' + id + '" data-role="' + nextRole + '" onclick="adminSetRoleBtn(this)">' + roleBtnLabel + '</button>';
@@ -703,15 +721,20 @@ async function renderUsersTable() {
       actionHtml = '<div style="display:flex;gap:6px">' + roleBtn + statusBtn + '</div>';
     }
 
-    return '<tr>' +
+    var rowHtml = '<tr>' +
       '<td style="color:#aaa;font-size:0.75rem">' + ((ADMIN_USER_PAGE - 1) * ADMIN_USER_PER + i + 1) + '</td>' +
       '<td><div style="font-weight:700;font-size:0.82rem">' + name + '</div></td>' +
       '<td style="font-size:0.78rem;color:#555">' + email + '</td>' +
       '<td style="font-size:0.78rem;color:#555">' + phone + '</td>' +
       '<td>' + roleBadge + '</td>' +
-      '<td>' + statusBadge + '</td>' +
-      '<td>' + actionHtml + '</td>' +
-      '</tr>';
+      '<td>' + statusBadge + '</td>';
+
+    if (!isEmployeeView) {
+      rowHtml += '<td>' + actionHtml + '</td>';
+    }
+
+    rowHtml += '</tr>';
+    return rowHtml;
   }).join('');
 }
 
@@ -1075,6 +1098,7 @@ async function adminRenderTours() {
   var tbody = document.getElementById('adminToursBody');
   var footer = document.getElementById('adminToursFooter');
   if (!tbody) return;
+  var canDeleteTour = adminCanDeleteTours();
 
   tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:24px;font-size:0.82rem">Đang tải danh sách tour...</td></tr>';
   if (footer) footer.innerHTML = '';
@@ -1129,7 +1153,9 @@ async function adminRenderTours() {
       : '<div class="admin-tour-thumb-fallback">No img</div>';
     var actionBtns = '<button class="admin-act-btn admin-tour-save-status-btn" style="display:none" onclick="adminTourSaveStatus(this)">Lưu</button>' +
       '<button class="admin-act-btn" onclick="adminOpenEditTourModalByIdx(' + realIdx + ')">Sửa</button>' +
-      '<button class="admin-act-btn admin-act-btn-red" data-id="' + (t._id || t.id || '') + '" data-idx="' + realIdx + '" onclick="adminDeleteTour(this)">Xóa</button>';
+      (canDeleteTour
+        ? '<button class="admin-act-btn admin-act-btn-red" data-id="' + (t._id || t.id || '') + '" data-idx="' + realIdx + '" onclick="adminDeleteTour(this)">Xóa</button>'
+        : '');
     var statusDropdown = '<select class="admin-tour-status-dropdown" data-id="' + (t._id || t.id || '') + '" data-current="' + statusVal + '" onchange="adminTourHandleStatusChange(this)">' +
       adminTourStatusDropdownOptions(statusVal) +
       '</select>';
@@ -1528,6 +1554,7 @@ function adminEditTourUpdateHeaderMeta(meta) {
 function adminEditTourRenderSchedulesTable() {
   var body = document.getElementById('adminEditSchedulesBody');
   if (!body) return;
+  var canDeleteSchedule = adminCanDeleteTours();
 
   if (!Array.isArray(ADMIN_EDIT_TOUR_SCHEDULES) || !ADMIN_EDIT_TOUR_SCHEDULES.length) {
     body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#9ca3af;padding:14px">Chưa có lịch khởi hành</td></tr>';
@@ -1543,6 +1570,11 @@ function adminEditTourRenderSchedulesTable() {
     var note = String(s.note || '').trim();
     var total = Number(s.total_slots || 0);
     var avail = Number(s.available_slots || 0);
+    var scheduleActions = '<button type="button" class="admin-act-btn" onclick="adminEditTourSchedulePromptEdit(' + idx + ')">Sửa</button>' +
+      (canDeleteSchedule
+        ? '<button type="button" class="admin-act-btn admin-act-btn-red" onclick="adminEditTourScheduleDelete(' + idx + ')">Xóa</button>'
+        : '');
+
     return '<tr>' +
       '<td>' + adminTourDetailEscapeHtml(dep) + '</td>' +
       '<td>' + adminTourDetailEscapeHtml(ret) + '</td>' +
@@ -1552,7 +1584,7 @@ function adminEditTourRenderSchedulesTable() {
       '<td>' + adminTourDetailEscapeHtml(note || '—') + '</td>' +
       '<td>' + adminTourDetailEscapeHtml(String(total)) + '</td>' +
       '<td>' + adminTourDetailEscapeHtml(String(avail)) + '</td>' +
-      '<td><div class="act-btns"><button type="button" class="admin-act-btn" onclick="adminEditTourSchedulePromptEdit(' + idx + ')">Sửa</button><button type="button" class="admin-act-btn admin-act-btn-red" onclick="adminEditTourScheduleDelete(' + idx + ')">Xóa</button></div></td>' +
+      '<td><div class="act-btns">' + scheduleActions + '</div></td>' +
       '</tr>';
   }).join('');
 }
@@ -1829,6 +1861,11 @@ async function adminEditTourScheduleSaveEditRow() {
 }
 
 async function adminEditTourScheduleDelete(idx) {
+  if (!adminCanDeleteTours()) {
+    showToast('❌ Nhân viên không có quyền xóa lịch khởi hành');
+    return;
+  }
+
   var sc = Array.isArray(ADMIN_EDIT_TOUR_SCHEDULES) ? ADMIN_EDIT_TOUR_SCHEDULES[idx] : null;
   if (!sc) return;
   var sid = String(sc._id || sc.id || '').trim();
@@ -1958,6 +1995,11 @@ function adminCreateTourEnsureModal() {
 }
 
 function adminOpenCreateTourModal() {
+  if (!adminCanCreateTours()) {
+    showToast('❌ Nhân viên không có quyền thêm tour');
+    return;
+  }
+
   var modal = adminCreateTourEnsureModal();
   if (!modal) return;
   adminSetCreateTourModalMode('create');
@@ -2283,6 +2325,11 @@ function adminCreateTourCollectItinerary() {
 
 async function adminSubmitCreateTour() {
   var isEditMode = ADMIN_CREATE_TOUR_MODE === 'edit' && !!ADMIN_EDIT_TOUR_ID;
+  if (!isEditMode && !adminCanCreateTours()) {
+    showToast('❌ Nhân viên không có quyền thêm tour');
+    return;
+  }
+
   var name = String(document.getElementById('newTourName')?.value || '').trim();
   var categoryId = String(document.getElementById('newTourCategory')?.value || '').trim();
   var destination = String(document.getElementById('newTourDestination')?.value || '').trim();
@@ -2367,6 +2414,12 @@ function adminDoSaveTour(publish) {
   var duration = (document.getElementById('atfDuration').value || '').trim();
   var desc = (document.getElementById('atfDesc').innerText || '').trim();
   var idxStr = document.getElementById('atfName').dataset.idx;
+  var isEditMode = idxStr !== undefined && idxStr !== null && String(idxStr).trim() !== '';
+
+  if (!isEditMode && !adminCanCreateTours()) {
+    showToast('❌ Nhân viên không có quyền thêm tour');
+    return;
+  }
 
   if (!name) { showToast('⚠️ Vui lòng nhập tên tour'); return; }
   if (!location) { showToast('⚠️ Vui lòng chọn địa điểm'); return; }
@@ -3822,6 +3875,10 @@ switchTab = function (name) {
 var ADMIN_BK_PAGE = 1;
 var ADMIN_BK_PER = 10;
 
+function adminCanCancelBookings() {
+  return adminGetCurrentUserRole() !== 2;
+}
+
 function adminBkFormatDate(dateInput) {
   if (!dateInput) return '—';
   var d = new Date(dateInput);
@@ -4314,7 +4371,7 @@ async function adminOpenBookingDetail(id) {
       var paymentStatus = adminBkGetPaymentStatus(booking);
       var canConfirm = bookingStatus === 0;
       var canComplete = bookingStatus === 1;
-      var canCancel = bookingStatus !== 2 && bookingStatus !== 3;
+      var canCancel = bookingStatus !== 2 && bookingStatus !== 3 && adminCanCancelBookings();
       var canConfirmRefund = bookingStatus === 3 && paymentStatus === 4;
       var statusHtml = '' +
         '<div style="display:grid;gap:10px">' +
@@ -4428,7 +4485,7 @@ async function adminBkRender() {
     var badge = statusMap[stRaw] || statusMap['upcoming'];
     var canConfirm = st === 0;
     var canComplete = st === 1;
-    var canCancel = st !== 2 && st !== 3;
+    var canCancel = st !== 2 && st !== 3 && adminCanCancelBookings();
     var canConfirmRefund = st === 3 && paymentStatus === 4;
 
     var actions = '<div style="display:flex;gap:5px;flex-wrap:wrap">';
@@ -4471,6 +4528,11 @@ function adminBkPagination(total, footer) {
 async function adminBkUpdateStatus(btn) {
   var id = btn.dataset.id;
   var status = parseInt(btn.dataset.status);
+  if (status === 3 && !adminCanCancelBookings()) {
+    showToast('❌ Nhân viên không có quyền hủy đơn hàng');
+    return;
+  }
+
   var labels = { 1: 'xác nhận', 2: 'hoàn thành' };
   var buttonLabel = status === 2 ? 'Hoàn thành tour' : 'Xác nhận đơn hàng';
   var bookingConfirmed = await adminOpenConfirmModal('Xác nhận ' + (labels[status] || 'cập nhật') + ' đơn hàng này?', buttonLabel);
@@ -4504,6 +4566,11 @@ async function adminBkUpdateStatus(btn) {
 }
 
 async function adminBkCancel(btn) {
+  if (!adminCanCancelBookings()) {
+    showToast('❌ Nhân viên không có quyền hủy đơn hàng');
+    return;
+  }
+
   var id = btn.dataset.id;
   var reason = await adminBkOpenCancelModal();
   if (!reason) { showToast('⚠️ Vui lòng nhập lý do hủy'); return; }
@@ -4593,6 +4660,11 @@ switchTab = function (name) {
 // DELETE TOUR – DELETE /api/tours/:id
 // ============================================================
 async function adminDeleteTour(btn) {
+  if (!adminCanDeleteTours()) {
+    showToast('❌ Nhân viên không có quyền xóa tour');
+    return;
+  }
+
   var id = btn.dataset.id;
   var idx = parseInt(btn.dataset.idx);
   var tours = (Array.isArray(ADMIN_TOUR_API_CACHE) && ADMIN_TOUR_API_CACHE.length)

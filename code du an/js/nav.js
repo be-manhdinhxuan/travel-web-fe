@@ -306,15 +306,33 @@
       avatarEl.innerText = user.name?.charAt(0).toUpperCase() || 'U'
     }
 
-    // admin menu
-    const isAdminRole = Number(user.role) === Number(ROLE.ADMIN) || String(user.role || '').toLowerCase() === 'admin';
+    // menu theo quyền
+    const roleText = String(user.role || '').toLowerCase();
+    const isAdminRole = Number(user.role) === Number(ROLE.ADMIN) || roleText === 'admin';
+    const isEmployeeRole = Number(user.role) === 2 || roleText === 'employee' || roleText === 'staff' || roleText === 'nhanvien';
+
     if (isAdminRole) {
-      if (adminMenuBtn) adminMenuBtn.style.display = 'block';
+      if (adminMenuBtn) {
+        adminMenuBtn.style.display = 'block';
+        adminMenuBtn.textContent = 'Quản trị Admin';
+        adminMenuBtn.href = 'admin.html';
+      }
       if (profileMenuBtn) profileMenuBtn.style.display = 'none';
-    } else {
-      if (adminMenuBtn) adminMenuBtn.style.display = 'none';
-      if (profileMenuBtn) profileMenuBtn.style.display = 'block';
+      return;
     }
+
+    if (isEmployeeRole) {
+      if (adminMenuBtn) {
+        adminMenuBtn.style.display = 'block';
+        adminMenuBtn.textContent = 'Quản lý';
+        adminMenuBtn.href = 'nhan-vien.html';
+      }
+      if (profileMenuBtn) profileMenuBtn.style.display = 'none';
+      return;
+    }
+
+    if (adminMenuBtn) adminMenuBtn.style.display = 'none';
+    if (profileMenuBtn) profileMenuBtn.style.display = 'block';
   }
 
   // ==========================

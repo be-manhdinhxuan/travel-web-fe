@@ -3271,6 +3271,18 @@
    white-space: nowrap
 }
 
+.admin-tour-status-dropdown {
+   height: 38px;
+   border: 1.5px solid #e5e7eb;
+   border-radius: 9px;
+   padding: 0 12px;
+   min-width: 180px;
+   font-size: 0.8rem;
+   font-family: inherit;
+   color: #374151;
+   background: #fff;
+}
+
 .admin-table td {
    padding: 12px 14px;
    border-bottom: 1px solid #f8f8f8;
