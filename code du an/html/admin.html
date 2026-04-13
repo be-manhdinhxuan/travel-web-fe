@@ -136,7 +136,7 @@
               <h1 class="admin-page-title">Quản lý Tour</h1>
             </div>
             <div class="admin-topbar-actions">
-              <button class="admin-btn-primary" onclick="window.location.href='admin-tour.html'">＋ Thêm Tour</button>
+              <button class="admin-btn-primary" onclick="adminOpenCreateTourModal()">＋ Thêm Tour</button>
             </div>
           </div>
 
@@ -146,26 +146,35 @@
                 <div>
                   <div class="admin-section-title">Danh sách tour</div>
                 </div>
-                <div class="admin-search-bar" style="width:280px">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                  <input type="text" placeholder="Tìm kiếm tour..." id="adminTourSearch" oninput="adminRenderTours()">
+                <div class="admin-tour-controls">
+                  <div class="admin-search-bar" style="width:280px">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input type="search" id="adminTourSearch" name="tour-search" placeholder="Tìm kiếm tour..."
+                      oninput="adminTourHandleSearch()" autocomplete="off" autocorrect="off" autocapitalize="off"
+                      spellcheck="false" enterkeyhint="search" data-lpignore="true">
+                  </div>
+                  <select id="adminTourStatus" class="admin-tour-sort-select" onchange="adminTourApplyFilters()"
+                    autocomplete="off">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="0">Không hoạt động</option>
+                    <option value="1">Hoạt động</option>
+                    <option value="2">Đã hủy</option>
+                  </select>
                 </div>
               </div>
               <div class="admin-table-wrap">
                 <table class="admin-table admin-tour-table">
                   <thead>
                     <tr>
-                      <th>STT</th>
-                      <th>Tên tour & slug</th>
-                      <th>Mô tả & highlights</th>
-                      <th>Điểm đến</th>
-                      <th>Thời lượng</th>
-                      <th>Ảnh & lịch trình</th>
-                      <th>Bao gồm / Không gồm</th>
+                      <th>Ảnh</th>
+                      <th>Tên tour</th>
+                      <th>Thời gian</th>
+                      <th>Khởi hành</th>
+                      <th>Giá từ</th>
                       <th>Trạng thái</th>
                       <th>Hành động</th>
                     </tr>
