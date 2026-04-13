@@ -306,7 +306,7 @@
     const primaryBtn = document.getElementById('tcPrimaryBtn');
     if (primaryBtn) {
       primaryBtn.textContent = 'Xem booking của tôi';
-      primaryBtn.href = 'ca-nhan.html';
+      primaryBtn.href = 'ca-nhan.html?tab=history';
       primaryBtn.onclick = null;
     }
   }
@@ -435,7 +435,7 @@
     const primaryBtn = document.getElementById('tcPrimaryBtn');
     if (primaryBtn) {
       primaryBtn.textContent = 'Xem booking của tôi';
-      primaryBtn.href = 'ca-nhan.html';
+      primaryBtn.href = 'ca-nhan.html?tab=history';
       primaryBtn.onclick = null;
     }
   }

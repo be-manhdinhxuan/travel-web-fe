@@ -18,6 +18,9 @@ var bookingHistoryState = {
   totalPages: 1,
 };
 
+var CP_TAB_QUERY_KEY = 'tab';
+var CP_ALLOWED_TABS = ['info', 'coupons', 'history', 'password'];
+
 function loadUser() {
   try {
     return JSON.parse(localStorage.getItem('vt_user') || 'null');
@@ -29,6 +32,27 @@ function loadUser() {
 function saveUser(user) {
   if (!user || typeof user !== 'object') return;
   localStorage.setItem('vt_user', JSON.stringify(user));
+}
+
+function getProfileTabFromQuery() {
+  try {
+    var params = new URLSearchParams(window.location.search || '');
+    var tab = (params.get(CP_TAB_QUERY_KEY) || '').toLowerCase();
+    return CP_ALLOWED_TABS.indexOf(tab) !== -1 ? tab : 'info';
+  } catch (_) {
+    return 'info';
+  }
+}
+
+function setProfileTabToQuery(name) {
+  try {
+    var nextTab = CP_ALLOWED_TABS.indexOf(name) !== -1 ? name : 'info';
+    var url = new URL(window.location.href);
+    url.searchParams.set(CP_TAB_QUERY_KEY, nextTab);
+    window.history.replaceState({}, '', url.toString());
+  } catch (_) {
+    // Ignore history errors and keep tab switching functional.
+  }
 }
 
 function syncProfileMainVisibility(activeTabName) {
@@ -52,24 +76,11 @@ document.addEventListener('DOMContentLoaded', async function () {
   cpLoadProfile(user);
   cpLoadForm(user);
 
-  var activeBtn = document.querySelector('.cp-nav-item.active:not(.cp-nav-logout)');
-  var activeTabName = 'info';
+  switchTabById(getProfileTabFromQuery());
 
-  if (activeBtn) {
-    if (activeBtn.id === 'cpNavcoupons') activeTabName = 'coupons';
-    if (activeBtn.id === 'cpNavHistory') activeTabName = 'history';
-    if (activeBtn.id === 'cpNavSettings') activeTabName = 'password';
-  }
-
-  syncProfileMainVisibility(activeTabName);
-
-  if (activeBtn && activeBtn.id === 'cpNavcoupons') {
-    await renderWishlist();
-  }
-
-  if (activeBtn && activeBtn.id === 'cpNavHistory') {
-    await renderBookingHistory();
-  }
+  window.addEventListener('popstate', function () {
+    switchTabById(getProfileTabFromQuery());
+  });
 });
 
 async function syncCurrentUser(fallbackUser) {
@@ -492,7 +503,10 @@ async function saveInfo() {
 }
 
 function switchTab(name, btn) {
-  syncProfileMainVisibility(name);
+  var activeTabName = CP_ALLOWED_TABS.indexOf(name) !== -1 ? name : 'info';
+
+  setProfileTabToQuery(activeTabName);
+  syncProfileMainVisibility(activeTabName);
 
   document.querySelectorAll('.cp-tab').forEach(function (tab) {
     tab.classList.remove('active');
@@ -503,7 +517,7 @@ function switchTab(name, btn) {
     item.classList.remove('active');
   });
 
-  var tabEl = document.getElementById('tab-' + name);
+  var tabEl = document.getElementById('tab-' + activeTabName);
   if (tabEl) {
     tabEl.classList.add('active');
     tabEl.style.display = 'flex';
@@ -528,8 +542,9 @@ function switchTabById(name) {
     password: 'cpNavSettings',
   };
 
-  var btn = document.getElementById(map[name]);
-  switchTab(name, btn);
+  var tabName = CP_ALLOWED_TABS.indexOf(name) !== -1 ? name : 'info';
+  var btn = document.getElementById(map[tabName]);
+  switchTab(tabName, btn);
 }
 
 function extractWishlistItems(payload) {
