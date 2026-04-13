@@ -254,6 +254,16 @@
 
   window.checkUserVerifiedForAction = function checkUserVerifiedForAction(actionName) {
     const user = getCurrentUser();
+    const token = localStorage.getItem('vt_access_token');
+
+    // Guest: yêu cầu đăng nhập, không hiển thị modal xác thực email.
+    if (!user || !token) {
+      if (typeof showToast === 'function') {
+        showToast('⚠️ Vui lòng đăng nhập để ' + (actionName || 'thực hiện thao tác này'));
+      }
+      return false;
+    }
+
     if (!isVerifiedUser(user)) {
       if (typeof showToast === 'function') {
         showToast('⚠️ Vui lòng xác thực email trước khi ' + (actionName || 'thực hiện hành động này'));

@@ -63,6 +63,15 @@ async function apiCall(method, endpoint, body = null, requireAuth = false) {
 
     // Token hết hạn → thử refresh
     if (res.status === 401 && requireAuth) {
+      var hasAccessToken = !!localStorage.getItem("vt_access_token");
+      var hasRefreshToken = !!localStorage.getItem("vt_refresh_token");
+      var hadSession = hasAccessToken || hasRefreshToken;
+
+      // Khách chưa đăng nhập gọi nhầm API cần auth: không ép redirect.
+      if (!hadSession) {
+        return { ok: false, status: 401, data: { message: "Unauthorized" } };
+      }
+
       const refreshed = await apiRefreshToken();
 
       if (refreshed) {

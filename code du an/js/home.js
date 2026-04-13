@@ -14,6 +14,12 @@ function checkLoginToast() {
 
 let userWishlist = []
 async function loadMe() {
+  const token = localStorage.getItem('vt_access_token')
+  if (!token) {
+    userWishlist = []
+    return
+  }
+
   try {
     const res = await apiGetMe()
 
@@ -22,7 +28,7 @@ async function loadMe() {
       return
     }
 
-    const data = await res.data
+    const data = res.data || {}
 
     userWishlist = (data.result?.wishlist || []).map(id => id.toString())
 
