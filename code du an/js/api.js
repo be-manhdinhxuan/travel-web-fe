@@ -420,9 +420,24 @@ async function apiGetTours(params = {}) {
   return apiCall("GET", "/tours" + qs);
 }
 
+// Admin/Employee — GET /tours (kèm auth để lấy đủ status)
+async function apiAdminGetTours(params = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") query.append(key, value);
+  });
+  const qs = query.toString() ? "?" + query.toString() : "";
+  return apiCall("GET", "/tours" + qs, null, true);
+}
+
 // GET /tours/:slug
 async function apiGetTour(slug) {
   return apiCall("GET", "/tours/" + slug);
+}
+
+// Admin/Employee — GET /tours/:slug (kèm auth để lấy cả tour ẩn/hủy)
+async function apiAdminGetTour(slug) {
+  return apiCall("GET", "/tours/" + slug, null, true);
 }
 
 // GET /tours/recommended
@@ -437,11 +452,28 @@ async function apiAdminCreateTour(formData) {
   }
   try {
     const token = localStorage.getItem("vt_access_token");
-    const res = await fetch(API_BASE + "/tours", {
+    let res = await fetch(API_BASE + "/tours", {
       method: "POST",
       headers: token ? { Authorization: "Bearer " + token } : {},
       body: formData,
     });
+
+    // Token hết hạn -> refresh rồi thử lại 1 lần
+    if (res.status === 401) {
+      const refreshed = await apiRefreshToken();
+      if (refreshed) {
+        const newToken = localStorage.getItem("vt_access_token");
+        res = await fetch(API_BASE + "/tours", {
+          method: "POST",
+          headers: newToken ? { Authorization: "Bearer " + newToken } : {},
+          body: formData,
+        });
+      } else {
+        apiLogoutLocal();
+        return { ok: false, status: 401, data: { message: "Session expired" } };
+      }
+    }
+
     let data = null;
     try { data = await res.json(); } catch { data = {}; }
     return { ok: res.ok, status: res.status, data };
@@ -457,11 +489,28 @@ async function apiAdminUpdateTour(id, formData) {
   }
   try {
     const token = localStorage.getItem("vt_access_token");
-    const res = await fetch(API_BASE + "/tours/" + id, {
+    let res = await fetch(API_BASE + "/tours/" + id, {
       method: "PUT",
       headers: token ? { Authorization: "Bearer " + token } : {},
       body: formData,
     });
+
+    // Token hết hạn -> refresh rồi thử lại 1 lần
+    if (res.status === 401) {
+      const refreshed = await apiRefreshToken();
+      if (refreshed) {
+        const newToken = localStorage.getItem("vt_access_token");
+        res = await fetch(API_BASE + "/tours/" + id, {
+          method: "PUT",
+          headers: newToken ? { Authorization: "Bearer " + newToken } : {},
+          body: formData,
+        });
+      } else {
+        apiLogoutLocal();
+        return { ok: false, status: 401, data: { message: "Session expired" } };
+      }
+    }
+
     let data = null;
     try { data = await res.json(); } catch { data = {}; }
     return { ok: res.ok, status: res.status, data };
@@ -473,6 +522,11 @@ async function apiAdminUpdateTour(id, formData) {
 // Admin/Employee — PATCH /tours/:id/status
 async function apiAdminUpdateTourStatus(id, status) {
   return apiCall("PATCH", "/tours/" + id + "/status", { status }, true);
+}
+
+// Admin/Employee — PATCH /tours/:id
+async function apiAdminPatchTourStatus(id, status) {
+  return apiCall("PATCH", "/tours/" + id, { status }, true);
 }
 
 // Admin — DELETE /tours/:id
@@ -697,7 +751,9 @@ window.apiAdminDeleteCategory = apiAdminDeleteCategory;
 
 // Tours
 window.apiGetTours = apiGetTours;
+window.apiAdminGetTours = apiAdminGetTours;
 window.apiGetTour = apiGetTour;
+window.apiAdminGetTour = apiAdminGetTour;
 window.apiGetRecommendedTours = apiGetRecommendedTours;
 window.apiAdminCreateTour = apiAdminCreateTour;
 window.apiAdminUpdateTour = apiAdminUpdateTour;
