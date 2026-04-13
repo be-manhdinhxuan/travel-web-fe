@@ -13,6 +13,10 @@ function checkLoginToast() {
 }
 
 let userWishlist = []
+const HOME_TOUR_INITIAL_LIMIT = 6
+let homeRecommendedTours = []
+let homeRecommendedExpanded = false
+
 async function loadMe() {
   const token = localStorage.getItem('vt_access_token')
   if (!token) {
@@ -119,23 +123,85 @@ async function loadTours() {
   const grid = document.getElementById('tourGrid')
   if (!grid) return
   grid.innerHTML = '<p style="padding:20px;color:var(--muted)">Đang tải tour...</p>'
+  hideHomeLoadMoreButton()
 
   await loadMe() // Load thông tin user trước để biết wishlist
 
-  const res = await apiGetTours({ page: 1, limit: 6 })
+  const res = await apiGetRecommendedTours()
 
   if (!res || !res.ok) {
     grid.innerHTML = '<p style="padding:20px;color:#e55">Không thể kết nối server</p>'
+    homeRecommendedTours = []
+    homeRecommendedExpanded = false
     return
   }
 
-  const tours = res.data?.result?.tours || []
+  const tours = res.data?.result?.tours || res.data?.result || []
   if (!tours.length) {
     grid.innerHTML = '<p style="padding:20px;color:var(--muted)">Chưa có tour nào</p>'
+    homeRecommendedTours = []
+    homeRecommendedExpanded = false
     return
   }
 
-  renderTours(tours)
+  homeRecommendedTours = Array.isArray(tours) ? tours : []
+  homeRecommendedExpanded = false
+  renderHomeRecommendedTours()
+}
+
+function renderHomeRecommendedTours() {
+  const toursToShow = homeRecommendedExpanded
+    ? homeRecommendedTours
+    : homeRecommendedTours.slice(0, HOME_TOUR_INITIAL_LIMIT)
+
+  renderTours(toursToShow)
+  renderHomeLoadMoreButton()
+}
+
+function ensureHomeLoadMoreWrap() {
+  const grid = document.getElementById('tourGrid')
+  if (!grid || !grid.parentNode) return null
+
+  let wrap = document.getElementById('homeLoadMoreWrap')
+  if (wrap) return wrap
+
+  wrap = document.createElement('div')
+  wrap.id = 'homeLoadMoreWrap'
+  wrap.className = 'home-load-more-wrap'
+  wrap.style.display = 'none'
+
+  const btn = document.createElement('button')
+  btn.id = 'homeLoadMoreBtn'
+  btn.type = 'button'
+  btn.textContent = 'Xem thêm'
+  btn.className = 'home-load-more-btn'
+  btn.onclick = showAllHomeTours
+
+  wrap.appendChild(btn)
+  grid.parentNode.insertBefore(wrap, grid.nextSibling)
+  return wrap
+}
+
+function renderHomeLoadMoreButton() {
+  const wrap = ensureHomeLoadMoreWrap()
+  if (!wrap) return
+
+  if (activeFilter || homeRecommendedExpanded || homeRecommendedTours.length <= HOME_TOUR_INITIAL_LIMIT) {
+    wrap.style.display = 'none'
+    return
+  }
+
+  wrap.style.display = 'flex'
+}
+
+function hideHomeLoadMoreButton() {
+  const wrap = document.getElementById('homeLoadMoreWrap')
+  if (wrap) wrap.style.display = 'none'
+}
+
+function showAllHomeTours() {
+  homeRecommendedExpanded = true
+  renderHomeRecommendedTours()
 }
 
 // ===== RENDER TOURS =====
@@ -216,6 +282,7 @@ let activeFilter = null
 function filterByCategory(categoryId, label) {
   if (activeFilter === categoryId) { clearFilter(); return }
   activeFilter = categoryId
+  hideHomeLoadMoreButton()
   document.querySelectorAll('.dest-card').forEach(c => c.classList.remove('dest-active'))
   document.querySelector(`[onclick*="${categoryId}"]`)?.classList.add('dest-active')
   document.getElementById('filterBannerText').textContent = `📍 ${label}`
