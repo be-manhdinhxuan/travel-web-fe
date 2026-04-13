@@ -109,6 +109,12 @@
                     </div>
                     <span id="pwdStrengthText"></span>
                   </div>
+                  <ul class="admin-pwd-rules">
+                    <li id="regPwdRuleLength">6-50 ký tự</li>
+                    <li id="regPwdRuleLower">Ít nhất 1 chữ thường (a-z)</li>
+                    <li id="regPwdRuleUpper">Ít nhất 1 chữ in hoa (A-Z)</li>
+                    <li id="regPwdRuleSymbol">Ít nhất 1 ký tự đặc biệt</li>
+                  </ul>
                 </div>
 
                 <!-- Xác nhận mật khẩu -->
@@ -122,6 +128,13 @@
                     </svg>
                     <input type="password" id="regConfirm" placeholder="Nhập lại mật khẩu"
                       onkeydown="if(event.key==='Enter') doRegister()">
+                    <button class="auth2-eye" type="button" onclick="togglePwd('regConfirm',this)" tabindex="-1"
+                      aria-label="Hiện mật khẩu xác nhận">
+                      <svg viewBox="0 0 20 20" fill="none" width="16" height="16">
+                        <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />
+                        <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
 

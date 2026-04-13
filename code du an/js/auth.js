@@ -185,6 +185,19 @@ async function doRegister() {
 function checkPasswordStrength(val) {
   const fill = document.getElementById('pwdBarFill')
   const txt = document.getElementById('pwdStrengthText')
+  const ruleMap = {
+    regPwdRuleLength: val.length >= 6,
+    regPwdRuleLower: /[a-z]/.test(val),
+    regPwdRuleUpper: /[A-Z]/.test(val),
+    regPwdRuleSymbol: /[^A-Za-z0-9]/.test(val)
+  }
+
+  Object.keys(ruleMap).forEach((id) => {
+    const el = document.getElementById(id)
+    if (!el) return
+    el.classList.toggle('ok', !!ruleMap[id])
+  })
+
   if (!fill) return
 
   let score = 0

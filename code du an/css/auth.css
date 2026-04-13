@@ -522,6 +522,38 @@ body {
   min-width: 60px;
 }
 
+.admin-pwd-rules {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.admin-pwd-rules li {
+  font-size: 0.75rem;
+  color: #9aa19e;
+  position: relative;
+  padding-left: 16px;
+}
+
+.admin-pwd-rules li::before {
+  content: '•';
+  position: absolute;
+  left: 4px;
+  top: 0;
+}
+
+.admin-pwd-rules li.ok {
+  color: #2d8a4e;
+  font-weight: 600;
+}
+
+.admin-pwd-rules li.ok::before {
+  content: '✓';
+  left: 0;
+}
+
 @media (max-width: 1024px) {
   .auth2-reg-inner {
     grid-template-columns: 1fr;

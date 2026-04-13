@@ -151,7 +151,7 @@ body {
   font-size: 0.9rem;
   color: #666;
   line-height: 1.6;
-  max-width: 400px;
+  max-width: 500px;
   margin: 0 auto;
 }
 
@@ -350,7 +350,7 @@ body {
   border-radius: 10px;
   padding: 14px 18px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   font-size: 0.82rem;
   color: #555;
@@ -403,6 +403,7 @@ body {
 .tc-kv {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   padding: 7px 0;
   border-bottom: 1px dashed #e6ece7;

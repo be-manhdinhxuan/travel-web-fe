@@ -3305,8 +3305,8 @@ function dashRenderTodaySummary(overviewToday, revenueWeekResult, label) {
       active: cancelRate > 40,
       color: cancelRate > 40 ? '#b42318' : '#ca8a04',
       text: cancelRate > 40
-        ? '⚠️ Tỷ lệ huỷ cao (' + cancelRate.toLocaleString('vi-VN') + '%)'
-        : '✅ Tỷ lệ huỷ bình thường (' + cancelRate.toLocaleString('vi-VN') + '%)'
+        ? '📉 Tỷ lệ huỷ cao (' + cancelRate.toLocaleString('vi-VN') + '%)'
+        : '📉 Tỷ lệ huỷ bình thường (' + cancelRate.toLocaleString('vi-VN') + '%)'
     },
     {
       active: !!negativeDay,
