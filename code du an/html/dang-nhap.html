@@ -18,7 +18,7 @@
       <div class="auth2-wrapper">
         <!-- NAV mini -->
         <div class="auth2-nav">
-          <a href="trang-chu.html" style="display:flex;align-items:center;gap:9px;text-decoration:none">
+          <a href="index.html" style="display:flex;align-items:center;gap:9px;text-decoration:none">
             <div
               style="width:34px;height:34px;background:#e8f5ee;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2d8a4e" stroke-width="2.5"
@@ -264,11 +264,11 @@
               } else if (user.role === 2 || user.role === 'employee') {
                 window.location.href = 'nhan-vien.html';
               } else {
-                window.location.href = 'trang-chu.html';
+                window.location.href = 'index.html';
               }
             } else {
               // Nếu chưa xác thực (verify = 0), redirect tới trang chủ (nav.js sẽ show modal)
-              window.location.href = 'trang-chu.html';
+              window.location.href = 'index.html';
             }
           }
         } catch (e) {

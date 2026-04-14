@@ -120,7 +120,7 @@ function nvGetIssues() {
             toastMessage("Bạn không có quyền truy cập trang nhân viên", false);
           }
           setTimeout(function () {
-            window.location.href = "./trang-chu.html";
+            window.location.href = "./index.html";
           }, 500);
           return null;
         }
@@ -144,7 +144,7 @@ function nvGetIssues() {
         toastMessage("Đã đăng xuất", true);
       }
       setTimeout(function () {
-        window.location.href = "./trang-chu.html";
+        window.location.href = "./index.html";
       }, 300);
     };
 

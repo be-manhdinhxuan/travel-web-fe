@@ -6,7 +6,7 @@
 
   const NAV_HTML = `
 <nav id="mainNav">
-  <a href="trang-chu.html" style="display:flex;align-items:center;gap:9px;text-decoration:none">
+  <a href="index.html" style="display:flex;align-items:center;gap:9px;text-decoration:none">
     <div style="width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;">
       <svg fill=" #2d8a4e" height=" 40px" width="40px" version="1.1" id="Layer_1"
                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -30,7 +30,7 @@
   </a>
 
   <ul class="nav-links">
-    <li><a href="trang-chu.html">Điểm đến</a></li>
+    <li><a href="index.html">Điểm đến</a></li>
     <li><a href="tour-du-lich.html">Tour du lịch</a></li>
     <li><a href="uu-dai.html">Ưu đãi</a></li>
     <li><a href="ve-chung-toi.html">Về chúng tôi</a></li>

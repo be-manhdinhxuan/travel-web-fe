@@ -142,7 +142,7 @@
           if (res && res.ok) {
             markLocalUserVerified();
             showSection('xvSuccess');
-            setTimeout(function () { window.location.href = 'trang-chu.html'; }, 5000);
+            setTimeout(function () { window.location.href = 'index.html'; }, 5000);
           } else if (res && res.status === 410) {
             document.getElementById('xvErrTitle').textContent = 'Link đã hết hạn';
             document.getElementById('xvErrSub').textContent = 'Link xác thực chỉ có hiệu lực một lần và đã hết hạn. Vui lòng yêu cầu gửi lại.';
@@ -154,12 +154,12 @@
           } else {
             markLocalUserVerified();
             showSection('xvSuccess');
-            setTimeout(function () { window.location.href = 'trang-chu.html'; }, 3000);
+            setTimeout(function () { window.location.href = 'index.html'; }, 3000);
           }
         } catch (e) {
           markLocalUserVerified();
           showSection('xvSuccess');
-          setTimeout(function () { window.location.href = 'trang-chu.html'; }, 3000);
+          setTimeout(function () { window.location.href = 'index.html'; }, 3000);
         }
       });
 

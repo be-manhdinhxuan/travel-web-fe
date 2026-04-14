@@ -96,7 +96,7 @@ async function handleLogin() {
     } else if (user.role === 2 || user.role === 'employee') {
       window.location.href = 'nhan-vien.html'
     } else {
-      window.location.href = 'trang-chu.html'
+      window.location.href = 'index.html'
     }
 
   } catch (err) {
@@ -278,7 +278,7 @@ async function doLogin() {
     } else if (user.role === 2 || user.role === 'employee') {
       window.location.href = 'nhan-vien.html'
     } else {
-      window.location.href = 'trang-chu.html'
+      window.location.href = 'index.html'
     }
 
   } catch (err) {

@@ -1,4 +1,4 @@
-﻿const API_BASE = "http://localhost:5000/api";
+﻿const API_BASE = "https://travel-web-be.onrender.com/api";
 
 function isVerifyCheckRequired(method, endpoint) {
   const cleanEndpoint = String(endpoint || '').split('?')[0];
