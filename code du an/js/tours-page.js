@@ -41,6 +41,10 @@ async function loadTours() {
   if (searchInput) searchInput.value = keyword
   const sortEl = document.getElementById('tlSort')
   if (sortEl) sortEl.value = sort
+  const startDateEl = document.getElementById('tlStartDate')
+  if (startDateEl) startDateEl.value = departure_from || ''
+  const endDateEl = document.getElementById('tlEndDate')
+  if (endDateEl) endDateEl.value = departure_to || ''
   if (duration) {
     const radio = document.querySelector(`input[name="duration"][value="${duration}"]`)
     if (radio) radio.checked = true
