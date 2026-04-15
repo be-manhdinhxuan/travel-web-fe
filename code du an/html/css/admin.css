@@ -937,6 +937,32 @@
    font-family: inherit;
 }
 
+.admin-schedule-status-select {
+   width: 100%;
+   min-width: 130px;
+   height: 34px;
+   border: 1.5px solid #d8dee7;
+   border-radius: 8px;
+   padding: 0 10px;
+   font-size: 0.78rem;
+   font-family: inherit;
+   color: #374151;
+   background: #fff;
+   outline: none;
+}
+
+.admin-schedule-status-select:focus {
+   border-color: #3aaa62;
+   box-shadow: 0 0 0 3px rgba(58, 170, 98, 0.16);
+}
+
+.admin-schedule-status-select:disabled {
+   color: #4b5563;
+   background: #f9fafb;
+   border-color: #e5e7eb;
+   cursor: default;
+}
+
 .admin-create-tour-images {
    margin-top: 10px;
    display: grid;

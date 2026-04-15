@@ -1525,6 +1525,120 @@ function adminEditTourStatusMeta(status) {
   return { label: 'Inactive', cls: 'is-inactive' };
 }
 
+function adminEditScheduleStatusMeta(status) {
+  var n = Number(status);
+  switch (n) {
+    case 1:
+      return { text: 'Còn chỗ', color: 'green' };
+    case 2:
+      return { text: 'Đã đầy', color: 'orange' };
+    case 3:
+      return { text: 'Đã kết thúc', color: 'gray' };
+    case 0:
+      return { text: 'Đã hủy', color: 'red' };
+    default:
+      return { text: 'Không xác định', color: 'gray' };
+  }
+}
+
+function adminEditScheduleStatusSelectHtml(selectId, status, disabled) {
+  var current = Number(status);
+  var attrs = 'class="admin-schedule-status-select"';
+  if (selectId) attrs += ' id="' + adminTourDetailEscapeHtml(selectId) + '"';
+  if (disabled) attrs += ' disabled';
+
+  var options = [
+    { value: 1, text: 'Còn chỗ' },
+    { value: 2, text: 'Đã đầy' },
+    { value: 3, text: 'Đã kết thúc' },
+    { value: 0, text: 'Đã hủy' }
+  ];
+
+  var html = '<select ' + attrs + '>';
+  html += options.map(function (opt) {
+    var selected = Number(opt.value) === current ? ' selected' : '';
+    return '<option value="' + opt.value + '"' + selected + '>' + adminTourDetailEscapeHtml(opt.text) + '</option>';
+  }).join('');
+  if (![0, 1, 2, 3].includes(current)) {
+    html += '<option value="' + adminTourDetailEscapeHtml(String(current)) + '" selected>Không xác định</option>';
+  }
+  html += '</select>';
+  return html;
+}
+
+function adminScheduleParseTime(value) {
+  if (!value) return NaN;
+  var t = new Date(value).getTime();
+  return Number.isFinite(t) ? t : NaN;
+}
+
+function adminScheduleBookedCount(sc) {
+  var total = Number(sc && sc.total_slots || 0);
+  var available = Number(sc && sc.available_slots || 0);
+  return Math.max(0, total - available);
+}
+
+function adminScheduleCanUpdateFromBe(sc) {
+  if (!sc || typeof sc !== 'object') {
+    return { ok: false, message: 'Không tìm thấy dữ liệu lịch từ BE.' };
+  }
+
+  var status = Number(sc.status);
+  if (status === 3) {
+    return { ok: false, message: 'Lịch đã kết thúc (Expired), không được phép chỉnh sửa.' };
+  }
+  if (status === 0) {
+    return { ok: false, message: 'Lịch đã hủy (Cancelled), không được phép chỉnh sửa.' };
+  }
+  if (status !== 1 && status !== 2) {
+    return { ok: false, message: 'Trạng thái lịch không hợp lệ để cập nhật.' };
+  }
+
+  var departureMs = adminScheduleParseTime(sc.departure_date);
+  if (!Number.isFinite(departureMs)) {
+    return { ok: false, message: 'Ngày khởi hành từ BE không hợp lệ.' };
+  }
+  if (departureMs <= Date.now()) {
+    return { ok: false, message: 'Ngày khởi hành đã qua, không được phép chỉnh sửa.' };
+  }
+
+  return { ok: true };
+}
+
+function adminScheduleValidateDateInput(dep, ret) {
+  var depMs = adminScheduleParseTime(dep);
+  var retMs = adminScheduleParseTime(ret);
+
+  if (!Number.isFinite(depMs) || !Number.isFinite(retMs)) {
+    return { ok: false, message: 'Ngày đi hoặc ngày về không hợp lệ.' };
+  }
+  if (depMs >= retMs) {
+    return { ok: false, message: 'Ngày đi phải nhỏ hơn ngày về.' };
+  }
+  if (depMs <= Date.now()) {
+    return { ok: false, message: 'Không được sửa lịch về quá khứ (ngày đi phải lớn hơn hiện tại).' };
+  }
+
+  return { ok: true };
+}
+
+function adminScheduleValidateTotalSlots(totalSlots, sourceSc) {
+  if (!sourceSc || typeof sourceSc !== 'object') {
+    return { ok: false, message: 'Không thể kiểm tra số chỗ đã đặt từ dữ liệu hiện tại.' };
+  }
+
+  var booked = adminScheduleBookedCount(sourceSc);
+  var total = Number(totalSlots);
+  if (!Number.isFinite(total) || total <= 0) {
+    return { ok: false, message: 'Tổng chỗ phải lớn hơn 0.' };
+  }
+  if (total < booked) {
+    return { ok: false, message: 'Tổng chỗ không được nhỏ hơn số đã đặt (' + booked + ').' };
+  }
+
+  return { ok: true, booked: booked };
+}
+
 function adminEditTourFormatDateTime(value) {
   if (!value) return '—';
   var d = new Date(value);
@@ -1557,7 +1671,7 @@ function adminEditTourRenderSchedulesTable() {
   var canDeleteSchedule = adminCanDeleteTours();
 
   if (!Array.isArray(ADMIN_EDIT_TOUR_SCHEDULES) || !ADMIN_EDIT_TOUR_SCHEDULES.length) {
-    body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#9ca3af;padding:14px">Chưa có lịch khởi hành</td></tr>';
+    body.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#9ca3af;padding:14px">Chưa có lịch khởi hành</td></tr>';
     return;
   }
 
@@ -1570,7 +1684,12 @@ function adminEditTourRenderSchedulesTable() {
     var note = String(s.note || '').trim();
     var total = Number(s.total_slots || 0);
     var avail = Number(s.available_slots || 0);
-    var scheduleActions = '<button type="button" class="admin-act-btn" onclick="adminEditTourSchedulePromptEdit(' + idx + ')">Sửa</button>' +
+    var statusSelect = adminEditScheduleStatusSelectHtml('', s.status, true);
+    var updateRule = adminScheduleCanUpdateFromBe(s);
+    var editBtn = updateRule.ok
+      ? '<button type="button" class="admin-act-btn" onclick="adminEditTourSchedulePromptEdit(' + idx + ')">Sửa</button>'
+      : '<button type="button" class="admin-act-btn" disabled title="' + adminTourDetailEscapeHtml(updateRule.message) + '">Sửa</button>';
+    var scheduleActions = editBtn +
       (canDeleteSchedule
         ? '<button type="button" class="admin-act-btn admin-act-btn-red" onclick="adminEditTourScheduleDelete(' + idx + ')">Xóa</button>'
         : '');
@@ -1584,6 +1703,7 @@ function adminEditTourRenderSchedulesTable() {
       '<td>' + adminTourDetailEscapeHtml(note || '—') + '</td>' +
       '<td>' + adminTourDetailEscapeHtml(String(total)) + '</td>' +
       '<td>' + adminTourDetailEscapeHtml(String(avail)) + '</td>' +
+      '<td>' + statusSelect + '</td>' +
       '<td><div class="act-btns">' + scheduleActions + '</div></td>' +
       '</tr>';
   }).join('');
@@ -1643,6 +1763,7 @@ async function adminEditTourScheduleAdd() {
     '<td><input id="newScNote" type="text" class="admin-create-tour-line-input" placeholder="Ghi chú"></td>' +
     '<td><input id="newScTotalSlots" type="number" min="1" class="admin-create-tour-line-input" placeholder="10"></td>' +
     '<td style="color:#6b7280;font-size:0.78rem">Tự động</td>' +
+    '<td>' + adminEditScheduleStatusSelectHtml('newScStatus', 1, false) + '</td>' +
     '<td><div class="act-btns"><button type="button" class="admin-act-btn" onclick="adminEditTourScheduleSaveNewRow()">✅ Lưu</button><button type="button" class="admin-act-btn admin-act-btn-red" onclick="adminEditTourScheduleCancelNewRow()">❌ Hủy</button></div></td>';
 
   body.appendChild(row);
@@ -1669,6 +1790,7 @@ async function adminEditTourScheduleSaveNewRow() {
   var pb = Number(document.getElementById('newScPriceBaby')?.value || 0);
   var note = String(document.getElementById('newScNote')?.value || '').trim();
   var total = Number(document.getElementById('newScTotalSlots')?.value || 0);
+  var status = Number(document.getElementById('newScStatus')?.value || 1);
 
   if (!dep || !ret) {
     showToast('⚠️ Vui lòng nhập ngày đi và ngày về');
@@ -1676,6 +1798,12 @@ async function adminEditTourScheduleSaveNewRow() {
   }
   if (!isFinite(total) || total <= 0) {
     showToast('⚠️ Tổng chỗ phải lớn hơn 0');
+    return;
+  }
+
+  var dateRule = adminScheduleValidateDateInput(dep, ret);
+  if (!dateRule.ok) {
+    showToast('⚠️ ' + dateRule.message);
     return;
   }
 
@@ -1688,7 +1816,7 @@ async function adminEditTourScheduleSaveNewRow() {
     note: note,
     total_slots: total,
     available_slots: total,
-    status: 1
+    status: status
   };
 
   try {
@@ -1707,6 +1835,13 @@ async function adminEditTourScheduleSaveNewRow() {
 async function adminEditTourSchedulePromptEdit(idx) {
   var sc = Array.isArray(ADMIN_EDIT_TOUR_SCHEDULES) ? ADMIN_EDIT_TOUR_SCHEDULES[idx] : null;
   if (!sc) return;
+
+  var updateRule = adminScheduleCanUpdateFromBe(sc);
+  if (!updateRule.ok) {
+    showToast('❌ ' + updateRule.message);
+    return;
+  }
+
   var sid = String(sc._id || sc.id || '').trim();
   if (!sid) {
     showToast('❌ Không tìm thấy id lịch');
@@ -1728,7 +1863,6 @@ async function adminEditTourSchedulePromptEdit(idx) {
   var row = document.createElement('tr');
   row.id = 'adminEditScheduleEditRow';
   row.setAttribute('data-schedule-id', sid);
-  row.setAttribute('data-status', String(Number(sc.status || 0)));
 
   row.innerHTML =
     '<td><input id="editScDepartureDate" type="date" class="admin-create-tour-line-input" value="' + adminTourDetailEscapeHtml(String(sc.departure_date || '').slice(0, 10)) + '"></td>' +
@@ -1739,6 +1873,7 @@ async function adminEditTourSchedulePromptEdit(idx) {
     '<td><input id="editScNote" type="text" class="admin-create-tour-line-input" value="' + adminTourDetailEscapeHtml(String(sc.note || '')) + '"></td>' +
     '<td><input id="editScTotalSlots" type="number" min="1" class="admin-create-tour-line-input" value="' + adminTourDetailEscapeHtml(String(sc.total_slots || 0)) + '"></td>' +
     '<td><input id="editScAvailableSlots" type="number" min="0" class="admin-create-tour-line-input" value="' + adminTourDetailEscapeHtml(String(sc.available_slots || 0)) + '"></td>' +
+    '<td>' + adminEditScheduleStatusSelectHtml('editScStatus', sc.status, false) + '</td>' +
     '<td><div class="act-btns"><button type="button" class="admin-act-btn" onclick="adminEditTourScheduleSaveEditRow()">✅ Lưu</button><button type="button" class="admin-act-btn admin-act-btn-red" onclick="adminEditTourScheduleCancelEditRow()">❌ Hủy</button></div></td>';
 
   body.appendChild(row);
@@ -1816,7 +1951,7 @@ async function adminEditTourScheduleSaveEditRow() {
     return;
   }
 
-  var status = Number(row.getAttribute('data-status') || 0);
+  var status = Number(document.getElementById('editScStatus')?.value || 0);
   var dep = String(document.getElementById('editScDepartureDate')?.value || '').trim();
   var ret = String(document.getElementById('editScReturnDate')?.value || '').trim();
   var pa = Number(document.getElementById('editScPriceAdult')?.value || 0);
@@ -1832,6 +1967,27 @@ async function adminEditTourScheduleSaveEditRow() {
   }
   if (!isFinite(total) || total <= 0) {
     showToast('⚠️ Tổng chỗ phải lớn hơn 0');
+    return;
+  }
+
+  var sourceSchedule = (Array.isArray(ADMIN_EDIT_TOUR_SCHEDULES) ? ADMIN_EDIT_TOUR_SCHEDULES : [])
+    .find(function (it) { return String(it && (it._id || it.id) || '').trim() === sid; });
+
+  var canUpdateRule = adminScheduleCanUpdateFromBe(sourceSchedule);
+  if (!canUpdateRule.ok) {
+    showToast('❌ ' + canUpdateRule.message);
+    return;
+  }
+
+  var totalRule = adminScheduleValidateTotalSlots(total, sourceSchedule);
+  if (!totalRule.ok) {
+    showToast('⚠️ ' + totalRule.message);
+    return;
+  }
+
+  var dateRule = adminScheduleValidateDateInput(dep, ret);
+  if (!dateRule.ok) {
+    showToast('⚠️ ' + dateRule.message);
     return;
   }
 
@@ -1978,9 +2134,9 @@ function adminCreateTourEnsureModal() {
     '<section class="admin-create-tour-section" id="adminEditExtraSection" style="display:none">' +
     '<div class="admin-create-tour-row-head"><h4>Phần 6 - Lịch khởi hành</h4><button type="button" class="admin-btn-ghost" onclick="adminEditTourScheduleAdd()">+ Thêm lịch mới</button></div>' +
     '<div style="overflow:auto;border:1px solid #e5e7eb;border-radius:10px">' +
-    '<table class="admin-table" style="min-width:1080px;margin:0">' +
-    '<thead><tr><th>Ngày đi</th><th>Ngày về</th><th>Giá Người Lớn</th><th>Giá Trẻ em</th><th>Giá em bé</th><th>Ghi chú</th><th>Tổng chỗ</th><th>Còn</th><th>Thao tác</th></tr></thead>' +
-    '<tbody id="adminEditSchedulesBody"><tr><td colspan="9" style="text-align:center;color:#9ca3af;padding:14px">Chưa có lịch khởi hành</td></tr></tbody>' +
+    '<table class="admin-table" style="min-width:1180px;margin:0">' +
+    '<thead><tr><th>Ngày đi</th><th>Ngày về</th><th>Giá Người Lớn</th><th>Giá Trẻ em</th><th>Giá em bé</th><th>Ghi chú</th><th>Tổng chỗ</th><th>Còn</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>' +
+    '<tbody id="adminEditSchedulesBody"><tr><td colspan="10" style="text-align:center;color:#9ca3af;padding:14px">Chưa có lịch khởi hành</td></tr></tbody>' +
     '</table>' +
     '</div>' +
     '</section>' +
@@ -2182,7 +2338,7 @@ function adminResetCreateTourForm() {
   if (itinerary) itinerary.innerHTML = '';
   if (includes) includes.innerHTML = '';
   if (excludes) excludes.innerHTML = '';
-  if (schedulesBody) schedulesBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:14px">Chưa có lịch khởi hành</td></tr>';
+  if (schedulesBody) schedulesBody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#9ca3af;padding:14px">Chưa có lịch khởi hành</td></tr>';
 
   adminCreateTourAddHighlight('');
   adminCreateTourAddItineraryRow();
