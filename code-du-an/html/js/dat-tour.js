@@ -374,6 +374,48 @@ function mapCouponError(reason) {
   return 'Mã không hợp lệ'
 }
 
+function mapCheckoutErrorMessage(message) {
+  const raw = String(message || '').trim();
+  const normalized = raw.toLowerCase();
+
+  if (normalized.includes('booking already paid')) {
+    return 'Booking đã được thanh toán';
+  }
+
+  if (normalized.includes('booking has expired')) {
+    return 'Booking đã hết hạn thanh toán';
+  }
+
+  if (normalized.includes('booking already completed')) {
+    return 'Booking đã hoàn thành';
+  }
+
+  if (normalized.includes('invalid booking status')) {
+    return 'Trạng thái booking không hợp lệ';
+  }
+
+  return raw || 'Không thể tạo giao dịch thanh toán';
+}
+
+function extractCheckoutErrorMessageFromResponse(res) {
+  const data = res?.data || {};
+  const errors = data?.errors;
+
+  if (errors && typeof errors === 'object') {
+    if (errors?.booking_id?.msg) {
+      return String(errors.booking_id.msg).trim();
+    }
+
+    const firstFieldKey = Object.keys(errors)[0] || '';
+    const firstFieldMsg = firstFieldKey ? errors?.[firstFieldKey]?.msg : '';
+    if (firstFieldMsg) {
+      return String(firstFieldMsg).trim();
+    }
+  }
+
+  return String(data?.message || '').trim();
+}
+
 async function doCheckout() {
   if (!state.bookingId) {
     showToast('⚠️ Không tìm thấy booking để thanh toán');
@@ -388,7 +430,8 @@ async function doCheckout() {
         : await apiCreateMomoPayment(state.bookingId));
 
     if (!res?.ok) {
-      throw new Error(res?.data?.message || 'Thanh toán thất bại');
+      const serverMessage = extractCheckoutErrorMessageFromResponse(res);
+      throw new Error(serverMessage || 'Thanh toán thất bại');
     }
 
     const paymentUrl =
@@ -409,7 +452,7 @@ async function doCheckout() {
     window.location.href = 'ket-qua-thanh-toan.html?booking_id=' + encodeURIComponent(state.bookingId);
   } catch (error) {
     console.error(error);
-    showToast('❌ ' + (error?.message || 'Không thể tạo giao dịch thanh toán'));
+    showToast('❌ ' + mapCheckoutErrorMessage(error?.message));
   }
 }
 

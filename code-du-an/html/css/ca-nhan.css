@@ -958,6 +958,35 @@ body {
   background: var(--green-lt);
 }
 
+.cp-modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 22px 22px;
+}
+
+.cp-modal-close-btn.cp-modal-close-btn-inline {
+  width: 100%;
+  margin: 0;
+}
+
+.cp-modal-retry-btn {
+  width: 100%;
+  padding: 11px;
+  background: #f59e0b;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.cp-modal-retry-btn:hover {
+  background: #d97706;
+}
+
 .toast {
   position: fixed;
   bottom: 28px;

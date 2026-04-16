@@ -915,6 +915,97 @@ function closeBookingDetailModal() {
   if (existing) existing.remove();
 }
 
+function isPendingBookingStatus(statusValue) {
+  var normalized = Number(statusValue);
+  if (normalized === 0) return true;
+  return String(statusValue ?? '').toLowerCase() === 'pending';
+}
+
+function isPendingPaymentStatus(statusValue) {
+  var normalized = Number(statusValue);
+  if (normalized === 0) return true;
+  return String(statusValue ?? '').toLowerCase() === 'pending';
+}
+
+function shouldShowRetryPaymentButton(detail, fallbackBooking) {
+  // Ưu tiên cùng một chuẩn với badge đang hiển thị ở danh sách lịch sử.
+  if (fallbackBooking && normalizeBookingStatus(fallbackBooking?.status).className === 'status-pending') {
+    return true;
+  }
+  if (detail && normalizeBookingStatus(detail?.status).className === 'status-pending') {
+    return true;
+  }
+
+  var bookingStatusCandidates = [
+    detail?.status,
+    detail?.booking_status,
+    fallbackBooking?.status,
+    fallbackBooking?.booking_status,
+  ];
+
+  for (var i = 0; i < bookingStatusCandidates.length; i++) {
+    if (isPendingBookingStatus(bookingStatusCandidates[i])) return true;
+  }
+
+  var paymentStatusCandidates = [
+    detail?.payment?.status,
+    detail?.payment_status,
+    fallbackBooking?.payment?.status,
+    fallbackBooking?.payment_status,
+  ];
+
+  for (var j = 0; j < paymentStatusCandidates.length; j++) {
+    if (isPendingPaymentStatus(paymentStatusCandidates[j])) return true;
+  }
+
+  return false;
+}
+
+function retryBookingPayment(bookingId) {
+  var id = String(bookingId || '').trim();
+  if (!id) {
+    showToast('⚠️ Không tìm thấy booking để thanh toán lại');
+    return;
+  }
+  closeBookingDetailModal();
+  window.location.href = 'dat-tour.html?booking_id=' + encodeURIComponent(id);
+}
+
+function extractCancelledReason(detail, fallbackBooking) {
+  var candidates = [
+    detail?.booking?.cancelled_reason,
+    detail?.booking?.cancel_reason,
+    detail?.booking?.cancellation_reason,
+    detail?.booking?.reason_cancel,
+    detail?.booking?.cancel_note,
+    detail?.booking?.cancellation?.reason,
+    detail?.cancelled_reason,
+    detail?.cancel_reason,
+    detail?.cancellation_reason,
+    detail?.reason_cancel,
+    detail?.cancel_note,
+    detail?.cancellation?.reason,
+    fallbackBooking?.booking?.cancelled_reason,
+    fallbackBooking?.booking?.cancel_reason,
+    fallbackBooking?.booking?.cancellation_reason,
+    fallbackBooking?.booking?.reason_cancel,
+    fallbackBooking?.booking?.cancel_note,
+    fallbackBooking?.booking?.cancellation?.reason,
+    fallbackBooking?.cancelled_reason,
+    fallbackBooking?.cancel_reason,
+    fallbackBooking?.cancellation_reason,
+    fallbackBooking?.reason_cancel,
+    fallbackBooking?.cancel_note,
+    fallbackBooking?.cancellation?.reason,
+  ];
+
+  for (var i = 0; i < candidates.length; i++) {
+    var val = String(candidates[i] || '').trim();
+    if (val) return val;
+  }
+  return '';
+}
+
 function openBookingDetailModal(detail, fallbackBooking) {
   closeBookingDetailModal();
 
@@ -922,6 +1013,18 @@ function openBookingDetailModal(detail, fallbackBooking) {
   var contact = detail?.contact_info || {};
   var price = detail?.price_detail || {};
   var payment = detail?.payment || {};
+  var cancelledReason = extractCancelledReason(detail, fallbackBooking);
+  var cancelledReasonRow = cancelledReason
+    ? '<div class="cp-modal-row"><span>Lý do hủy</span><strong>' + cancelledReason + '</strong></div>'
+    : '';
+  var canRetryPayment = shouldShowRetryPaymentButton(detail, fallbackBooking);
+  var bookingId = String(detail?._id || fallbackBooking?._id || '').trim();
+  var actionButtonsHtml = canRetryPayment
+    ? '<div class="cp-modal-actions">' +
+    '<button type="button" class="cp-modal-retry-btn" onclick="retryBookingPayment(\'' + bookingId.replace(/'/g, "\\'") + '\')">Thanh toán lại</button>' +
+    '<button type="button" class="cp-modal-close-btn cp-modal-close-btn-inline" onclick="closeBookingDetailModal()">Đóng</button>' +
+    '</div>'
+    : '<button type="button" class="cp-modal-close-btn" onclick="closeBookingDetailModal()">Đóng</button>';
   var snapshot = normalizeTourSnapshot(detail, fallbackBooking);
 
   var durationDays = Number(snapshot?.duration_days || 0);
@@ -956,9 +1059,10 @@ function openBookingDetailModal(detail, fallbackBooking) {
     '<div class="cp-modal-row"><span>Tổng thanh toán</span><strong>' + (formatVnd(detail?.final_price) || '—') + '</strong></div>' +
     '<div class="cp-modal-row"><span>Phương thức</span><strong>' + formatPaymentProvider(payment?.provider ?? detail?.payment_method) + '</strong></div>' +
     '<div class="cp-modal-row"><span>Trạng thái thanh toán</span><strong>' + formatPaymentStatus(payment?.status) + '</strong></div>' +
+    cancelledReasonRow +
     '<div class="cp-modal-row"><span>Ngày đặt</span><strong>' + formatBookingDate(detail?.created_at) + '</strong></div>' +
     '</div>' +
-    '<button type="button" class="cp-modal-close-btn" onclick="closeBookingDetailModal()">Đóng</button>' +
+    actionButtonsHtml +
     '</div>';
 
   document.body.appendChild(overlay);
@@ -1098,6 +1202,7 @@ async function renderBookingHistory() {
   try {
     var res = await apiGetMyBookings({ page: bookingHistoryState.page, limit: bookingHistoryState.limit });
     var bookings = res && res.ok ? extractBookingItems(res.data) : [];
+    bookingDetailsCache = {};
     bookingHistoryItemMap = {};
     bookings.forEach(function (b) {
       if (b && b._id) bookingHistoryItemMap[String(b._id)] = b;
