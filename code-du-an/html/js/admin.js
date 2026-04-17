@@ -45,6 +45,79 @@ function adminSettingsSaveUser(user) {
   localStorage.setItem('vt_user', JSON.stringify(user));
 }
 
+function adminResolveDisplayName(user, fallbackName) {
+  var name = String(user?.name || user?.full_name || '').trim();
+  if (name) return name;
+
+  var email = String(user?.email || '').trim();
+  if (email && email.includes('@')) return email.split('@')[0];
+
+  return fallbackName || 'Admin';
+}
+
+function adminResolveRoleLabel(user, fallbackRoleLabel) {
+  var roleNum = Number(user?.role);
+  var roleText = String(user?.role || '').toLowerCase();
+  if (roleNum === 2 || roleText === 'employee' || roleText === 'staff') return 'Nhân viên';
+  if (roleNum === 1 || roleText === 'admin') return 'Quản trị viên';
+  return fallbackRoleLabel || 'Quản trị viên';
+}
+
+function adminApplySidebarUser(user, fallbackRoleLabel, fallbackName) {
+  var sideName = document.getElementById('sideUserName');
+  var sideAvatar = document.getElementById('sideUserAvatar');
+  var roleEl = document.querySelector('.admin-user-role');
+
+  var displayName = adminResolveDisplayName(user, fallbackName);
+  var roleLabel = adminResolveRoleLabel(user, fallbackRoleLabel);
+  var avatarUrl = String(user?.avatar || '').trim();
+  var initial = (displayName || 'A').charAt(0).toUpperCase();
+
+  if (sideName) sideName.textContent = displayName;
+  if (roleEl) roleEl.textContent = roleLabel;
+
+  if (!sideAvatar) return;
+
+  if (avatarUrl) {
+    sideAvatar.style.backgroundImage = 'url(' + avatarUrl + ')';
+    sideAvatar.style.backgroundSize = 'cover';
+    sideAvatar.style.backgroundPosition = 'center';
+    sideAvatar.style.backgroundRepeat = 'no-repeat';
+    sideAvatar.textContent = '';
+    return;
+  }
+
+  sideAvatar.style.backgroundImage = '';
+  sideAvatar.textContent = initial;
+}
+
+async function adminHydrateSidebarUser(fallbackRoleLabel, fallbackName) {
+  var cached = adminSettingsLoadUser() || null;
+  if (cached) adminApplySidebarUser(cached, fallbackRoleLabel, fallbackName);
+
+  if (typeof apiGetMe !== 'function') return;
+
+  try {
+    var res = await apiGetMe();
+    if (!(res && res.ok)) return;
+
+    var me = res?.data?.result?.user || res?.data?.result || null;
+    if (!me || typeof me !== 'object') return;
+
+    var merged = {
+      ...(cached || {}),
+      ...me,
+      name: me.full_name || me.name || cached?.name || '',
+      full_name: me.full_name || me.name || cached?.full_name || '',
+      email: me.email || cached?.email || '',
+      avatar: me.avatar || cached?.avatar || ''
+    };
+
+    adminSettingsSaveUser(merged);
+    adminApplySidebarUser(merged, fallbackRoleLabel, fallbackName);
+  } catch (_) { }
+}
+
 function adminSettingsFill(user) {
   var setValue = function (id, value) {
     var el = document.getElementById(id);

@@ -55,8 +55,10 @@ function clearAuthError(id) {
 
 function getRedirectPathByRole(user) {
   if (!user) return 'index.html'
-  if (user.role === 1 || user.role === 'admin') return 'admin.html'
-  if (user.role === 2 || user.role === 'employee') return 'nhan-vien.html'
+  var roleNum = Number(user.role)
+  var roleText = String(user.role || '').toLowerCase()
+  if (roleNum === 1 || roleText === 'admin') return 'admin.html'
+  if (roleNum === 2 || roleText === 'employee' || roleText === 'staff') return 'nhan-vien.html'
   return 'index.html'
 }
 
@@ -91,6 +93,46 @@ function tryParseOAuthUser(raw) {
   return null
 }
 
+function decodeJwtPayload(token) {
+  try {
+    var parts = String(token || '').split('.')
+    if (parts.length < 2) return null
+    var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    while (payload.length % 4 !== 0) payload += '='
+    var json = atob(payload)
+    return JSON.parse(json)
+  } catch (_) {
+    return null
+  }
+}
+
+function buildOAuthUserFromToken(accessToken) {
+  var payload = decodeJwtPayload(accessToken)
+  if (!payload || typeof payload !== 'object') return null
+
+  var role = payload.role
+  if (role === undefined && Array.isArray(payload.roles) && payload.roles.length) {
+    role = payload.roles[0]
+  }
+  if (role === undefined && payload.user && typeof payload.user === 'object') {
+    role = payload.user.role
+  }
+
+  var fullName = payload.full_name || payload.name || payload.username || payload.user_name || ''
+  var email = payload.email || ''
+  var status = payload.status
+
+  if (role === undefined && !fullName && !email && status === undefined) return null
+
+  return {
+    role: role,
+    name: fullName,
+    full_name: fullName,
+    email: email,
+    status: status
+  }
+}
+
 function readOAuthParams() {
   var query = new URLSearchParams(window.location.search)
   var hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
@@ -114,14 +156,13 @@ function clearOAuthParamsFromUrl() {
 async function completeOAuthLogin(accessToken, refreshToken, providedUser) {
   if (!accessToken) return { ok: false, message: 'Thiếu access token từ Google OAuth.' }
 
-  persistAuthSession(accessToken, refreshToken, providedUser)
-
-  var user = providedUser || null
+  var user = providedUser || buildOAuthUserFromToken(accessToken) || null
   if (isBannedUser(user)) {
     localStorage.clear()
     return { ok: false, message: 'Tài khoản đã bị khóa.' }
   }
 
+  persistAuthSession(accessToken, refreshToken, user)
   finalizeLoginAndRedirect(accessToken, refreshToken, user)
   return { ok: true }
 }

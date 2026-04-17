@@ -1095,12 +1095,9 @@
         var roleText = String((u && u.role) || '').toLowerCase();
         var isAdminOrEmployee = !!u && (roleNum === 1 || roleNum === 2 || roleText === 'admin' || roleText === 'employee' || roleText === 'staff');
         if (!isAdminOrEmployee) { window.location.href = 'index.html'; return; }
-        var n = u.name || 'Admin';
         var roleLabel = (roleNum === 2 || roleText === 'employee' || roleText === 'staff') ? 'Nhân viên' : 'Quản trị viên';
-        document.getElementById('sideUserName').textContent = n;
-        document.getElementById('sideUserAvatar').textContent = n[0].toUpperCase();
-        var roleEl = document.querySelector('.admin-user-role');
-        if (roleEl) roleEl.textContent = roleLabel;
+        adminApplySidebarUser(u || {}, roleLabel, 'Admin');
+        adminHydrateSidebarUser(roleLabel, 'Admin');
         renderUsersTable();
         adminRenderTours();
         adminRenderPromoPreview();

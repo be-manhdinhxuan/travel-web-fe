@@ -323,9 +323,9 @@ body {
 }
 
 .auth2-forgot {
-  display: inline-block;
-  width: 100%;
-  text-align: right;
+  display: block;
+  width: fit-content;
+  margin-left: auto;
   margin-top: 8px;
   font-size: 0.85rem;
   color: var(--green);

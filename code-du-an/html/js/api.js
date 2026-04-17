@@ -117,6 +117,10 @@ async function apiLogin(email, password) {
   return apiCall("POST", "/auths/login", { email, password });
 }
 
+function apiGoogleLoginUrl() {
+  return API_BASE.replace(/\/$/, "") + "/auths/google";
+}
+
 // POST /auths/logout
 async function apiLogout(refresh_token) {
   return apiCall("POST", "/auths/logout", { refresh_token }, true);
