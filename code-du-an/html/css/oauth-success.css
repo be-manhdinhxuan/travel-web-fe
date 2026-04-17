@@ -1,0 +1,49 @@
+.oauth-loading-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.oauth-loading-card {
+  width: min(460px, 100%);
+  padding: 28px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(16, 24, 40, 0.12);
+  text-align: center;
+}
+
+.oauth-spinner {
+  width: 46px;
+  height: 46px;
+  margin: 2px auto 14px;
+  border: 4px solid #e4efe8;
+  border-top-color: #2d8a4e;
+  border-radius: 50%;
+  animation: oauthSpin 0.85s linear infinite;
+}
+
+.oauth-title {
+  margin-bottom: 6px;
+}
+
+.oauth-status-text {
+  margin-bottom: 10px;
+}
+
+.oauth-error {
+  display: none;
+  margin-top: 10px;
+}
+
+.oauth-switch {
+  margin-top: 12px;
+}
+
+@keyframes oauthSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

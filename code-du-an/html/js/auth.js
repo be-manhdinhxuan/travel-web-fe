@@ -53,6 +53,194 @@ function clearAuthError(id) {
   el.style.display = 'none'
 }
 
+function getRedirectPathByRole(user) {
+  if (!user) return 'index.html'
+  if (user.role === 1 || user.role === 'admin') return 'admin.html'
+  if (user.role === 2 || user.role === 'employee') return 'nhan-vien.html'
+  return 'index.html'
+}
+
+function persistAuthSession(accessToken, refreshToken, user) {
+  if (accessToken) localStorage.setItem('vt_access_token', accessToken)
+  else localStorage.removeItem('vt_access_token')
+
+  if (refreshToken) localStorage.setItem('vt_refresh_token', refreshToken)
+  else localStorage.removeItem('vt_refresh_token')
+
+  if (user) localStorage.setItem('vt_user', JSON.stringify(user))
+  else localStorage.removeItem('vt_user')
+}
+
+function finalizeLoginAndRedirect(accessToken, refreshToken, user) {
+  persistAuthSession(accessToken, refreshToken, user)
+  localStorage.setItem('showLoginToast', 'true')
+  window.location.href = getRedirectPathByRole(user)
+}
+
+function tryParseOAuthUser(raw) {
+  if (!raw) return null
+  try {
+    return JSON.parse(raw)
+  } catch (_) { }
+
+  try {
+    const decoded = atob(raw.replace(/-/g, '+').replace(/_/g, '/'))
+    return JSON.parse(decoded)
+  } catch (_) { }
+
+  return null
+}
+
+function readOAuthParams() {
+  var query = new URLSearchParams(window.location.search)
+  var hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+  function pick(name) {
+    return query.get(name) || hash.get(name) || ''
+  }
+  return {
+    accessToken: pick('access_token') || pick('token'),
+    refreshToken: pick('refresh_token'),
+    userRaw: pick('user'),
+    error: pick('error')
+  }
+}
+
+function clearOAuthParamsFromUrl() {
+  try {
+    window.history.replaceState({}, document.title, window.location.pathname)
+  } catch (_) { }
+}
+
+async function completeOAuthLogin(accessToken, refreshToken, providedUser) {
+  if (!accessToken) return { ok: false, message: 'Thiếu access token từ Google OAuth.' }
+
+  persistAuthSession(accessToken, refreshToken, providedUser)
+
+  var user = providedUser || null
+  if (isBannedUser(user)) {
+    localStorage.clear()
+    return { ok: false, message: 'Tài khoản đã bị khóa.' }
+  }
+
+  finalizeLoginAndRedirect(accessToken, refreshToken, user)
+  return { ok: true }
+}
+
+function handleGoogleLoginErrorFromQuery() {
+  var isLoginPage = /dang-nhap\.html|login\.html$/i.test(window.location.pathname)
+  if (!isLoginPage) return
+
+  var params = new URLSearchParams(window.location.search)
+  var errorCode = String(params.get('error') || '').trim().toLowerCase()
+  if (!errorCode) return
+
+  var message = ''
+  if (errorCode === 'google_failed') message = 'Đăng nhập Google thất bại'
+  if (errorCode === 'account_banned') message = 'Tài khoản đã bị khóa'
+  if (!message) return
+
+  if (errorCode === 'account_banned') {
+    localStorage.clear()
+  }
+
+  if (typeof showToast === 'function') {
+    showToast(message)
+  } else {
+    showAuthError('loginError', message)
+  }
+
+  params.delete('error')
+  var nextUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash
+  window.history.replaceState({}, document.title, nextUrl)
+}
+
+function doGoogleLogin() {
+  // Luôn khởi tạo OAuth bằng phiên sạch để tránh dính user/token cũ.
+  localStorage.removeItem('vt_access_token')
+  localStorage.removeItem('vt_refresh_token')
+  localStorage.removeItem('vt_user')
+
+  var target = typeof apiGoogleLoginUrl === 'function'
+    ? apiGoogleLoginUrl()
+    : ((typeof API_BASE === 'string' && API_BASE) ? API_BASE.replace(/\/$/, '') + '/auths/google' : '')
+
+  if (!target) {
+    showAuthError('loginError', 'Thiếu cấu hình API để đăng nhập Google')
+    return
+  }
+
+  window.location.href = target
+}
+
+async function handleOAuthSuccessPage() {
+  var oauthError = document.getElementById('oauthError')
+  var helpText = document.getElementById('oauthStatusText')
+
+  function setError(msg) {
+    if (!oauthError) return
+    oauthError.textContent = msg
+    oauthError.style.display = 'block'
+  }
+
+  function clearError() {
+    if (!oauthError) return
+    oauthError.style.display = 'none'
+    oauthError.textContent = ''
+  }
+
+  async function submitOAuth(accessToken, refreshToken, userRaw) {
+    clearError()
+
+    try {
+      var providedUser = tryParseOAuthUser(userRaw)
+      var done = await completeOAuthLogin(accessToken, refreshToken, providedUser)
+      if (!done.ok) {
+        setError(done.message || 'Đăng nhập Google thất bại')
+      }
+    } catch (err) {
+      console.error(err)
+      setError('Đăng nhập Google thất bại')
+    }
+  }
+
+  var fromUrl = readOAuthParams()
+  if (fromUrl.error === 'google_failed' || fromUrl.error === 'account_banned') {
+    if (fromUrl.error === 'account_banned') {
+      localStorage.clear()
+    }
+    window.location.href = 'dang-nhap.html?error=' + encodeURIComponent(fromUrl.error)
+    return
+  }
+
+  if (fromUrl.accessToken) {
+    if (helpText) helpText.textContent = 'Đang hoàn tất đăng nhập Google...'
+    clearOAuthParamsFromUrl()
+    await submitOAuth(fromUrl.accessToken, fromUrl.refreshToken, fromUrl.userRaw)
+    return
+  }
+
+  setError('Không nhận được token đăng nhập. Vui lòng thử lại.')
+  setTimeout(function () {
+    window.location.href = 'dang-nhap.html?error=google_failed'
+  }, 1200)
+}
+
+function isBannedUser(user) {
+  if (!user) return false
+
+  var status = user.status
+  var statusText = String(status == null ? '' : status).trim().toLowerCase()
+  return Number(status) === 1 || status === true || statusText === '1' || statusText === 'banned' || statusText === 'locked'
+}
+
+function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem('vt_user') || 'null')
+  } catch (_) {
+    return null
+  }
+}
+
 // ==========================
 // LOGIN
 // ==========================
@@ -225,6 +413,13 @@ function checkPasswordStrength(val) {
 // ==========================
 
 async function doLogout() {
+  const currentUser = getStoredUser()
+  if (isBannedUser(currentUser)) {
+    localStorage.clear()
+    window.location.href = 'dang-nhap.html'
+    return
+  }
+
   try {
     const refresh_token = localStorage.getItem('vt_refresh_token')
     if (refresh_token && typeof apiLogout === 'function') {
@@ -266,23 +461,18 @@ async function doLogin() {
     }
 
     const { access_token, refresh_token, user } = res.data.result
-    localStorage.setItem('vt_access_token', access_token)
-    localStorage.setItem('vt_refresh_token', refresh_token)
-    localStorage.setItem('vt_user', JSON.stringify(user))
-
-    // Cờ để hiển thị toast sau khi redirect
-    localStorage.setItem('showLoginToast', 'true')
-
-    if (user.role === 1 || user.role === 'admin') {
-      window.location.href = 'admin.html'
-    } else if (user.role === 2 || user.role === 'employee') {
-      window.location.href = 'nhan-vien.html'
-    } else {
-      window.location.href = 'index.html'
-    }
+    finalizeLoginAndRedirect(access_token, refresh_token, user)
 
   } catch (err) {
     console.error(err)
     showAuthError('loginError', 'Không thể kết nối server')
   }
 }
+
+window.addEventListener('DOMContentLoaded', function () {
+  handleGoogleLoginErrorFromQuery()
+
+  if (/oauth-success\.html$/i.test(window.location.pathname)) {
+    handleOAuthSuccessPage()
+  }
+})

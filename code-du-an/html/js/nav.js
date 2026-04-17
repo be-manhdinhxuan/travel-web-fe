@@ -87,6 +87,32 @@
     }
   }
 
+  function getUserDisplayName(user) {
+    if (!user) return 'User';
+
+    var name = String(
+      user.full_name ||
+      user.name ||
+      user.username ||
+      user.display_name ||
+      ''
+    ).trim();
+
+    if (name) return name;
+
+    var email = String(user.email || '').trim();
+    if (email && email.includes('@')) return email.split('@')[0];
+
+    return 'User';
+  }
+
+  function isBannedUser(user) {
+    if (!user) return false;
+    var status = user.status;
+    var statusText = String(status == null ? '' : status).trim().toLowerCase();
+    return Number(status) === 1 || status === true || statusText === '1' || statusText === 'banned' || statusText === 'locked';
+  }
+
   function isVerifiedUser(user) {
     if (!user) return false;
     const verifyValue = user.verify;
@@ -277,46 +303,26 @@
   // ==========================
   // INIT NAV
   // ==========================
-  function initNav() {
-    const user = getCurrentUser();
-    const token = localStorage.getItem('vt_access_token');
+  function applyUserToNav(user, profileMenuBtn, adminMenuBtn) {
+    var displayName = getUserDisplayName(user);
 
-    const navGuest = document.getElementById('navGuest');
-    const navUser = document.getElementById('navUser');
-    const profileMenuBtn = document.getElementById('profileMenuBtn');
-    const adminMenuBtn = document.getElementById('adminMenuBtn');
-
-    if (!user || !token) {
-      navGuest.style.display = 'flex';
-      navUser.style.display = 'none';
-      return;
-    }
-
-    navGuest.style.display = 'none';
-    navUser.style.display = 'flex';
-
-    // set info
-    document.getElementById('navUsernameEl').innerText = user.name || 'User';
-    document.getElementById('dropName').innerText = user.name || '';
+    document.getElementById('navUsernameEl').innerText = displayName;
+    document.getElementById('dropName').innerText = displayName;
     document.getElementById('dropEmail').innerText = user.email || '';
 
     const avatarEl = document.getElementById('navAvatarEl')
 
     if (user.avatar && user.avatar.trim() !== '') {
-      // có avatar ảnh
       avatarEl.style.backgroundImage = `url(${user.avatar})`
       avatarEl.style.backgroundSize = 'cover'
       avatarEl.style.backgroundPosition = 'center'
       avatarEl.style.backgroundRepeat = 'no-repeat'
-
       avatarEl.innerText = ''
     } else {
-      // fallback chữ cái
       avatarEl.style.backgroundImage = ''
-      avatarEl.innerText = user.name?.charAt(0).toUpperCase() || 'U'
+      avatarEl.innerText = displayName.charAt(0).toUpperCase() || 'U'
     }
 
-    // menu theo quyền
     const roleText = String(user.role || '').toLowerCase();
     const isAdminRole = Number(user.role) === Number(ROLE.ADMIN) || roleText === 'admin';
     const isEmployeeRole = Number(user.role) === 2 || roleText === 'employee' || roleText === 'staff' || roleText === 'nhanvien';
@@ -343,6 +349,58 @@
 
     if (adminMenuBtn) adminMenuBtn.style.display = 'none';
     if (profileMenuBtn) profileMenuBtn.style.display = 'block';
+  }
+
+  function forceLogoutToLogin(errorCode) {
+    localStorage.clear();
+    var target = 'dang-nhap.html';
+    if (errorCode) target += '?error=' + encodeURIComponent(errorCode);
+    window.location.href = target;
+  }
+
+  async function initNav() {
+    const localUser = getCurrentUser();
+    const token = localStorage.getItem('vt_access_token');
+
+    const navGuest = document.getElementById('navGuest');
+    const navUser = document.getElementById('navUser');
+    const profileMenuBtn = document.getElementById('profileMenuBtn');
+    const adminMenuBtn = document.getElementById('adminMenuBtn');
+
+    if (!token) {
+      navGuest.style.display = 'flex';
+      navUser.style.display = 'none';
+      return;
+    }
+
+    navGuest.style.display = 'none';
+    navUser.style.display = 'flex';
+
+    if (localUser) {
+      applyUserToNav(localUser, profileMenuBtn, adminMenuBtn);
+    }
+
+    if (typeof apiGetMe !== 'function') {
+      if (!localUser) {
+        forceLogoutToLogin();
+      }
+      return;
+    }
+
+    const meRes = await apiGetMe();
+    if (!meRes || !meRes.ok || !meRes.data?.result) {
+      forceLogoutToLogin();
+      return;
+    }
+
+    const serverUser = meRes.data.result;
+    if (isBannedUser(serverUser)) {
+      forceLogoutToLogin('account_banned');
+      return;
+    }
+
+    localStorage.setItem('vt_user', JSON.stringify(serverUser));
+    applyUserToNav(serverUser, profileMenuBtn, adminMenuBtn);
   }
 
   // ==========================

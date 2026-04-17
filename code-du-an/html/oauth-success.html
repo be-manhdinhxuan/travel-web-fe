@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Success – VietnamTravel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="./css/bass.css">
+    <link rel="stylesheet" href="./css/auth.css">
+    <link rel="stylesheet" href="./css/oauth-success.css">
+    <link rel="icon" href="./images/favicon/favicon.svg" type="image/svg+xml">
+  </head>
+
+  <body>
+    <div id="page-auth">
+      <div class="oauth-loading-wrap">
+        <div class="oauth-loading-card">
+          <div class="oauth-spinner" aria-hidden="true"></div>
+          <h2 class="auth2-title oauth-title">Đang hoàn tất đăng nhập Google</h2>
+          <p class="auth2-subtitle oauth-status-text" id="oauthStatusText">
+            Hệ thống đang xác thực tài khoản của bạn. Vui lòng chờ trong giây lát...
+          </p>
+          <div id="oauthError" class="auth2-error oauth-error"></div>
+          <p class="auth2-switch oauth-switch">Nếu chờ quá lâu, bạn có thể quay lại <a href="dang-nhap.html">trang đăng
+              nhập</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="./js/config.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/toast.js"></script>
+    <script src="./js/auth.js"></script>
+  </body>
+
+</html>
