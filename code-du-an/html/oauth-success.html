@@ -17,10 +17,19 @@
       <div class="oauth-loading-wrap">
         <div class="oauth-loading-card">
           <div class="oauth-spinner" aria-hidden="true"></div>
-          <h2 class="auth2-title oauth-title">Đang hoàn tất đăng nhập Google</h2>
+          <h2 class="auth2-title oauth-title" id="oauthTitle">Đang hoàn tất đăng nhập Google</h2>
           <p class="auth2-subtitle oauth-status-text" id="oauthStatusText">
             Hệ thống đang xác thực tài khoản của bạn. Vui lòng chờ trong giây lát...
           </p>
+
+          <form id="oauthEmailForm" class="oauth-email-form" novalidate>
+            <label for="oauthEmailInput" class="oauth-email-label">Facebook chưa cung cấp email. Vui lòng nhập email để
+              hoàn tất đăng nhập.</label>
+            <input type="email" id="oauthEmailInput" class="auth2-input oauth-email-input"
+              placeholder="Nhập email của bạn" autocomplete="email" required>
+            <button type="submit" id="oauthEmailSubmit" class="btn auth2-btn">Tiếp tục</button>
+          </form>
+
           <div id="oauthError" class="auth2-error oauth-error"></div>
           <p class="auth2-switch oauth-switch">Nếu chờ quá lâu, bạn có thể quay lại <a href="dang-nhap.html">trang đăng
               nhập</a></p>

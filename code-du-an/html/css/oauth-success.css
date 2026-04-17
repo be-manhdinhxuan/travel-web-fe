@@ -33,6 +33,29 @@
   margin-bottom: 10px;
 }
 
+.oauth-email-form {
+  display: none;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.oauth-email-label {
+  display: block;
+  margin: 0 0 8px;
+  color: #1f2937;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.oauth-email-input {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.oauth-email-form .auth2-btn {
+  width: 100%;
+}
+
 .oauth-error {
   display: none;
   margin-top: 10px;

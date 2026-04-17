@@ -139,17 +139,52 @@ function readOAuthParams() {
   function pick(name) {
     return query.get(name) || hash.get(name) || ''
   }
+
+  function collect(keys) {
+    var picked = {}
+      ; (keys || []).forEach(function (k) {
+        var v = pick(k)
+        if (v) picked[k] = v
+      })
+    return picked
+  }
+
+  var facebookCompleteContext = collect([
+    'facebook_token',
+    'fb_token',
+    'facebook_id',
+    'fb_id',
+    'provider_id',
+    'provider_user_id',
+    'oauth_token',
+    'pending_token',
+    'complete_token',
+    'state'
+  ])
+
   return {
     accessToken: pick('access_token') || pick('token'),
     refreshToken: pick('refresh_token'),
     userRaw: pick('user'),
-    error: pick('error')
+    error: pick('error'),
+    facebookCompleteContext: facebookCompleteContext
   }
 }
 
 function clearOAuthParamsFromUrl() {
   try {
     window.history.replaceState({}, document.title, window.location.pathname)
+  } catch (_) { }
+}
+
+function clearAuthQueryParams(keysToRemove) {
+  try {
+    var params = new URLSearchParams(window.location.search)
+      ; (keysToRemove || []).forEach(function (k) {
+        params.delete(k)
+      })
+    var nextUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '')
+    window.history.replaceState({}, document.title, nextUrl)
   } catch (_) { }
 }
 
@@ -177,8 +212,18 @@ function handleGoogleLoginErrorFromQuery() {
 
   var message = ''
   if (errorCode === 'google_failed') message = 'Đăng nhập Google thất bại'
+  if (errorCode === 'facebook_failed') message = 'Đăng nhập Facebook thất bại'
   if (errorCode === 'account_banned') message = 'Tài khoản đã bị khóa'
+  if (errorCode === 'email_required') message = 'Facebook không cung cấp email. Vui lòng nhập email để tiếp tục.'
   if (!message) return
+
+  if (errorCode === 'facebook_failed') {
+    console.warn('[AUTH][FACEBOOK] Redirected back with facebook_failed', {
+      path: window.location.pathname,
+      search: window.location.search,
+      hash: window.location.hash
+    })
+  }
 
   if (errorCode === 'account_banned') {
     localStorage.clear()
@@ -190,9 +235,100 @@ function handleGoogleLoginErrorFromQuery() {
     showAuthError('loginError', message)
   }
 
-  params.delete('error')
+  if (!(errorCode === 'email_required' && String(params.get('provider') || '').trim().toLowerCase() === 'facebook')) {
+    params.delete('error')
+  }
   var nextUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash
   window.history.replaceState({}, document.title, nextUrl)
+}
+
+function initFacebookEmailRequiredFlow() {
+  var isLoginPage = /dang-nhap\.html|login\.html$/i.test(window.location.pathname)
+  if (!isLoginPage) return
+
+  var params = new URLSearchParams(window.location.search)
+  var error = String(params.get('error') || '').trim().toLowerCase()
+  var provider = String(params.get('provider') || '').trim().toLowerCase()
+  var providerId = String(params.get('provider_id') || '').trim()
+
+  if (!(error === 'email_required' && provider === 'facebook')) return
+
+  var form = document.getElementById('facebook-email-form')
+  var input = document.getElementById('facebookEmailInput')
+  var submitBtn = document.getElementById('facebookEmailSubmit')
+  var loginNormalContent = document.getElementById('loginNormalContent')
+  var facebookEmailState = document.getElementById('facebookEmailState')
+  var facebookEmailErrorId = document.getElementById('facebookEmailError') ? 'facebookEmailError' : 'loginError'
+
+  if (!form || !input) {
+    console.error('[AUTH][FACEBOOK] Missing facebook-email-form or facebookEmailInput')
+    return
+  }
+
+  if (typeof showToast === 'function') {
+    showToast('Facebook không cung cấp email. Vui lòng nhập email để tiếp tục.')
+  }
+
+  if (loginNormalContent) loginNormalContent.style.display = 'none'
+  if (facebookEmailState) facebookEmailState.style.display = 'block'
+  input.focus()
+
+  window.facebookProviderId = providerId
+
+  function onSubmit(event) {
+    event.preventDefault()
+
+    var email = String(input.value || '').trim()
+    if (!email) {
+      showAuthError(facebookEmailErrorId, 'Vui lòng nhập email để tiếp tục')
+      return
+    }
+
+    clearAuthError(facebookEmailErrorId)
+    if (submitBtn) submitBtn.disabled = true
+
+    var payload = {
+      provider: 'facebook',
+      provider_id: window.facebookProviderId || providerId,
+      email: email
+    }
+
+    console.log('[AUTH][FACEBOOK] Completing facebook login with email', {
+      hasProviderId: !!payload.provider_id,
+      email: payload.email
+    })
+
+    Promise.resolve(typeof apiFacebookComplete === 'function' ? apiFacebookComplete(payload) : null)
+      .then(async function (res) {
+        if (!res || !res.ok) {
+          var message = res?.data?.message || 'Không thể hoàn tất đăng nhập Facebook'
+          showAuthError(facebookEmailErrorId, message)
+          return
+        }
+
+        var result = res?.data?.result || {}
+        var accessToken = result.access_token || ''
+        var refreshToken = result.refresh_token || ''
+        var user = result.user || null
+
+        if (!accessToken) {
+          showAuthError(facebookEmailErrorId, 'Không nhận được access token từ hệ thống')
+          return
+        }
+
+        clearAuthQueryParams(['error', 'provider', 'provider_id'])
+        await completeOAuthLogin(accessToken, refreshToken, user)
+      })
+      .catch(function (err) {
+        console.error('[AUTH][FACEBOOK] /auths/facebook/complete exception', err)
+        showAuthError(facebookEmailErrorId, 'Không thể kết nối server')
+      })
+      .finally(function () {
+        if (submitBtn) submitBtn.disabled = false
+      })
+  }
+
+  form.addEventListener('submit', onSubmit)
 }
 
 function doGoogleLogin() {
@@ -213,9 +349,40 @@ function doGoogleLogin() {
   window.location.href = target
 }
 
+function doFacebookLogin() {
+  // Luôn khởi tạo OAuth bằng phiên sạch để tránh dính user/token cũ.
+  localStorage.removeItem('vt_access_token')
+  localStorage.removeItem('vt_refresh_token')
+  localStorage.removeItem('vt_user')
+
+  var target = typeof apiFacebookLoginUrl === 'function'
+    ? apiFacebookLoginUrl()
+    : ((typeof API_BASE === 'string' && API_BASE) ? API_BASE.replace(/\/$/, '') + '/auths/facebook' : '')
+
+  if (!target) {
+    console.error('[AUTH][FACEBOOK] Missing API target for Facebook login', {
+      apiBase: (typeof API_BASE === 'string' ? API_BASE : null)
+    })
+    showAuthError('loginError', 'Thiếu cấu hình API để đăng nhập Facebook')
+    return
+  }
+
+  console.log('[AUTH][FACEBOOK] Redirecting to OAuth endpoint', { target: target })
+
+  window.location.href = target
+}
+
 async function handleOAuthSuccessPage() {
   var oauthError = document.getElementById('oauthError')
   var helpText = document.getElementById('oauthStatusText')
+  var oauthTitle = document.getElementById('oauthTitle')
+  var oauthEmailForm = document.getElementById('oauthEmailForm')
+  var oauthEmailInput = document.getElementById('oauthEmailInput')
+  var oauthEmailSubmit = document.getElementById('oauthEmailSubmit')
+
+  var oauthPending = {
+    facebookCompleteContext: {}
+  }
 
   function setError(msg) {
     if (!oauthError) return
@@ -229,31 +396,164 @@ async function handleOAuthSuccessPage() {
     oauthError.textContent = ''
   }
 
+  function setLoadingMode(isLoading) {
+    var spinner = document.querySelector('.oauth-spinner')
+    if (spinner) spinner.style.display = isLoading ? 'block' : 'none'
+    if (helpText) helpText.style.display = 'block'
+    if (oauthEmailForm) oauthEmailForm.style.display = 'none'
+  }
+
+  function showEmailRequiredForm(context) {
+    oauthPending.facebookCompleteContext = context || {}
+
+    if (oauthTitle) oauthTitle.textContent = 'Cần bổ sung email để hoàn tất đăng nhập Facebook'
+    if (helpText) helpText.textContent = 'Facebook không trả về email. Vui lòng nhập email đang dùng để hệ thống liên kết hoặc tạo tài khoản.'
+
+    var spinner = document.querySelector('.oauth-spinner')
+    if (spinner) spinner.style.display = 'none'
+    if (oauthEmailForm) oauthEmailForm.style.display = 'block'
+    if (oauthEmailInput) {
+      oauthEmailInput.focus()
+      oauthEmailInput.select()
+    }
+
+    console.warn('[AUTH][FACEBOOK] EMAIL_REQUIRED received, waiting user email', {
+      contextKeys: Object.keys(oauthPending.facebookCompleteContext || {})
+    })
+  }
+
+  async function handleFacebookCompleteSubmit(event) {
+    if (event) event.preventDefault()
+    clearError()
+
+    var email = String(oauthEmailInput?.value || '').trim()
+    if (!email) {
+      setError('Vui lòng nhập email để tiếp tục.')
+      return
+    }
+
+    if (oauthEmailSubmit) oauthEmailSubmit.disabled = true
+    if (helpText) helpText.textContent = 'Đang hoàn tất đăng nhập Facebook...'
+
+    try {
+      var payload = Object.assign({}, oauthPending.facebookCompleteContext || {}, {
+        email: email
+      })
+
+      console.log('[AUTH][FACEBOOK] Calling /auths/facebook/complete', {
+        hasEmail: !!payload.email,
+        contextKeys: Object.keys(payload).filter(function (k) { return k !== 'email' })
+      })
+
+      if (typeof apiFacebookComplete !== 'function') {
+        setError('Thiếu hàm apiFacebookComplete trong api.js')
+        return
+      }
+
+      var res = await apiFacebookComplete(payload)
+      if (!res || !res.ok) {
+        var msg = res?.data?.message || 'Hoàn tất đăng nhập Facebook thất bại'
+        console.warn('[AUTH][FACEBOOK] /facebook/complete failed', {
+          status: res?.status,
+          message: msg
+        })
+        setError(msg)
+        return
+      }
+
+      var result = res?.data?.result || {}
+      var accessToken = result.access_token || ''
+      var refreshToken = result.refresh_token || ''
+      var user = result.user || null
+
+      if (!accessToken) {
+        setError('Không nhận được access token sau khi hoàn tất đăng nhập Facebook.')
+        return
+      }
+
+      clearOAuthParamsFromUrl()
+      var done = await completeOAuthLogin(accessToken, refreshToken, user)
+      if (!done.ok) {
+        setError(done.message || 'Hoàn tất đăng nhập Facebook thất bại')
+      }
+    } catch (err) {
+      console.error('[AUTH][FACEBOOK] /facebook/complete exception', {
+        message: err?.message || String(err),
+        stack: err?.stack || null
+      })
+      setError('Không thể kết nối server khi hoàn tất đăng nhập Facebook.')
+    } finally {
+      if (oauthEmailSubmit) oauthEmailSubmit.disabled = false
+    }
+  }
+
+  if (oauthEmailForm) {
+    oauthEmailForm.addEventListener('submit', handleFacebookCompleteSubmit)
+  }
+
   async function submitOAuth(accessToken, refreshToken, userRaw) {
     clearError()
+
+    var oauthSource = ''
+    if (userRaw) oauthSource = 'provider-user-payload'
+    else if (accessToken) oauthSource = 'token-only'
+    else oauthSource = 'missing-token'
+
+    console.log('[AUTH][OAUTH] submitOAuth called', {
+      source: oauthSource,
+      hasAccessToken: !!accessToken,
+      hasRefreshToken: !!refreshToken,
+      hasUserRaw: !!userRaw
+    })
 
     try {
       var providedUser = tryParseOAuthUser(userRaw)
       var done = await completeOAuthLogin(accessToken, refreshToken, providedUser)
       if (!done.ok) {
+        console.warn('[AUTH][OAUTH] completeOAuthLogin failed', {
+          source: oauthSource,
+          reason: done.message || 'unknown'
+        })
         setError(done.message || 'Đăng nhập Google thất bại')
       }
     } catch (err) {
-      console.error(err)
+      console.error('[AUTH][OAUTH] submitOAuth exception', {
+        source: oauthSource,
+        message: err?.message || String(err),
+        stack: err?.stack || null
+      })
       setError('Đăng nhập Google thất bại')
     }
   }
 
   var fromUrl = readOAuthParams()
-  if (fromUrl.error === 'google_failed' || fromUrl.error === 'account_banned') {
-    if (fromUrl.error === 'account_banned') {
+  var errorCode = String(fromUrl.error || '').trim().toLowerCase()
+  console.log('[AUTH][OAUTH] oauth-success params', {
+    hasAccessToken: !!fromUrl.accessToken,
+    hasRefreshToken: !!fromUrl.refreshToken,
+    hasUserRaw: !!fromUrl.userRaw,
+    error: fromUrl.error || '',
+    facebookCompleteContextKeys: Object.keys(fromUrl.facebookCompleteContext || {})
+  })
+
+  if (errorCode === 'email_required') {
+    showEmailRequiredForm(fromUrl.facebookCompleteContext)
+    return
+  }
+
+  if (errorCode === 'google_failed' || errorCode === 'facebook_failed' || errorCode === 'account_banned') {
+    if (errorCode === 'facebook_failed') {
+      console.warn('[AUTH][FACEBOOK] oauth-success received facebook_failed, redirecting to login page')
+    }
+    if (errorCode === 'account_banned') {
       localStorage.clear()
     }
-    window.location.href = 'dang-nhap.html?error=' + encodeURIComponent(fromUrl.error)
+    window.location.href = 'dang-nhap.html?error=' + encodeURIComponent(errorCode)
     return
   }
 
   if (fromUrl.accessToken) {
+    setLoadingMode(true)
     if (helpText) helpText.textContent = 'Đang hoàn tất đăng nhập Google...'
     clearOAuthParamsFromUrl()
     await submitOAuth(fromUrl.accessToken, fromUrl.refreshToken, fromUrl.userRaw)
@@ -512,6 +812,7 @@ async function doLogin() {
 
 window.addEventListener('DOMContentLoaded', function () {
   handleGoogleLoginErrorFromQuery()
+  initFacebookEmailRequiredFlow()
 
   if (/oauth-success\.html$/i.test(window.location.pathname)) {
     handleOAuthSuccessPage()

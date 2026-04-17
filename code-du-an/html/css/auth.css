@@ -352,6 +352,27 @@ body {
   margin-bottom: 12px;
 }
 
+.fb-email-form {
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid #d5e8db;
+  border-radius: 10px;
+  background: #f7fcf9;
+}
+
+.fb-email-state {
+  animation: fadeUp .28s ease both;
+}
+
+.fb-email-state .auth2-subtitle {
+  margin-bottom: 14px;
+}
+
+.fb-email-submit {
+  margin-top: 2px;
+  font-size: 0.9rem;
+}
+
 .auth2-submit {
   width: 100%;
   background: var(--green);

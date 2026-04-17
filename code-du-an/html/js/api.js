@@ -121,6 +121,15 @@ function apiGoogleLoginUrl() {
   return API_BASE.replace(/\/$/, "") + "/auths/google";
 }
 
+function apiFacebookLoginUrl() {
+  return API_BASE.replace(/\/$/, "") + "/auths/facebook";
+}
+
+// POST /auths/facebook/complete
+async function apiFacebookComplete(payload) {
+  return apiCall("POST", "/auths/facebook/complete", payload);
+}
+
 // POST /auths/logout
 async function apiLogout(refresh_token) {
   return apiCall("POST", "/auths/logout", { refresh_token }, true);
@@ -738,6 +747,7 @@ window.apiVerifyEmail = apiVerifyEmail;
 window.apiResendVerifyEmail = apiResendVerifyEmail;
 window.apiForgotPassword = apiForgotPassword;
 window.apiResetPassword = apiResetPassword;
+window.apiFacebookComplete = apiFacebookComplete;
 window.apiLogoutLocal = apiLogoutLocal;
 
 // Users
