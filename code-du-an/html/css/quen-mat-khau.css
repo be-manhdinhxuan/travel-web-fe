@@ -206,7 +206,7 @@ input::placeholder {
   padding: 9px 13px;
   font-size: 0.8rem;
   color: #c33;
-  margin-bottom: 12px;
+  margin: 12px 0;
 }
 
 .fp-countdown {
@@ -331,28 +331,35 @@ input::placeholder {
   cursor: default;
 }
 
-.fp-strength-wrap {
-  margin: 8px 0 4px;
+.admin-pwd-rules {
+  list-style: none;
+  margin-top: 8px;
+  display: grid;
+  gap: 5px;
 }
 
-.fp-strength-bar {
-  height: 4px;
-  background: #eee;
-  border-radius: 4px;
-  overflow: hidden;
+.admin-pwd-rules li {
+  font-size: 0.75rem;
+  color: #9aa19e;
+  position: relative;
+  padding-left: 16px;
 }
 
-.fp-strength-fill {
-  height: 100%;
-  width: 0;
-  border-radius: 4px;
-  transition: width .3s, background .3s;
+.admin-pwd-rules li::before {
+  content: '•';
+  position: absolute;
+  left: 4px;
+  top: 0;
 }
 
-.fp-strength-text {
-  font-size: 0.72rem;
-  font-weight: 700;
-  margin-top: 4px;
+.admin-pwd-rules li.ok {
+  color: #2d8a4e;
+  font-weight: 600;
+}
+
+.admin-pwd-rules li.ok::before {
+  content: '✓';
+  left: 0;
 }
 
 .fp-eye {

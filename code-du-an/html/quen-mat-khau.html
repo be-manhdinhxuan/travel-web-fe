@@ -105,7 +105,8 @@
               <path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.5"
                 stroke-linecap="round"></path>
             </svg>
-            <input type="password" id="fpNewPwd" placeholder="Tối thiểu 6 ký tự" oninput="fpStrength(this.value)">
+            <input type="password" id="fpNewPwd" placeholder="Nhập mật khẩu mới"
+              oninput="fpCheckPwdRequirements(this.value)">
             <button class="fp-eye" type="button" onclick="fpToggle('fpNewPwd',this)" aria-label="Hiện mật khẩu">
               <svg viewBox="0 0 20 20" fill="none" width="16" height="16">
                 <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" stroke="currentColor" stroke-width="1.5" />
@@ -113,12 +114,12 @@
               </svg>
             </button>
           </div>
-          <div class="fp-strength-wrap">
-            <div class="fp-strength-bar">
-              <div class="fp-strength-fill" id="fpStrFill"></div>
-            </div>
-            <div class="fp-strength-text" id="fpStrText"></div>
-          </div>
+          <ul class="admin-pwd-rules" id="fpPwdRulesList">
+            <li id="fpPwdRuleLength">Từ 6 đến 50 ký tự</li>
+            <li id="fpPwdRuleLower">Có ít nhất 1 chữ thường (a-z)</li>
+            <li id="fpPwdRuleUpper">Có ít nhất 1 chữ hoa (A-Z)</li>
+            <li id="fpPwdRuleSymbol">Có ít nhất 1 ký tự đặc biệt</li>
+          </ul>
         </div>
         <div class="fp-field">
           <label>Xác nhận mật khẩu mới</label>
@@ -305,8 +306,11 @@
         var err = document.getElementById('resetErr');
         err.hidden = true;
 
-        if (pwd.length < 6) { showFpErr(err, '⚠️ Mật khẩu phải có ít nhất 6 ký tự'); return; }
-        if (pwd.length > 50) { showFpErr(err, '⚠️ Mật khẩu không được quá 50 ký tự'); return; }
+        var req = fpGetPasswordRequirementStatus(pwd);
+        if (!(req.length && req.lower && req.upper && req.symbol)) {
+          showFpErr(err, '⚠️ Mật khẩu mới chưa đủ mạnh (6-50 ký tự, gồm chữ thường, chữ hoa và ký tự đặc biệt)');
+          return;
+        }
         if (pwd !== conf) { showFpErr(err, '⚠️ Mật khẩu xác nhận không khớp'); return; }
 
         var btn = document.querySelector('#stepReset .fp-btn');
@@ -345,19 +349,30 @@
         }
       }
 
-      // Password strength
-      function fpStrength(val) {
-        var fill = document.getElementById('fpStrFill');
-        var txt = document.getElementById('fpStrText');
-        if (!fill) return;
-        var s = 0;
-        if (val.length >= 8) s++;
-        if (/[A-Z]/.test(val)) s++;
-        if (/[0-9]/.test(val)) s++;
-        if (/[^A-Za-z0-9]/.test(val)) s++;
-        var lv = [{ w: '0%', c: '#eee', t: '' }, { w: '25%', c: '#e04444', t: 'Yếu' }, { w: '50%', c: '#f90', t: 'Trung bình' }, { w: '75%', c: '#3aaa62', t: 'Khá' }, { w: '100%', c: '#2d8a4e', t: 'Mạnh' }][s];
-        fill.style.width = lv.w; fill.style.background = lv.c;
-        txt.textContent = lv.t; txt.style.color = lv.c;
+      function fpGetPasswordRequirementStatus(value) {
+        var v = String(value || '');
+        return {
+          length: v.length >= 6 && v.length <= 50,
+          lower: /[a-z]/.test(v),
+          upper: /[A-Z]/.test(v),
+          symbol: /[^A-Za-z0-9]/.test(v)
+        };
+      }
+
+      function fpCheckPwdRequirements(value) {
+        var status = fpGetPasswordRequirementStatus(value);
+        var map = {
+          fpPwdRuleLength: status.length,
+          fpPwdRuleLower: status.lower,
+          fpPwdRuleUpper: status.upper,
+          fpPwdRuleSymbol: status.symbol
+        };
+
+        Object.keys(map).forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          el.classList.toggle('ok', !!map[id]);
+        });
       }
 
       function fpToggle(id, btn) {
