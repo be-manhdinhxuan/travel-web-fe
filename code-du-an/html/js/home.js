@@ -240,6 +240,11 @@ function renderTours(tours) {
       </div>
       <div class="tour-body">
         <div class="tour-title">${name}</div>
+        <div class="tour-rating" style="margin:2px 0 6px 0;font-size:0.97em;color:#f5a623;display:flex;align-items:center;gap:4px">
+          ${typeof tour.average_rating === 'number' && tour.total_reviews > 0
+        ? `⭐ ${tour.average_rating.toFixed(1)} <span style='color:#555;font-size:0.95em'>(${tour.total_reviews} đánh giá)</span>`
+        : '⭐ — <span style="color:#888">(Chưa có đánh giá)</span>'}
+        </div>
         <div class="tour-location">📍 ${location}</div>
         ${urgency}
         <div class="tour-footer">

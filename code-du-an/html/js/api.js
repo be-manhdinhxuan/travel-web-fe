@@ -1,4 +1,4 @@
-﻿const API_BASE = "https://travel-web-be.onrender.com/api";
+﻿const API_BASE = "https://travel-web-fe.vercel.app/api";
 
 function isVerifyCheckRequired(method, endpoint) {
   const cleanEndpoint = String(endpoint || '').split('?')[0];
@@ -21,6 +21,7 @@ function getActionNameFromEndpoint(method, endpoint) {
   const cleanEndpoint = String(endpoint || '').split('?')[0];
 
   if (cleanEndpoint.includes('/bookings') || cleanEndpoint.includes('/payments')) return 'đặt tour/thanh toán';
+  if (cleanEndpoint.includes('/reviews')) return 'đánh giá tour';
   if (cleanEndpoint.includes('/wishlist')) return 'thêm tour vào yêu thích';
   if (cleanEndpoint.includes('/users/me/password')) return 'đổi mật khẩu';
   if (cleanEndpoint.includes('/users/me/avatar')) return 'cập nhật avatar';
@@ -642,6 +643,25 @@ async function apiAdminConfirmBookingRefund(id) {
 }
 
 // ============================================================
+// REVIEWS
+// ============================================================
+
+// POST /reviews
+async function apiCreateReview(booking_id, rating, comment) {
+  return apiCall("POST", "/reviews", { booking_id, rating, comment }, true);
+}
+
+// GET /reviews?tour_id=...&page=...&limit=...
+async function apiGetReviewsByTour(params = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") query.append(key, value);
+  });
+  const qs = query.toString() ? "?" + query.toString() : "";
+  return apiCall("GET", "/reviews" + qs);
+}
+
+// ============================================================
 // PAYMENTS
 // ============================================================
 
@@ -798,6 +818,10 @@ window.apiAdminGetBookings = apiAdminGetBookings;
 window.apiAdminGetBooking = apiAdminGetBooking;
 window.apiAdminUpdateBookingStatus = apiAdminUpdateBookingStatus;
 window.apiAdminConfirmBookingRefund = apiAdminConfirmBookingRefund;
+
+// Reviews
+window.apiCreateReview = apiCreateReview;
+window.apiGetReviewsByTour = apiGetReviewsByTour;
 
 // Payments
 window.apiCreateMomoPayment = apiCreateMomoPayment;

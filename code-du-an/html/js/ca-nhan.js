@@ -1,3 +1,37 @@
+// Gửi đánh giá tour
+async function submitReview() {
+  var overlay = document.getElementById('cpReviewModalOverlay');
+  if (!overlay) return;
+  var bookingId = overlay.getAttribute('data-booking-id');
+  if (!bookingId) return;
+  var booking = bookingHistoryItemMap[bookingId];
+  if (!booking) return;
+  var tourId = booking?.tour_snapshot?.tour_id;
+  if (!tourId) return;
+  var rating = window._cpReviewSelectedStar || 0;
+  var content = document.getElementById('cpReviewTextarea').value.trim();
+  if (!rating) {
+    showToast('Vui lòng chọn số sao!');
+    return;
+  }
+  var btn = document.getElementById('cpReviewSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Đang gửi...';
+  try {
+    var res = await apiCreateReview(bookingId, rating, content);
+    if (res && res.ok) {
+      showToast('Đã gửi đánh giá!');
+      closeReviewModal();
+      renderBookingHistory();
+    } else {
+      showToast('Gửi đánh giá thất bại!');
+    }
+  } catch (e) {
+    showToast('Lỗi kết nối khi gửi đánh giá!');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Gửi đánh giá';
+}
 // ============================================================
 // ca-nhan.js (API-first)
 // ============================================================
@@ -796,7 +830,7 @@ function getTotalGuests(passengers) {
 function buildHistoryItem(booking) {
   var snapshot = booking?.tour_snapshot || {};
   var bookingId = booking?._id ? String(booking._id) : '';
-  var title = snapshot?.tour_name || booking?.tour_name || booking?.tour?.name || 'Tour du lịch';
+  var title = snapshot?.tour_name || booking?.tour?.name || 'Tour du lịch';
   var departureDate = snapshot?.departure_date || booking?.departure_date || booking?.schedule?.departure_date;
   var returnDate = snapshot?.return_date || booking?.return_date;
   var displayDepartureDate = formatBookingDate(departureDate);
@@ -842,6 +876,7 @@ function buildHistoryItem(booking) {
     '</div>' +
     '<div class="cp-booking-right">' +
     '<span class="cp-booking-status ' + status.className + '">' + status.text + '</span>' +
+    '<span id="cpBookingReview-' + bookingId + '"></span>' +
     '</div>' +
     '</a>'
   );
@@ -1226,6 +1261,36 @@ async function renderBookingHistory() {
     if (empty) empty.style.display = 'none';
     list.innerHTML = bookings.map(buildHistoryItem).join('');
     renderHistoryPagination();
+
+    // Sau khi render xong, kiểm tra review từng booking hoàn thành
+    const user = loadUser();
+    bookings.forEach(async function (b) {
+      const status = normalizeBookingStatus(b?.status);
+      if (status.className === 'status-completed') {
+        const reviewEl = document.getElementById('cpBookingReview-' + b._id);
+        if (!reviewEl) return;
+        const tourId = b?.tour_snapshot?.tour_id;
+        if (!tourId) return;
+        try {
+          const res = await apiGetReviewsByTour({ tour_id: tourId, page: 1, limit: 50 });
+          const reviews = res?.data?.result?.reviews || [];
+          // Kiểm tra review của user hiện tại
+          const myReview = reviews.find(r => r.user_id === user._id);
+          if (myReview) {
+            const rating = myReview.rating;
+            let stars = '';
+            for (let i = 1; i <= rating; i++) {
+              stars += `<span class="cp-star cp-star--active">&#9733;</span>`;
+            }
+            reviewEl.innerHTML = `<span class="cp-booking-reviewed">Đã đánh giá ${stars}</span>`;
+          } else {
+            reviewEl.innerHTML = `<button class="cp-booking-review-btn" onclick="event.stopPropagation();openReviewModal('${b._id}')">Đánh giá</button>`;
+          }
+        } catch (e) {
+          reviewEl.innerHTML = '';
+        }
+      }
+    });
   } catch (_) {
     list.innerHTML = '';
     if (empty) empty.style.display = 'block';
@@ -1429,4 +1494,60 @@ function togglePwd(id, btn) {
       '<path d="M3 17L17 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />';
     btn.setAttribute('aria-label', 'Ẩn mật khẩu');
   }
+}
+
+// Đóng modal chi tiết booking nếu đang mở
+function closeBookingDetailModalIfOpen() {
+  var existing = document.getElementById('cpBookingDetailOverlay');
+  if (existing) existing.remove();
+}
+
+// Mở modal đánh giá tour
+function openReviewModal(bookingId) {
+  closeBookingDetailModalIfOpen(); // Đảm bảo không bị chồng modal
+  var overlay = document.getElementById('cpReviewModalOverlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  // Lấy booking từ map
+  var booking = bookingHistoryItemMap[bookingId];
+  var tourName = booking?.tour_snapshot?.tour_name || 'Tour du lịch';
+  document.getElementById('cpReviewTourName').textContent = tourName;
+  // Reset rating và textarea
+  renderReviewStars(0);
+  document.getElementById('cpReviewTextarea').value = '';
+  document.getElementById('cpReviewSubmitBtn').disabled = true;
+  overlay.setAttribute('data-booking-id', bookingId);
+}
+
+function closeReviewModal() {
+  var overlay = document.getElementById('cpReviewModalOverlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+// Render 5 sao, cho phép hover/chọn
+function renderReviewStars(selected) {
+  var starsHtml = '';
+  for (let i = 1; i <= 5; i++) {
+    starsHtml += `<span class="cp-star cp-star-select${i <= selected ? ' cp-star--active' : ''}" data-star="${i}" onmouseover="highlightReviewStars(${i})" onmouseout="highlightReviewStars(0)" onclick="selectReviewStar(${i})">&#9733;</span>`;
+  }
+  document.getElementById('cpReviewStars').innerHTML = starsHtml;
+  window._cpReviewSelectedStar = selected;
+}
+
+function highlightReviewStars(star) {
+  var selected = window._cpReviewSelectedStar || 0;
+  var stars = document.querySelectorAll('#cpReviewStars .cp-star-select');
+  stars.forEach(function (el, idx) {
+    if (star > 0) {
+      el.classList.toggle('cp-star--active', idx < star);
+    } else {
+      el.classList.toggle('cp-star--active', idx < selected);
+    }
+  });
+}
+
+function selectReviewStar(star) {
+  window._cpReviewSelectedStar = star;
+  renderReviewStars(star);
+  document.getElementById('cpReviewSubmitBtn').disabled = !star;
 }

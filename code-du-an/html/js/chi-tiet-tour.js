@@ -16,7 +16,11 @@ const HIGHLIGHT_ICON = `
 
 function getStoredUser() {
   try {
-    return JSON.parse(localStorage.getItem('vt_user') || sessionStorage.getItem('vt_user') || 'null');
+    return JSON.parse(
+      localStorage.getItem("vt_user") ||
+      sessionStorage.getItem("vt_user") ||
+      "null",
+    );
   } catch {
     return null;
   }
@@ -25,8 +29,17 @@ function getStoredUser() {
 function isAdminOrStaffRole(role) {
   var numRole = Number(role);
   if (numRole === 1 || numRole === 2) return true;
-  var r = String(role || '').trim().toLowerCase();
-  return r === 'admin' || r === 'staff' || r === 'employee' || r === 'nhanvien' || r === 'nhan_vien' || r === 'nhân viên';
+  var r = String(role || "")
+    .trim()
+    .toLowerCase();
+  return (
+    r === "admin" ||
+    r === "staff" ||
+    r === "employee" ||
+    r === "nhanvien" ||
+    r === "nhan_vien" ||
+    r === "nhân viên"
+  );
 }
 
 function isAdminOrStaffUser() {
@@ -35,10 +48,9 @@ function isAdminOrStaffUser() {
 }
 
 // INIT
-window.addEventListener('DOMContentLoaded', async () => {
-
+window.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get('slug') || params.get('tour') || params.get('id');
+  const slug = params.get("slug") || params.get("tour") || params.get("id");
 
   if (!slug) {
     showError();
@@ -46,15 +58,23 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   // 🔥 nếu snapshot KHÁC tour → xóa
-  const snapshot = JSON.parse(sessionStorage.getItem('vt_checkout_tour') || 'null');
+  const snapshot = JSON.parse(
+    sessionStorage.getItem("vt_checkout_tour") || "null",
+  );
 
   if (snapshot && snapshot.tourId !== slug) {
-    sessionStorage.removeItem('vt_checkout_tour');
+    sessionStorage.removeItem("vt_checkout_tour");
   }
 
-  const detailSnapshot = JSON.parse(sessionStorage.getItem('vt_detail_state') || 'null');
-  if (detailSnapshot && detailSnapshot.tourId && detailSnapshot.tourId !== slug) {
-    sessionStorage.removeItem('vt_detail_state');
+  const detailSnapshot = JSON.parse(
+    sessionStorage.getItem("vt_detail_state") || "null",
+  );
+  if (
+    detailSnapshot &&
+    detailSnapshot.tourId &&
+    detailSnapshot.tourId !== slug
+  ) {
+    sessionStorage.removeItem("vt_detail_state");
   }
 
   await loadTour(slug);
@@ -75,11 +95,91 @@ async function loadTour(slug) {
     schedules = result?.schedules || [];
 
     renderTour();
+    await loadAndRenderReviews();
     renderSchedules();
     restoreDetailState();
+    // Load và render đánh giá tour
+    async function loadAndRenderReviews() {
+      const section = document.getElementById("ctReviewsSection");
+      if (!section || !tourData?._id) return;
 
-    document.getElementById('ctLoading').style.display = 'none';
-    document.getElementById('ctMain').style.display = 'block';
+      section.innerHTML =
+        '<div style="padding:32px 0;text-align:center;color:var(--muted)">Đang tải đánh giá...</div>';
+      try {
+        const res = await apiGetReviewsByTour({
+          tour_id: tourData._id,
+          page: 1,
+          limit: 10,
+        });
+        const reviews = res?.data?.result?.reviews || [];
+        const total = tourData.total_reviews || 0;
+        const avg =
+          typeof tourData.average_rating === "number"
+            ? tourData.average_rating
+            : null;
+
+        let html = '<div class="ct-reviews-block">';
+        html += '<div class="ct-reviews-summary">';
+        if (total > 0 && avg !== null) {
+          html += `<div class="ct-reviews-rating">⭐ ${avg.toFixed(1)} <span>(${total} đánh giá)</span></div>`;
+        } else {
+          html += `<div class="ct-reviews-rating">⭐ — <span>Chưa có đánh giá nào cho tour này</span></div>`;
+        }
+        html += "</div>";
+
+        if (reviews.length > 0) {
+          html += '<div class="ct-reviews-list">';
+          for (const r of reviews) {
+            const name = r.user?.full_name || "Ẩn danh";
+            // Avatar giả
+            let avatarHtml = "";
+            if (r.user?.avatar && r.user.avatar.trim() !== "") {
+              avatarHtml = `<span class="ct-review-avatar" style="background-image:url('${r.user.avatar}');background-size:cover;background-position:center;"></span>`;
+            } else {
+              // Lấy chữ cái đầu, màu nền mặc định
+              const initial = name.charAt(0).toUpperCase() || "U";
+              avatarHtml = `<span class="ct-review-avatar ct-review-avatar--fake">${initial}</span>`;
+            }
+            // Render 3 sao vàng, 2 sao xám
+            let rating = "";
+            for (let i = 1; i <= 5; i++) {
+              if (i <= r.rating) {
+                rating +=
+                  '<span class="ct-star ct-star--active">&#9733;</span>';
+              } else {
+                rating += '<span class="ct-star">&#9733;</span>';
+              }
+            }
+            const comment = r.comment
+              ? `<div class="ct-review-comment">${r.comment}</div>`
+              : "";
+            const date = new Date(r.created_at).toLocaleDateString("vi-VN");
+            html += `<div class="ct-review-item">
+                    <div class="ct-review-row">
+                      ${avatarHtml}
+                      <div class="ct-review-main">
+                        <div class="ct-review-top">
+                          <span class="ct-review-user">${name}</span>
+                          <span class="ct-review-rating">${rating}</span>
+                          <span class="ct-review-date">${date}</span>
+                        </div>
+                        ${comment}
+                      </div>
+                    </div>
+                  </div>`;
+          }
+          html += "</div>";
+        }
+        html += "</div>";
+        section.innerHTML = html;
+      } catch (e) {
+        section.innerHTML =
+          '<div style="padding:32px 0;text-align:center;color:var(--muted)">Không thể tải đánh giá</div>';
+      }
+    }
+
+    document.getElementById("ctLoading").style.display = "none";
+    document.getElementById("ctMain").style.display = "block";
   } catch (e) {
     console.error(e);
     showError();
@@ -91,93 +191,121 @@ function renderTour() {
   const t = tourData;
   if (!t) return;
 
-  document.getElementById('ctBreadcrumbName').textContent = t.name || '—';
-  document.title = (t.name || 'Chi tiết tour') + ' – VietnamTravel';
+  document.getElementById("ctBreadcrumbName").textContent = t.name || "—";
+  document.title = (t.name || "Chi tiết tour") + " – VietnamTravel";
 
-  const img = t.images?.[0] || '';
-  const heroImg = document.getElementById('ctHeroImg');
+  const img = t.images?.[0] || "";
+  const heroImg = document.getElementById("ctHeroImg");
   if (img) {
     heroImg.src = img;
     heroImg.alt = t.name;
   } else {
-    heroImg.parentElement.style.background = 'linear-gradient(135deg,#2d8a4e,#3aaa62)';
+    heroImg.parentElement.style.background =
+      "linear-gradient(135deg,#2d8a4e,#3aaa62)";
   }
 
-  document.getElementById('ctDuration').textContent =
-    t.duration_days ? `${t.duration_days} ngày ${t.duration_nights} đêm` : '—';
-  document.getElementById('ctHeroTitle').textContent = t.name || '—';
-  document.getElementById('ctDestination').textContent = t.destination || '—';
-  document.getElementById('ctDepartureCity').textContent = t.departure_city || '—';
+  document.getElementById("ctDuration").textContent = t.duration_days
+    ? `${t.duration_days} ngày ${t.duration_nights} đêm`
+    : "—";
+  document.getElementById("ctHeroTitle").textContent = t.name || "—";
+  document.getElementById("ctDestination").textContent = t.destination || "—";
+  document.getElementById("ctDepartureCity").textContent =
+    t.departure_city || "—";
 
-  document.getElementById('ctDesc').textContent = t.description || '—';
+  document.getElementById("ctDesc").textContent = t.description || "—";
 
   if (t.highlights?.length) {
-    document.getElementById('ctHighlights').innerHTML =
-      t.highlights.map(h => `<div class="ct-highlight-item">${HIGHLIGHT_ICON}<span class="ct-highlight-text">${h}</span></div>`).join('');
+    document.getElementById("ctHighlights").innerHTML = t.highlights
+      .map(
+        (h) =>
+          `<div class="ct-highlight-item">${HIGHLIGHT_ICON}<span class="ct-highlight-text">${h}</span></div>`,
+      )
+      .join("");
   } else {
-    document.getElementById('ctHighlightsSection').style.display = 'none';
+    document.getElementById("ctHighlightsSection").style.display = "none";
   }
 
   if (t.itinerary?.length) {
-    document.getElementById('ctItinerary').innerHTML =
-      t.itinerary.map(day => `
+    document.getElementById("ctItinerary").innerHTML = t.itinerary
+      .map(
+        (day) => `
         <div class="ct-day">
           <div class="ct-day-num">${day.day}</div>
           <div class="ct-day-body">
             <div class="ct-day-title">${day.title}</div>
             <div class="ct-day-desc">${day.description}</div>
           </div>
-        </div>`).join('');
+        </div>`,
+      )
+      .join("");
   } else {
-    document.getElementById('ctItinerarySection').style.display = 'none';
+    document.getElementById("ctItinerarySection").style.display = "none";
   }
 
   if (t.includes?.length) {
-    document.getElementById('ctIncludes').innerHTML = t.includes.map(i => `<li>${i}</li>`).join('');
+    document.getElementById("ctIncludes").innerHTML = t.includes
+      .map((i) => `<li>${i}</li>`)
+      .join("");
   }
 
   if (t.excludes?.length) {
-    document.getElementById('ctExcludes').innerHTML = t.excludes.map(i => `<li>${i}</li>`).join('');
+    document.getElementById("ctExcludes").innerHTML = t.excludes
+      .map((i) => `<li>${i}</li>`)
+      .join("");
   }
 }
 
 // RENDER SCHEDULES
 function renderSchedules() {
-  const list = document.getElementById('ctScheduleList');
+  const list = document.getElementById("ctScheduleList");
 
   if (!schedules.length) {
-    list.innerHTML = '<p style="color:var(--muted);font-size:0.875rem">Hiện chưa có lịch khởi hành</p>';
-    document.getElementById('ctBtnBook').disabled = true;
+    list.innerHTML =
+      '<p style="color:var(--muted);font-size:0.875rem">Hiện chưa có lịch khởi hành</p>';
+    document.getElementById("ctBtnBook").disabled = true;
     return;
   }
 
-  list.innerHTML = schedules.map((s, i) => {
-    const dep = new Date(s.departure_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const ret = new Date(s.return_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const price = s.price_adult.toLocaleString('vi-VN') + 'đ';
-    const slots = s.available_slots;
-    const slotsText = slots <= 3
-      ? `<span style="color:#e55;font-weight:600">Còn ${slots} chỗ!</span>`
-      : slots <= 10
-        ? `<span style="color:var(--gold)">Còn ${slots} chỗ</span>`
-        : `<span style="color:var(--muted)">${slots} chỗ trống</span>`;
+  list.innerHTML = schedules
+    .map((s, i) => {
+      const dep = new Date(s.departure_date).toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      const ret = new Date(s.return_date).toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      const price = s.price_adult.toLocaleString("vi-VN") + "đ";
+      const slots = s.available_slots;
+      const slotsText =
+        slots <= 3
+          ? `<span style="color:#e55;font-weight:600">Còn ${slots} chỗ!</span>`
+          : slots <= 10
+            ? `<span style="color:var(--gold)">Còn ${slots} chỗ</span>`
+            : `<span style="color:var(--muted)">${slots} chỗ trống</span>`;
 
-    return `
-      <div class="ct-schedule-item ${i === 0 ? 'active' : ''}" onclick="selectSchedule(${i}, this)">
+      return `
+      <div class="ct-schedule-item ${i === 0 ? "active" : ""}" onclick="selectSchedule(${i}, this)">
         <div>
           <div class="ct-schedule-date">🗓️ ${dep} → ${ret}</div>
           <div class="ct-schedule-slots">${slotsText}</div>
         </div>
         <div class="ct-schedule-price">${price}</div>
       </div>`;
-  }).join('');
+    })
+    .join("");
 
-  selectSchedule(0, list.querySelector('.ct-schedule-item'));
+  selectSchedule(0, list.querySelector(".ct-schedule-item"));
 }
 
 function selectSchedule(idx, el) {
-  document.querySelectorAll('.ct-schedule-item').forEach(i => i.classList.remove('active'));
-  if (el) el.classList.add('active');
+  document
+    .querySelectorAll(".ct-schedule-item")
+    .forEach((i) => i.classList.remove("active"));
+  if (el) el.classList.add("active");
   selectedSchedule = schedules[idx];
   enforceGuestLimit();
   updateSummary();
@@ -185,18 +313,20 @@ function selectSchedule(idx, el) {
 
 // GUESTS
 function changeGuest(type, delta) {
-  const min = type === 'adult' ? 1 : 0;
+  const min = type === "adult" ? 1 : 0;
   const nextValue = Math.max(min, (guests[type] || 0) + delta);
   const nextGuests = { ...guests, [type]: nextValue };
   const slots = getAvailableSlots();
 
   if (slots > 0 && totalGuests(nextGuests) > slots) {
-    showToast('⚠️ Số lượng khách vượt quá số chỗ trống (' + slots + ' chỗ)');
+    showToast("⚠️ Số lượng khách vượt quá số chỗ trống (" + slots + " chỗ)");
     return;
   }
 
   guests[type] = nextValue;
-  document.getElementById('g' + type.charAt(0).toUpperCase() + type.slice(1)).textContent = guests[type];
+  document.getElementById(
+    "g" + type.charAt(0).toUpperCase() + type.slice(1),
+  ).textContent = guests[type];
   updateSummary();
 }
 
@@ -213,15 +343,17 @@ function updateSummary() {
   const totalBaby = pb * guests.baby;
   const total = totalAdult + totalChild + totalBaby;
 
-  const fmt = n => (n > 0 ? n.toLocaleString('vi-VN') + 'đ' : '0đ');
+  const fmt = (n) => (n > 0 ? n.toLocaleString("vi-VN") + "đ" : "0đ");
 
-  document.getElementById('sumAdult').textContent = guests.adult;
-  document.getElementById('sumAdultPrice').textContent = fmt(totalAdult);
-  document.getElementById('sumChild').textContent = guests.child;
-  document.getElementById('sumChildPrice').textContent = guests.child > 0 ? fmt(totalChild) : '—';
-  document.getElementById('sumBaby').textContent = guests.baby;
-  document.getElementById('sumBabyPrice').textContent = guests.baby > 0 ? fmt(totalBaby) : '—';
-  document.getElementById('sumTotal').textContent = fmt(total);
+  document.getElementById("sumAdult").textContent = guests.adult;
+  document.getElementById("sumAdultPrice").textContent = fmt(totalAdult);
+  document.getElementById("sumChild").textContent = guests.child;
+  document.getElementById("sumChildPrice").textContent =
+    guests.child > 0 ? fmt(totalChild) : "—";
+  document.getElementById("sumBaby").textContent = guests.baby;
+  document.getElementById("sumBabyPrice").textContent =
+    guests.baby > 0 ? fmt(totalBaby) : "—";
+  document.getElementById("sumTotal").textContent = fmt(total);
 
   updateCapacityHint();
   updateBookButtonState();
@@ -230,54 +362,65 @@ function updateSummary() {
 // GO TO BOOKING
 async function goToBooking() {
   if (isAdminOrStaffUser()) {
-    showToast('⚠️ Tài khoản admin/nhân viên không thể đặt tour');
+    showToast("⚠️ Tài khoản admin/nhân viên không thể đặt tour");
     return;
   }
 
   if (!selectedSchedule) {
-    showToast('⚠️ Vui lòng chọn lịch khởi hành');
+    showToast("⚠️ Vui lòng chọn lịch khởi hành");
     return;
   }
 
-  if (typeof checkUserVerifiedForAction !== 'undefined' && !checkUserVerifiedForAction('đặt tour')) {
+  if (
+    typeof checkUserVerifiedForAction !== "undefined" &&
+    !checkUserVerifiedForAction("đặt tour")
+  ) {
     return;
   }
 
   const slots = getAvailableSlots();
   const pax = totalGuests();
   if (slots > 0 && pax > slots) {
-    showToast('⚠️ Bạn đã chọn ' + pax + ' khách, nhưng lịch này chỉ còn ' + slots + ' chỗ');
+    showToast(
+      "⚠️ Bạn đã chọn " +
+      pax +
+      " khách, nhưng lịch này chỉ còn " +
+      slots +
+      " chỗ",
+    );
     updateBookButtonState();
     return;
   }
 
-  if (!localStorage.getItem('vt_access_token')) {
-    showToast('⚠️ Vui lòng đăng nhập để đặt tour');
-    setTimeout(() => { window.location.href = 'dang-nhap.html'; }, 1200);
+  if (!localStorage.getItem("vt_access_token")) {
+    showToast("⚠️ Vui lòng đăng nhập để đặt tour");
+    setTimeout(() => {
+      window.location.href = "dang-nhap.html";
+    }, 1200);
     return;
   }
 
   const user = (() => {
     try {
-      return JSON.parse(localStorage.getItem('vt_user') || 'null');
+      return JSON.parse(localStorage.getItem("vt_user") || "null");
     } catch {
       return null;
     }
   })();
 
-  const btn = document.getElementById('ctBtnBook');
-  const oldText = btn ? btn.textContent : '';
+  const btn = document.getElementById("ctBtnBook");
+  const oldText = btn ? btn.textContent : "";
   if (btn) {
     btn.disabled = true;
-    btn.textContent = 'Đang tạo booking...';
+    btn.textContent = "Đang tạo booking...";
   }
 
-  let fullName = String(user?.full_name || user?.name || '').trim();
-  let email = String(user?.email || '').trim();
-  let phone = String(user?.phone || '').trim();
+  let fullName = String(user?.full_name || user?.name || "").trim();
+  let email = String(user?.email || "").trim();
+  let phone = String(user?.phone || "").trim();
 
   // Local profile có thể bị cũ; đồng bộ lại từ backend trước khi tạo booking.
-  if ((!fullName || !email || !phone) && typeof apiGetMe === 'function') {
+  if ((!fullName || !email || !phone) && typeof apiGetMe === "function") {
     try {
       const meRes = await apiGetMe();
       if (meRes?.ok) {
@@ -288,15 +431,16 @@ async function goToBooking() {
 
         // Cache lại để các trang khác dùng đúng dữ liệu mới.
         try {
-          const oldUser = JSON.parse(localStorage.getItem('vt_user') || 'null') || {};
+          const oldUser =
+            JSON.parse(localStorage.getItem("vt_user") || "null") || {};
           const merged = {
             ...oldUser,
-            full_name: me?.full_name || oldUser?.full_name || '',
-            name: me?.full_name || oldUser?.name || '',
-            email: me?.email || oldUser?.email || '',
-            phone: me?.phone || oldUser?.phone || '',
+            full_name: me?.full_name || oldUser?.full_name || "",
+            name: me?.full_name || oldUser?.name || "",
+            email: me?.email || oldUser?.email || "",
+            phone: me?.phone || oldUser?.phone || "",
           };
-          localStorage.setItem('vt_user', JSON.stringify(merged));
+          localStorage.setItem("vt_user", JSON.stringify(merged));
         } catch (e) { }
       }
     } catch (e) { }
@@ -304,13 +448,17 @@ async function goToBooking() {
 
   if (!fullName || !email || !phone) {
     const missing = [];
-    if (!fullName) missing.push('họ tên');
-    if (!email) missing.push('email');
-    if (!phone) missing.push('số điện thoại');
-    showToast('⚠️ Thiếu ' + missing.join(', ') + '. Vui lòng cập nhật hồ sơ trước khi đặt tour');
+    if (!fullName) missing.push("họ tên");
+    if (!email) missing.push("email");
+    if (!phone) missing.push("số điện thoại");
+    showToast(
+      "⚠️ Thiếu " +
+      missing.join(", ") +
+      ". Vui lòng cập nhật hồ sơ trước khi đặt tour",
+    );
     if (btn) {
       btn.disabled = false;
-      btn.textContent = oldText || 'Đặt tour ngay';
+      btn.textContent = oldText || "Đặt tour ngay";
     }
     return;
   }
@@ -334,33 +482,35 @@ async function goToBooking() {
   try {
     const res = await apiCreateBooking(body);
     if (!res?.ok) {
-      const apiMsg = res?.data?.message || '';
+      const apiMsg = res?.data?.message || "";
       const errs = res?.data?.errors;
-      let firstErr = '';
+      let firstErr = "";
       if (Array.isArray(errs) && errs.length) {
-        firstErr = errs[0]?.msg || errs[0]?.message || '';
-      } else if (errs && typeof errs === 'object') {
+        firstErr = errs[0]?.msg || errs[0]?.message || "";
+      } else if (errs && typeof errs === "object") {
         const firstVal = Object.values(errs)[0];
-        firstErr = firstVal?.msg || firstVal?.message || String(firstVal || '');
+        firstErr = firstVal?.msg || firstVal?.message || String(firstVal || "");
       }
-      throw new Error(firstErr || apiMsg || 'Tạo booking thất bại');
+      throw new Error(firstErr || apiMsg || "Tạo booking thất bại");
     }
 
     const result = res?.data?.result || {};
     const booking = result?.booking || result;
-    const bookingId = booking?._id || booking?.id || result?.booking_id || result?.id;
+    const bookingId =
+      booking?._id || booking?.id || result?.booking_id || result?.id;
 
     if (!bookingId) {
-      throw new Error('Không nhận được booking_id từ hệ thống');
+      throw new Error("Không nhận được booking_id từ hệ thống");
     }
 
-    window.location.href = 'dat-tour.html?booking_id=' + encodeURIComponent(bookingId);
+    window.location.href =
+      "dat-tour.html?booking_id=" + encodeURIComponent(bookingId);
   } catch (error) {
     console.error(error);
-    showToast('❌ ' + (error?.message || 'Không thể tạo booking'));
+    showToast("❌ " + (error?.message || "Không thể tạo booking"));
     if (btn) {
       btn.disabled = false;
-      btn.textContent = oldText || 'Đặt tour ngay';
+      btn.textContent = oldText || "Đặt tour ngay";
     }
   }
 }
@@ -397,89 +547,94 @@ function enforceGuestLimit() {
     pax -= 1;
   }
 
-  document.getElementById('gAdult').textContent = guests.adult;
-  document.getElementById('gChild').textContent = guests.child;
-  document.getElementById('gBaby').textContent = guests.baby;
+  document.getElementById("gAdult").textContent = guests.adult;
+  document.getElementById("gChild").textContent = guests.child;
+  document.getElementById("gBaby").textContent = guests.baby;
 }
 
 function updateCapacityHint() {
-  const hint = document.getElementById('ctCapacityHint');
+  const hint = document.getElementById("ctCapacityHint");
   if (!hint || !selectedSchedule) return;
 
   const slots = getAvailableSlots();
   const pax = totalGuests();
 
-  hint.classList.remove('warn');
+  hint.classList.remove("warn");
   if (slots <= 0) {
-    hint.textContent = 'Lịch này đã hết chỗ.';
-    hint.classList.add('warn');
+    hint.textContent = "Lịch này đã hết chỗ.";
+    hint.classList.add("warn");
     return;
   }
 
   if (pax > slots) {
-    hint.textContent = 'Bạn đang chọn ' + pax + ' khách, vượt quá số chỗ còn lại: ' + slots + '.';
-    hint.classList.add('warn');
+    hint.textContent =
+      "Bạn đang chọn " +
+      pax +
+      " khách, vượt quá số chỗ còn lại: " +
+      slots +
+      ".";
+    hint.classList.add("warn");
     return;
   }
 
-  hint.textContent = 'Số chỗ còn lại: ' + slots + ' | Bạn đã chọn: ' + pax;
+  hint.textContent = "Số chỗ còn lại: " + slots + " | Bạn đã chọn: " + pax;
 }
 
 function updateBookButtonState() {
-  const btn = document.getElementById('ctBtnBook');
+  const btn = document.getElementById("ctBtnBook");
   if (!btn) return;
 
   const slots = getAvailableSlots();
   const pax = totalGuests();
   const blockedByRole = isAdminOrStaffUser();
-  const blocked = blockedByRole || !selectedSchedule || slots <= 0 || pax > slots;
+  const blocked =
+    blockedByRole || !selectedSchedule || slots <= 0 || pax > slots;
 
   btn.disabled = blocked;
   if (blockedByRole) {
-    btn.textContent = 'Không khả dụng cho admin/nhân viên';
+    btn.textContent = "Không khả dụng cho admin/nhân viên";
     return;
   }
 
-  btn.textContent = blocked ? 'Không đủ chỗ' : 'Đặt tour ngay';
+  btn.textContent = blocked ? "Không đủ chỗ" : "Đặt tour ngay";
 }
 
 // HELPERS
 function showError() {
-  document.getElementById('ctLoading').style.display = 'none';
-  document.getElementById('ctMain').style.display = 'none';
-  document.getElementById('ctError').style.display = 'block';
+  document.getElementById("ctLoading").style.display = "none";
+  document.getElementById("ctMain").style.display = "none";
+  document.getElementById("ctError").style.display = "block";
 }
 
 function restoreDetailState() {
   try {
-    const state = JSON.parse(sessionStorage.getItem('vt_detail_state') || 'null');
+    const state = JSON.parse(
+      sessionStorage.getItem("vt_detail_state") || "null",
+    );
     if (!state) return;
 
-    const currentTourId = tourData?.slug || tourData?._id || '';
+    const currentTourId = tourData?.slug || tourData?._id || "";
     if (state.tourId && state.tourId !== currentTourId) {
-      sessionStorage.removeItem('vt_detail_state');
+      sessionStorage.removeItem("vt_detail_state");
       return;
     }
 
     // ===== restore guests =====
     guests = state.guests || guests;
 
-    document.getElementById('gAdult').textContent = guests.adult;
-    document.getElementById('gChild').textContent = guests.child;
-    document.getElementById('gBaby').textContent = guests.baby;
+    document.getElementById("gAdult").textContent = guests.adult;
+    document.getElementById("gChild").textContent = guests.child;
+    document.getElementById("gBaby").textContent = guests.baby;
 
     // ===== restore schedule =====
-    const idx = schedules.findIndex(s => s._id === state.scheduleId);
+    const idx = schedules.findIndex((s) => s._id === state.scheduleId);
     if (idx !== -1) {
-      const el = document.querySelectorAll('.ct-schedule-item')[idx];
+      const el = document.querySelectorAll(".ct-schedule-item")[idx];
       selectSchedule(idx, el);
     }
 
     // 🔥 OPTIONAL: xóa sau khi dùng
-    sessionStorage.removeItem('vt_detail_state');
-
-
-
+    sessionStorage.removeItem("vt_detail_state");
   } catch (e) {
     console.error(e);
   }

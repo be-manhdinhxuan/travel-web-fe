@@ -37,7 +37,7 @@
 
       <!-- HERO -->
       <div class="ct-hero">
-        <img class="ct-hero-img" id="ctHeroImg" src="" alt="">
+        <img class="ct-hero-img" id="ctHeroImg" alt="Banner tour">
         <div class="ct-hero-overlay"></div>
         <div class="ct-hero-info">
           <div class="ct-hero-badge" id="ctDuration"></div>
@@ -48,118 +48,122 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- LAYOUT -->
-      <div class="ct-layout">
+    <!-- LAYOUT -->
+    <div class="ct-layout">
 
-        <!-- LEFT: NỘI DUNG -->
-        <div class="ct-content">
+      <!-- LEFT: NỘI DUNG -->
+      <div class="ct-content">
 
-          <!-- MÔ TẢ -->
-          <div class="ct-section">
-            <div class="ct-section-title"><span>📋</span> Mô tả tour</div>
-            <p class="ct-desc" id="ctDesc">—</p>
-          </div>
-
-          <!-- ĐIỂM NỔI BẬT -->
-          <div class="ct-section" id="ctHighlightsSection">
-            <div class="ct-section-title"><span>✨</span> Điểm nổi bật</div>
-            <div class="ct-highlights" id="ctHighlights"></div>
-          </div>
-
-          <!-- LỊCH TRÌNH -->
-          <div class="ct-section" id="ctItinerarySection">
-            <div class="ct-section-title"><span>🗓️</span> Lịch trình chi tiết</div>
-            <div class="ct-itinerary" id="ctItinerary"></div>
-          </div>
-
-          <!-- BAO GỒM / KHÔNG BAO GỒM -->
-          <div class="ct-section">
-            <div class="ct-section-title"><span>📦</span> Dịch vụ</div>
-            <div class="ct-inc-exc">
-              <div class="ct-inc">
-                <h4>✅ Bao gồm</h4>
-                <ul id="ctIncludes"></ul>
-              </div>
-              <div class="ct-exc">
-                <h4>❌ Không bao gồm</h4>
-                <ul id="ctExcludes"></ul>
-              </div>
-            </div>
-          </div>
-
+        <!-- MÔ TẢ -->
+        <div class="ct-section">
+          <div class="ct-section-title"><span>📋</span> Mô tả tour</div>
+          <p class="ct-desc" id="ctDesc">—</p>
         </div>
 
-        <!-- RIGHT: BOOKING -->
-        <div class="ct-sidebar">
-          <div class="ct-booking-card">
-            <div class="ct-booking-title">Chọn lịch khởi hành</div>
+        <!-- ĐIỂM NỔI BẬT -->
+        <div class="ct-section" id="ctHighlightsSection">
+          <div class="ct-section-title"><span>✨</span> Điểm nổi bật</div>
+          <div class="ct-highlights" id="ctHighlights"></div>
+        </div>
 
-            <!-- SCHEDULES -->
-            <div class="ct-schedule-label">Lịch trình có sẵn</div>
-            <div class="ct-schedule-list" id="ctScheduleList">
-              <p style="color:var(--muted);font-size:0.875rem">Đang tải lịch trình...</p>
+        <!-- LỊCH TRÌNH -->
+        <div class="ct-section" id="ctItinerarySection">
+          <div class="ct-section-title"><span>🗓️</span> Lịch trình chi tiết</div>
+          <div class="ct-itinerary" id="ctItinerary"></div>
+        </div>
+
+        <!-- BAO GỒM / KHÔNG BAO GỒM -->
+        <div class="ct-section">
+          <div class="ct-section-title"><span>📦</span> Dịch vụ</div>
+          <div class="ct-inc-exc">
+            <div class="ct-inc">
+              <h4>✅ Bao gồm</h4>
+              <ul id="ctIncludes"></ul>
             </div>
-
-            <!-- GUESTS -->
-            <div class="ct-schedule-label">Số lượng khách</div>
-            <div class="ct-guests">
-              <div class="ct-guest-item">
-                <div class="ct-guest-label">Người lớn</div>
-                <div class="ct-guest-ctrl">
-                  <button class="ct-guest-btn" onclick="changeGuest('adult',-1)">−</button>
-                  <span class="ct-guest-num" id="gAdult">1</span>
-                  <button class="ct-guest-btn" onclick="changeGuest('adult',1)">+</button>
-                </div>
-              </div>
-              <div class="ct-guest-item">
-                <div class="ct-guest-label">Trẻ em</div>
-                <div class="ct-guest-ctrl">
-                  <button class="ct-guest-btn" onclick="changeGuest('child',-1)">−</button>
-                  <span class="ct-guest-num" id="gChild">0</span>
-                  <button class="ct-guest-btn" onclick="changeGuest('child',1)">+</button>
-                </div>
-              </div>
-              <div class="ct-guest-item">
-                <div class="ct-guest-label">Em bé</div>
-                <div class="ct-guest-ctrl">
-                  <button class="ct-guest-btn" onclick="changeGuest('baby',-1)">−</button>
-                  <span class="ct-guest-num" id="gBaby">0</span>
-                  <button class="ct-guest-btn" onclick="changeGuest('baby',1)">+</button>
-                </div>
-              </div>
+            <div class="ct-exc">
+              <h4>❌ Không bao gồm</h4>
+              <ul id="ctExcludes"></ul>
             </div>
-
-            <div class="ct-capacity-hint" id="ctCapacityHint"></div>
-
-            <!-- PRICE SUMMARY -->
-            <div class="ct-price-summary">
-              <div class="ct-price-row">
-                <span>Người lớn × <span id="sumAdult">1</span></span>
-                <span id="sumAdultPrice">—</span>
-              </div>
-              <div class="ct-price-row">
-                <span>Trẻ em × <span id="sumChild">0</span></span>
-                <span id="sumChildPrice">—</span>
-              </div>
-              <div class="ct-price-row">
-                <span>Em bé × <span id="sumBaby">0</span></span>
-                <span id="sumBabyPrice">—</span>
-              </div>
-              <div class="ct-price-row total">
-                <span>Tổng cộng</span>
-                <span class="ct-price-val" id="sumTotal">—</span>
-              </div>
-            </div>
-
-            <button class="ct-btn-book" id="ctBtnBook" onclick="goToBooking()">
-              Đặt tour ngay
-            </button>
           </div>
         </div>
 
       </div>
+
+      <!-- RIGHT: BOOKING -->
+      <div class="ct-sidebar">
+        <div class="ct-booking-card">
+          <div class="ct-booking-title">Chọn lịch khởi hành</div>
+
+          <!-- SCHEDULES -->
+          <div class="ct-schedule-label">Lịch trình có sẵn</div>
+          <div class="ct-schedule-list" id="ctScheduleList">
+            <p style="color:var(--muted);font-size:0.875rem">Đang tải lịch trình...</p>
+          </div>
+
+          <!-- GUESTS -->
+          <div class="ct-schedule-label">Số lượng khách</div>
+          <div class="ct-guests">
+            <div class="ct-guest-item">
+              <div class="ct-guest-label">Người lớn</div>
+              <div class="ct-guest-ctrl">
+                <button class="ct-guest-btn" onclick="changeGuest('adult',-1)">−</button>
+                <span class="ct-guest-num" id="gAdult">1</span>
+                <button class="ct-guest-btn" onclick="changeGuest('adult',1)">+</button>
+              </div>
+            </div>
+            <div class="ct-guest-item">
+              <div class="ct-guest-label">Trẻ em</div>
+              <div class="ct-guest-ctrl">
+                <button class="ct-guest-btn" onclick="changeGuest('child',-1)">−</button>
+                <span class="ct-guest-num" id="gChild">0</span>
+                <button class="ct-guest-btn" onclick="changeGuest('child',1)">+</button>
+              </div>
+            </div>
+            <div class="ct-guest-item">
+              <div class="ct-guest-label">Em bé</div>
+              <div class="ct-guest-ctrl">
+                <button class="ct-guest-btn" onclick="changeGuest('baby',-1)">−</button>
+                <span class="ct-guest-num" id="gBaby">0</span>
+                <button class="ct-guest-btn" onclick="changeGuest('baby',1)">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ct-capacity-hint" id="ctCapacityHint"></div>
+
+          <!-- PRICE SUMMARY -->
+          <div class="ct-price-summary">
+            <div class="ct-price-row">
+              <span>Người lớn × <span id="sumAdult">1</span></span>
+              <span id="sumAdultPrice">—</span>
+            </div>
+            <div class="ct-price-row">
+              <span>Trẻ em × <span id="sumChild">0</span></span>
+              <span id="sumChildPrice">—</span>
+            </div>
+            <div class="ct-price-row">
+              <span>Em bé × <span id="sumBaby">0</span></span>
+              <span id="sumBabyPrice">—</span>
+            </div>
+            <div class="ct-price-row total">
+              <span>Tổng cộng</span>
+              <span class="ct-price-val" id="sumTotal">—</span>
+            </div>
+          </div>
+
+          <button class="ct-btn-book" id="ctBtnBook" onclick="goToBooking()">
+            Đặt tour ngay
+          </button>
+        </div>
+      </div>
+
     </div>
+
+
+    <!-- ĐÁNH GIÁ TOUR -->
+    <div id="ctReviewsSection"></div>
 
     <!-- ERROR STATE -->
     <div id="ctError" style="display:none; text-align:center; padding:80px 20px; color:var(--muted)">

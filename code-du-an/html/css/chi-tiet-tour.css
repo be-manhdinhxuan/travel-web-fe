@@ -1,3 +1,151 @@
+.ct-star {
+  color: #bbb;
+  font-size: 1.1em;
+  margin-right: 1px;
+  display: inline-block;
+}
+
+.ct-star--active {
+  color: #f7b500;
+}
+
+.ct-review-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ct-review-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.08em;
+  font-weight: 700;
+  margin-right: 10px;
+  background: #e8f5ee;
+  color: #2d8a4e;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  object-fit: cover;
+  background-size: cover;
+  background-position: center;
+}
+
+.ct-review-avatar--fake {
+  background: #e8f5ee;
+  color: #2d8a4e;
+}
+
+.ct-review-main {
+  flex: 1;
+}
+
+.ct-review-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ct-review-user {
+  font-weight: 600;
+}
+
+.ct-review-rating {
+  display: flex;
+  gap: 2px;
+}
+
+.ct-review-date {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ct-review-comment {
+  margin-top: 6px;
+  color: #333;
+}
+
+/* ĐÁNH GIÁ TOUR */
+.ct-reviews-block {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  margin: 0 auto 28px;
+  max-width: 600px;
+  padding: 36px 5%;
+}
+
+.ct-reviews-summary {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.ct-reviews-rating {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.ct-reviews-rating span {
+  color: var(--muted);
+  font-size: 0.98em;
+  font-weight: 400;
+}
+
+.ct-reviews-empty {
+  color: var(--muted);
+  font-size: 0.98em;
+  margin-top: 6px;
+}
+
+.ct-reviews-list {
+  margin-top: 12px;
+}
+
+.ct-review-item {
+  border-top: 1px solid #eee;
+  padding: 14px 0 8px 0;
+}
+
+.ct-review-item:first-child {
+  border-top: none;
+}
+
+.ct-review-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+
+.ct-review-user {
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.ct-review-rating {
+  font-size: 1.05em;
+  color: var(--gold);
+}
+
+.ct-review-date {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-left: auto;
+}
+
+.ct-review-comment {
+  margin-left: 2px;
+  color: var(--text);
+  font-size: 1em;
+  margin-top: 2px;
+}
+
 /* ===== CHI TIẾT TOUR ===== */
 
 /* BREADCRUMB */
