@@ -245,6 +245,28 @@
     <div class="toast" id="toast"></div>
     <div data-shared-footer></div>
 
+    <!-- Modal Đánh giá tour -->
+    <div id="cpReviewModalOverlay" class="cp-modal-overlay" style="display:none;">
+      <div class="cp-modal cp-review-modal" role="dialog" aria-modal="true" aria-label="Đánh giá tour">
+        <div class="cp-modal-header" style="justify-content: space-between; align-items: center;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0;">Đánh giá tour</h3>
+          <button type="button" class="cp-modal-close" onclick="closeReviewModal()" aria-label="Đóng">✕</button>
+        </div>
+        <div class="cp-modal-body" style="padding-top: 10px;">
+          <div id="cpReviewTourName"
+            style="font-weight: 600; font-size: 1rem; margin-bottom: 18px; color: var(--navy);">Tên tour</div>
+          <div style="margin-bottom: 18px; font-size: 13.5px; color: var(--text);">Bạn thấy chuyến đi thế nào?</div>
+          <div id="cpReviewStars" class="cp-review-stars" style="margin-bottom: 18px; font-size: 2rem;">
+            <!-- JS sẽ render 5 sao tại đây -->
+          </div>
+          <textarea id="cpReviewTextarea" class="cp-review-textarea" placeholder="Chia sẻ trải nghiệm của bạn..."
+            style="width:100%; min-height: 80px; margin-bottom: 18px; resize: vertical;"></textarea>
+          <button id="cpReviewSubmitBtn" class="cp-review-submit-btn" type="button" disabled
+            onclick="submitReview()">Gửi đánh giá</button>
+        </div>
+      </div>
+    </div>
+
     <script src="./js/config.js"></script>
     <script src="./js/api.js"></script>
     <script src="./js/nav.js"></script>

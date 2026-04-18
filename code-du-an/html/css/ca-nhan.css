@@ -1,3 +1,47 @@
+/* Nút Đánh giá trong lịch sử booking */
+.cp-booking-review-btn {
+  display: inline-block;
+  padding: 6px 16px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
+  box-shadow: 0 1px 4px rgba(45, 138, 78, 0.07);
+  margin-left: 8px;
+}
+
+.cp-booking-review-btn:hover {
+  background: var(--green-lt);
+  box-shadow: 0 2px 8px rgba(45, 138, 78, 0.13);
+}
+
+/* REVIEW STARS & STATUS */
+.cp-booking-reviewed {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f5b301;
+  margin-left: 8px;
+}
+
+.cp-star {
+  font-size: 15px;
+  color: #e0e0e0;
+  margin-left: 1px;
+  margin-right: 1px;
+}
+
+.cp-star--active {
+  color: #f5b301;
+  text-shadow: 0 1px 2px #f7e7a1;
+}
+
 /* ===============================
    CA NHAN PAGE
 ================================= */
@@ -537,7 +581,6 @@ body {
 
 .cp-booking-right {
   display: flex;
-  flex-direction: column;
   align-items: flex-end;
   gap: 8px;
   flex-shrink: 0;
@@ -1009,6 +1052,126 @@ body {
 .toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* Modal đánh giá tour: style riêng cho phần review */
+.cp-review-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: stretch;
+  margin-top: 8px;
+}
+
+.cp-review-stars-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
+#cpReviewStars .cp-star-select {
+  font-size: 28px;
+  cursor: pointer;
+  transition: transform 0.12s;
+  margin: 0 2px;
+}
+
+#cpReviewStars .cp-star-select.cp-star--active {
+  color: #f5b301;
+  text-shadow: 0 2px 8px #f7e7a1;
+  transform: scale(1.18);
+}
+
+#cpReviewTextarea {
+  min-height: 64px;
+  border-radius: 8px;
+  border: 1px solid #e8eaed;
+  padding: 10px 12px;
+  font-size: 14px;
+  resize: vertical;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+#cpReviewSubmitBtn {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 0;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.18s;
+}
+
+#cpReviewSubmitBtn:disabled {
+  background: #b7e2c7;
+  color: #fff;
+  cursor: not-allowed;
+}
+
+/* Modal đánh giá tour: style riêng cho phần review */
+.cp-review-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: stretch;
+  margin-top: 8px;
+}
+
+.cp-review-stars-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
+#cpReviewStars .cp-star-select {
+  font-size: 28px;
+  cursor: pointer;
+  transition: transform 0.12s;
+  margin: 0 2px;
+}
+
+#cpReviewStars .cp-star-select.cp-star--active {
+  color: #f5b301;
+  text-shadow: 0 2px 8px #f7e7a1;
+  transform: scale(1.18);
+}
+
+#cpReviewTextarea {
+  min-height: 64px;
+  border-radius: 8px;
+  border: 1px solid #e8eaed;
+  padding: 10px 12px;
+  font-size: 14px;
+  resize: vertical;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+#cpReviewSubmitBtn {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.18s;
+}
+
+#cpReviewSubmitBtn:disabled {
+  background: #b7e2c7;
+  color: #fff;
+  cursor: not-allowed;
 }
 
 @media (max-width: 1100px) {
