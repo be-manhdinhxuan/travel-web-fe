@@ -1,3 +1,20 @@
+.tour-rating {
+  font-weight: 500;
+  font-size: 0.88rem;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.tour-rating span {
+  color: var(--muted);
+  font-size: 0.85em;
+  font-weight: 400;
+}
+
 /* ===== HERO ===== */
 .hero {
   margin-top: 82px;
