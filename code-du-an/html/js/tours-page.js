@@ -1,3 +1,41 @@
+// ===== ĐIỂM ĐẾN: Xử lý chọn tỉnh =====
+function handleProvinceChange() {
+  const dropdown = document.getElementById('tlProvinceDropdown');
+  if (!dropdown) return;
+  const value = dropdown.value;
+  updateURLAndReload({ destination: value, page: 1 });
+}
+// ===== ĐIỂM ĐẾN: Dropdown tỉnh/thành =====
+async function loadProvincesDropdown() {
+  const dropdown = document.getElementById('tlProvinceDropdown');
+  if (!dropdown) return;
+  // Check cache
+  let provinces = [];
+  try {
+    const cached = localStorage.getItem('vt_provinces');
+    if (cached) {
+      provinces = JSON.parse(cached);
+    } else {
+      const res = await fetch('https://provinces.open-api.vn/api/v1/p/');
+      provinces = await res.json();
+      localStorage.setItem('vt_provinces', JSON.stringify(provinces));
+    }
+  } catch (e) {
+    provinces = [];
+  }
+  // Render options
+  function stripPrefix(name) {
+    return name.replace(/^(Tỉnh|Thành phố|TP\.?)[ ]*/i, '');
+  }
+  dropdown.innerHTML = '<option value="">Tất cả tỉnh/thành</option>' +
+    provinces.map(p => {
+      const shortName = stripPrefix(p.name);
+      return `<option value="${shortName}">${shortName}</option>`;
+    }).join('');
+}
+
+// Tự động gọi khi trang load
+window.addEventListener('DOMContentLoaded', loadProvincesDropdown);
 // ============================================================
 // tours-page.js — Trang danh sách tour
 // ============================================================
@@ -211,19 +249,20 @@ function handleSort() {
 }
 
 function handleFilter() {
-  const duration = document.querySelector('input[name="duration"]:checked')?.value
-  const departure_from = document.getElementById('tlStartDate')?.value
-  const departure_to = document.getElementById('tlEndDate')?.value
+  const duration = document.querySelector('input[name="duration"]:checked')?.value;
+  const departure_from = document.getElementById('tlStartDate')?.value;
+  const departure_to = document.getElementById('tlEndDate')?.value;
+  const province = document.getElementById('tlProvinceDropdown')?.value || '';
 
   // ✅ dùng radio
-  const selectedPrice = document.querySelector('input[name="price"]:checked')
+  const selectedPrice = document.querySelector('input[name="price"]:checked');
 
-  let min_price, max_price
+  let min_price, max_price;
 
   if (selectedPrice && selectedPrice.value) {
-    const [min, max] = selectedPrice.value.split('-')
-    min_price = min
-    max_price = max
+    const [min, max] = selectedPrice.value.split('-');
+    min_price = min;
+    max_price = max;
   }
 
   updateURLAndReload({
@@ -232,8 +271,9 @@ function handleFilter() {
     departure_to,
     min_price,
     max_price,
+    destination: province,
     page: 1
-  })
+  });
 }
 
 function updateURLAndReload(newParams) {
@@ -246,21 +286,18 @@ function updateURLAndReload(newParams) {
 }
 
 function resetFilters() {
-  const url = new URL(window.location)
-
-    ;['duration', 'sort', 'keyword', 'min_price', 'max_price', 'departure_from', 'departure_to'].forEach(k => url.searchParams.delete(k))
-
-  url.searchParams.set('page', '1')
-
-  window.history.pushState({}, '', url)
-
+  const url = new URL(window.location);
+  ['duration', 'sort', 'keyword', 'min_price', 'max_price', 'departure_from', 'departure_to', 'destination'].forEach(k => url.searchParams.delete(k));
+  url.searchParams.set('page', '1');
+  window.history.pushState({}, '', url);
   // reset UI
-  document.getElementById('tlSearch').value = ''
-  document.getElementById('tlSort').value = 'newest'
-  const defaultPrice = document.querySelector('input[name="price"][value=""]')
-  if (defaultPrice) defaultPrice.checked = true
-  document.getElementById('tlStartDate').value = ''
-  document.getElementById('tlEndDate').value = ''
-
-  loadTours()
+  document.getElementById('tlSearch').value = '';
+  document.getElementById('tlSort').value = 'newest';
+  const defaultPrice = document.querySelector('input[name="price"][value=""]');
+  if (defaultPrice) defaultPrice.checked = true;
+  document.getElementById('tlStartDate').value = '';
+  document.getElementById('tlEndDate').value = '';
+  const provinceDropdown = document.getElementById('tlProvinceDropdown');
+  if (provinceDropdown) provinceDropdown.value = '';
+  loadTours();
 }

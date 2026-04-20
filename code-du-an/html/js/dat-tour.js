@@ -1,3 +1,114 @@
+// ===== Mã giảm giá gợi ý =====
+function openSuggestedCouponsModal() {
+  const modal = document.getElementById('coSuggestedCouponsModal');
+  const listEl = document.getElementById('coSuggestedCouponsList');
+  if (!modal || !listEl) return;
+  listEl.innerHTML = '<div style="padding:18px;text-align:center;color:#888">Đang tải...</div>';
+  modal.style.display = 'flex';
+  fetchAndRenderSuggestedCoupons();
+}
+
+function closeSuggestedCouponsModal() {
+  const modal = document.getElementById('coSuggestedCouponsModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function fetchAndRenderSuggestedCoupons() {
+  const listEl = document.getElementById('coSuggestedCouponsList');
+  if (!listEl) return;
+  const bookingId = state.bookingId;
+  if (!bookingId || typeof apiGetSuggestedCoupons !== 'function') {
+    listEl.innerHTML = '<div style="padding:18px;text-align:center;color:#888">Không tìm thấy booking_id hoặc API</div>';
+    return;
+  }
+  try {
+    const res = await apiGetSuggestedCoupons(bookingId);
+    if (!res.ok) {
+      listEl.innerHTML = '<div style="padding:18px;text-align:center;color:#e55">Không thể tải mã giảm giá phù hợp</div>';
+      return;
+    }
+    const coupons = res.data?.result?.coupons || res.data?.result || [];
+    if (!Array.isArray(coupons) || coupons.length === 0) {
+      listEl.innerHTML = '<div style="padding:18px;text-align:center;color:#888">Không có mã phù hợp</div>';
+      return;
+    }
+    listEl.innerHTML = coupons.slice(0, 5).map(renderSuggestedCouponItem).join('');
+  } catch (e) {
+    listEl.innerHTML = '<div style="padding:18px;text-align:center;color:#e55">Lỗi khi tải mã giảm giá</div>';
+  }
+}
+
+function renderSuggestedCouponItem(coupon) {
+  const code = coupon.code || '';
+  const value = coupon.discount_amount || coupon.value || coupon.discount_value || 0;
+  const minOrder = coupon.min_order_value || coupon.min_order || 0;
+  const expiry = coupon.expires_at || coupon.expiry_date || coupon.expiry || coupon.expired_at || '';
+  const valueText = value ? `Giảm <b>${value.toLocaleString('vi-VN')}đ</b>` : '';
+  const minOrderText = minOrder ? `Đơn tối thiểu <b>${minOrder.toLocaleString('vi-VN')}đ</b>` : '';
+  const expiryText = expiry ? `HSD <b>${formatDateVN(expiry)}</b>` : '';
+  return `
+    <div class="co-suggested-coupon" style="border-bottom:1px solid #eee;padding:12px 0 8px 0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="font-weight:600;font-size:1.08em;color:#d35400">${code}</div>
+        <div style="color:#2d8a4e;font-weight:500">${valueText}</div>
+      </div>
+      <div style="font-size:0.97em;color:#555;margin:2px 0 6px 0">
+        ${minOrderText}
+        ${minOrderText && expiryText ? '<span style="color:#bbb"> | </span>' : ''}
+        ${expiryText}
+      </div>
+      <div style="font-size:0.97em;color:#888;margin-bottom:4px">
+        ID: <span style="font-family:monospace">${coupon._id || ''}</span>
+      </div>
+      <div style="text-align:right">
+        <button class="co-apply-suggested-btn" onclick="applySuggestedCoupon('${code}')" style="background:#2d8a4e;color:#fff;padding:5px 18px;border:none;border-radius:6px;cursor:pointer;font-weight:500">Áp dụng</button>
+      </div>
+    </div>
+  `;
+}
+function renderSuggestedCouponItem(coupon) {
+  const code = coupon.code || '';
+  const value = coupon.discount_amount || coupon.value || coupon.discount_value || 0;
+  const minOrder = coupon.min_order_value || coupon.min_order || 0;
+  const expiry = coupon.expires_at || coupon.expiry_date || coupon.expiry || coupon.expired_at || '';
+  return `
+    <div class="co-suggested-coupon">
+      <div class="co-suggested-coupon-row">
+        <div class="co-suggested-coupon-code-wrap">
+          <span class="co-suggested-coupon-code">${code}</span>
+        </div>
+        <div class="co-suggested-coupon-value">${value ? `-${value.toLocaleString('vi-VN')}đ` : ''}</div>
+      </div>
+      <div class="co-suggested-coupon-meta">
+        <div class="co-suggested-coupon-min">
+          <span class="co-suggested-coupon-icon">📝</span>
+          ${minOrder ? `Đơn tối thiểu <b>${minOrder.toLocaleString('vi-VN')}đ</b>` : ''}
+        </div>
+        </div>
+        <div class="co-suggested-coupon-expiry">
+          <span class="co-suggested-coupon-icon">⏰</span>
+          ${expiry ? `HSD <b>${formatDateVN(expiry)}</b>` : ''}
+        </div>
+      <div class="co-suggested-coupon-action">
+        <button class="co-apply-suggested-btn" onclick="applySuggestedCoupon('${code}')">Áp dụng</button>
+      </div>
+    </div>
+  `;
+}
+
+function formatDateVN(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '';
+  return d.toLocaleDateString('vi-VN');
+}
+
+function applySuggestedCoupon(code) {
+  const input = document.getElementById('coCouponCode');
+  if (input) input.value = code;
+  closeSuggestedCouponsModal();
+  setTimeout(() => validateCoupon(), 150);
+}
 // ============================================================
 // dat-tour.js – Backend-driven payment page
 // ============================================================
@@ -42,6 +153,34 @@ async function loadBooking() {
     await loadTourDetails();
     syncPaymentMethodFromBooking();
     renderAll();
+    // Nếu booking có coupon_id thì lấy tên mã từ public-coupon
+    const couponId = state.booking?.coupon_id || state.booking?.couponId || state.booking?.applied_coupon_id;
+    if (couponId && typeof apiGetPublicCoupons === 'function') {
+      try {
+        const res = await apiGetPublicCoupons();
+        if (res?.ok) {
+          const coupons = res?.data?.result?.coupons || res?.data?.result || [];
+          const found = coupons.find(c => (c._id || c.id || c.coupon_id || c.couponId) == couponId);
+          if (found && found.code) {
+            setValue('coCouponCode', found.code);
+            setText('coCouponCodeDiv', found.name || found.title || found.code);
+          } else {
+            setText('coCouponCodeDiv', 'Không có');
+          }
+        } else {
+          setText('coCouponCodeDiv', 'Không có');
+        }
+      } catch { setText('coCouponCodeDiv', 'Không có'); }
+    } else {
+      // fallback: nếu chỉ có coupon_code thì vẫn điền
+      const couponCode = state.booking?.coupon_code || state.booking?.couponCode || state.booking?.applied_coupon_code || '';
+      if (couponCode) {
+        setValue('coCouponCode', couponCode);
+        setText('coCouponCodeDiv', couponCode);
+      } else {
+        setText('coCouponCodeDiv', 'Không có');
+      }
+    }
     setActionButtonsDisabled(false);
   } catch (error) {
     console.error(error);
@@ -244,6 +383,20 @@ function updateSummary() {
   setText('coPriceBase', base ? formatMoney(base) : '—');
   setText('coDiscount', discount ? '-' + formatMoney(discount) : 'Không có');
   setText('coPriceTotal', total ? formatMoney(total) : '—');
+
+  // Hiển thị tên mã đã áp dụng (ưu tiên tên mã, nếu không có thì code)
+  const appliedCouponName = document.getElementById('coAppliedCouponName');
+  const appliedCouponRow = document.getElementById('coAppliedCouponRow');
+  const couponDisplay = document.getElementById('coCouponCodeDiv')?.textContent?.trim() || '';
+  if (appliedCouponName && appliedCouponRow) {
+    if (couponDisplay && couponDisplay !== 'Không có') {
+      appliedCouponName.textContent = couponDisplay;
+      appliedCouponRow.style.display = '';
+    } else {
+      appliedCouponName.textContent = '';
+      appliedCouponRow.style.display = 'none';
+    }
+  }
 }
 
 function setPriceRow(id, qty, unit, total) {
@@ -317,6 +470,8 @@ async function validateCoupon() {
       }
 
       state.booking = syncedBooking;
+      const couponCode = syncedBooking?.coupon_code || syncedBooking?.couponCode || syncedBooking?.applied_coupon_code || code;
+      setText('coCouponCodeDiv', couponCode);
       updateSummary();
       showToast('✅ Đã áp dụng mã giảm giá');
       return;

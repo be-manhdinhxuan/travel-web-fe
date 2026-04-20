@@ -277,12 +277,33 @@
               <div class="co-coupon-row">
                 <input type="text" id="coCouponCode" placeholder="Nhập mã giảm giá">
                 <button type="button" id="coApplyCouponBtn" onclick="validateCoupon()">Áp dụng</button>
+
+                <!-- Modal mã giảm giá gợi ý -->
+                <div id="coSuggestedCouponsModal" class="co-modal">
+                  <div class="co-modal-content">
+                    <div class="co-modal-header">
+                      <span class="co-modal-header-icon">🎟</span> Mã giảm giá phù hợp
+                      <span class="co-modal-header-spacer"></span>
+                      <button class="co-modal-close-btn" onclick="closeSuggestedCouponsModal()">×</button>
+                    </div>
+                    <div id="coSuggestedCouponsList" class="co-modal-list">
+                    </div>
+                  </div>
+                </div>
+
               </div>
+              <div class="showSuggestCoupon" type="button" id="coShowSuggestedBtn"
+                onclick="openSuggestedCouponsModal()">Xem mã phù hợp</div>
+
               <div class="co-price-breakdown">
                 <div class="co-price-row"><span>Người lớn</span><span id="coPriceAdult">—</span></div>
                 <div class="co-price-row"><span>Trẻ em</span><span id="coPriceChild">—</span></div>
                 <div class="co-price-row"><span>Em bé</span><span id="coPriceBaby">—</span></div>
                 <div class="co-price-row"><span>Tạm tính</span><span id="coPriceBase">—</span></div>
+                <div class="co-price-row">
+                  <span>Đang áp dụng</span>
+                  <span id="coCouponCodeDiv">Không có</span>
+                </div>
                 <div class="co-price-row"><span>Giảm giá</span><span id="coDiscount">Không có</span></div>
                 <div class="co-price-row co-price-total"><span>Tổng cộng</span><span id="coPriceTotal">—</span></div>
               </div>

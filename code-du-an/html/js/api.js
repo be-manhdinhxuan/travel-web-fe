@@ -1,4 +1,4 @@
-﻿const API_BASE = "https://travel-web-fe.vercel.app/api";
+﻿const API_BASE = "https://travel-web-be.onrender.com/api";
 
 function isVerifyCheckRequired(method, endpoint) {
   const cleanEndpoint = String(endpoint || '').split('?')[0];
@@ -716,6 +716,12 @@ async function apiAdminGetCoupons(params = {}) {
   const qs = query.toString() ? "?" + query.toString() : "";
   return apiCall("GET", "/coupons" + qs, null, true);
 }
+
+// GET /coupons/suggest/:booking_id
+async function apiGetSuggestedCoupons(booking_id) {
+  return apiCall("GET", "/coupons/suggest/" + booking_id, null, true);
+}
+window.apiGetSuggestedCoupons = apiGetSuggestedCoupons;
 
 // Admin — POST /coupons
 async function apiAdminCreateCoupon(data) {

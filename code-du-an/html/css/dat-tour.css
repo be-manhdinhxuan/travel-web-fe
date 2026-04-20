@@ -1,3 +1,178 @@
+/* ===== MODAL MÃ GIẢM GIÁ ===== */
+.co-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.25);
+  align-items: center;
+  justify-content: center;
+}
+
+.co-modal[style*="display: flex"] {
+  display: flex !important;
+}
+
+.co-modal-content {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 95vw;
+  padding: 0 0 18px 0;
+  box-shadow: 0 8px 32px #0002;
+}
+
+.co-modal-header {
+  padding: 18px 24px 10px 24px;
+  border-bottom: 1px solid #eee;
+  font-weight: 600;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.co-modal-header-icon {
+  font-size: 1.3em;
+}
+
+.co-modal-header-spacer {
+  flex: 1;
+}
+
+.showSuggestCoupon {
+  background: none;
+  border: none;
+  color: #2d8a4e;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: color .2s;
+  margin-bottom: 12px;
+  text-align: right;
+}
+
+.showSuggestCoupon:hover {
+  color: #24703f;
+  text-decoration: underline;
+}
+
+.co-coupon-row .co-modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 2em;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  color: #000000;
+  transition: color .2s;
+}
+
+.co-coupon-row .co-modal-close-btn:hover {
+  color: #d35400;
+  background: none;
+}
+
+.co-modal-list {
+  padding: 10px 18px 0 18px;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+/* ===== MÃ GIẢM GIÁ GỢI Ý - MODAL ===== */
+.co-suggested-coupon {
+  border-radius: 10px;
+  border: 1.5px solid #f3c17c;
+  background: #fff8f1;
+  margin-bottom: 16px;
+  padding: 18px 16px 12px 16px;
+  box-shadow: 0 2px 12px #0001;
+}
+
+.co-suggested-coupon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.co-suggested-coupon-code-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.co-suggested-coupon-code {
+  background: #ffe0b2;
+  color: #d35400;
+  font-weight: 700;
+  font-size: 1.15em;
+  padding: 6px 18px;
+  border-radius: 7px;
+  letter-spacing: 1px;
+  box-shadow: 0 1px 4px #0001;
+}
+
+.co-suggested-coupon-value {
+  color: #2d8a4e;
+  font-weight: 700;
+  font-size: 1.13em;
+  white-space: nowrap;
+}
+
+.co-suggested-coupon-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.co-suggested-coupon-min {
+  color: #555;
+  font-size: 0.98em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.co-suggested-coupon-expiry {
+  color: #888;
+  font-size: 0.98em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.co-suggested-coupon-icon {
+  font-size: 1.1em;
+}
+
+.co-suggested-coupon-action {
+  text-align: right;
+  margin-top: 8px;
+}
+
+.co-apply-suggested-btn {
+  background: #2d8a4e;
+  color: #fff;
+  padding: 7px 22px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1em;
+  box-shadow: 0 1px 4px #0001;
+  transition: background .2s;
+}
+
+.co-apply-suggested-btn:hover {
+  background: #24703f;
+}
+
 /* ===== ĐẶT TOUR ===== */
 
 /* BREADCRUMB */
@@ -291,6 +466,8 @@
 
 .co-field input {
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 10px 14px;
   border: 1.5px solid #e4e4e4;
   border-radius: 9px;
