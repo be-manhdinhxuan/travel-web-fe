@@ -1,4 +1,5 @@
 ﻿const API_BASE = "https://travel-web-be.onrender.com/api";
+// const API_BASE = "http://localhost:5000/api";
 
 function isVerifyCheckRequired(method, endpoint) {
   const cleanEndpoint = String(endpoint || '').split('?')[0];
@@ -30,6 +31,35 @@ function getActionNameFromEndpoint(method, endpoint) {
   if (cleanEndpoint.includes('/categories') || cleanEndpoint.includes('/tours') || cleanEndpoint.includes('/schedules')) return 'quản lý dữ liệu tour';
 
   return method === 'DELETE' ? 'xóa dữ liệu' : 'thực hiện thao tác này';
+}
+
+async function getProvinces() {
+  const CACHE_KEY = 'vt_provinces';
+
+  function stripPrefix(name) {
+    return name.replace(/^(Tỉnh|Thành phố|Thành Phố|TP\.?)\s*/i, '').trim();
+  }
+
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) return JSON.parse(cached);
+
+    const res = await fetch('https://provinces.open-api.vn/api/v1/p/?fields=name');
+    const raw = await res.json();
+
+    // 🔥 Format ngay tại đây
+    const data = raw.map(p => ({
+      name: stripPrefix(p.name)
+    }));
+
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+
+    return data;
+
+  } catch (e) {
+    console.error('Get provinces failed', e);
+    return [];
+  }
 }
 
 // ============================================================

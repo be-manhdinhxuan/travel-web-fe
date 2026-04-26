@@ -2233,6 +2233,21 @@ function adminOpenCreateTourModal() {
   adminLoadProvincesDropdowns();
 }
 
+// Load danh sách tỉnh/thành cho dropdown
+async function adminLoadProvincesDropdowns() {
+  const provinces = await getProvinces();
+
+  const options = provinces.map(p =>
+    `<option value="${p.name}">${p.name}</option>`
+  ).join('');
+
+  document.getElementById('newTourDestination').innerHTML =
+    '<option value="" disabled selected hidden>Chọn điểm đến</option>' + options;
+
+  document.getElementById('newTourDepartureCity').innerHTML =
+    '<option value="" disabled selected hidden>Chọn thành phố khởi hành</option>' + options;
+}
+
 async function adminOpenEditTourModalByIdx(idx) {
   var tours = (Array.isArray(ADMIN_TOUR_API_CACHE) && ADMIN_TOUR_API_CACHE.length)
     ? ADMIN_TOUR_API_CACHE
@@ -2259,32 +2274,6 @@ async function adminOpenEditTourModalByIdx(idx) {
   adminResetCreateTourForm();
   modal.classList.add('open');
   adminLoadProvincesDropdowns();
-  // Load danh sách tỉnh/thành cho dropdown
-  async function adminLoadProvincesDropdowns() {
-    try {
-      const res = await fetch('https://provinces.open-api.vn/api/v1/p/');
-      const data = await res.json();
-      // Format lại tên: chỉ lấy phần sau cùng (bỏ "Thành phố", "Tỉnh", ...)
-      function formatProvinceName(name) {
-        return name.replace(/^(Tỉnh|Thành phố|Thành Phố|TP)\s+/i, '').trim();
-      }
-      const options = data.map(p => {
-        const shortName = formatProvinceName(p.name);
-        return `<option value="${shortName}">${shortName}</option>`;
-      }).join('');
-      const dest = document.getElementById('newTourDestination');
-      const dep = document.getElementById('newTourDepartureCity');
-      // Luôn giữ option đầu là placeholder, không cho chọn
-      if (dest) dest.innerHTML = '<option value="" disabled selected hidden>Chọn điểm đến</option>' + options;
-      if (dep) dep.innerHTML = '<option value="" disabled selected hidden>Chọn thành phố khởi hành</option>' + options;
-    } catch (e) {
-      const errOpt = '<option value="">Không tải được dữ liệu</option>';
-      const dest = document.getElementById('newTourDestination');
-      const dep = document.getElementById('newTourDepartureCity');
-      if (dest) dest.innerHTML = errOpt;
-      if (dep) dep.innerHTML = errOpt;
-    }
-  }
 
   var submitBtn = document.getElementById('adminCreateTourSubmitBtn');
   if (submitBtn) {

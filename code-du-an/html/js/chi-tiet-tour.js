@@ -33,7 +33,7 @@ function isAdminOrStaffRole(role) {
     .trim()
     .toLowerCase();
   return (
-    r === "admin" ||
+    r === "Admin" ||
     r === "staff" ||
     r === "employee" ||
     r === "nhanvien" ||
@@ -83,7 +83,13 @@ window.addEventListener("DOMContentLoaded", async () => {
 // LOAD TOUR
 async function loadTour(slug) {
   try {
-    const res = await apiGetTour(slug);
+    // Nếu là admin/employee thì gọi API admin, ngược lại gọi public
+    let res;
+    if (isAdminOrStaffUser() && typeof apiAdminGetTour === 'function') {
+      res = await apiAdminGetTour(slug);
+    } else {
+      res = await apiGetTour(slug);
+    }
 
     if (!res || !res.ok) {
       showError();

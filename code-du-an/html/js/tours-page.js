@@ -9,29 +9,14 @@ function handleProvinceChange() {
 async function loadProvincesDropdown() {
   const dropdown = document.getElementById('tlProvinceDropdown');
   if (!dropdown) return;
-  // Check cache
-  let provinces = [];
-  try {
-    const cached = localStorage.getItem('vt_provinces');
-    if (cached) {
-      provinces = JSON.parse(cached);
-    } else {
-      const res = await fetch('https://provinces.open-api.vn/api/v1/p/');
-      provinces = await res.json();
-      localStorage.setItem('vt_provinces', JSON.stringify(provinces));
-    }
-  } catch (e) {
-    provinces = [];
-  }
-  // Render options
-  function stripPrefix(name) {
-    return name.replace(/^(Tỉnh|Thành phố|TP\.?)[ ]*/i, '');
-  }
-  dropdown.innerHTML = '<option value="">Tất cả tỉnh/thành</option>' +
-    provinces.map(p => {
-      const shortName = stripPrefix(p.name);
-      return `<option value="${shortName}">${shortName}</option>`;
-    }).join('');
+
+  const provinces = await getProvinces();
+
+  dropdown.innerHTML =
+    '<option value="">Tất cả tỉnh/thành</option>' +
+    provinces.map(p =>
+      `<option value="${p.name}">${p.name}</option>`
+    ).join('');
 }
 
 // Tự động gọi khi trang load
