@@ -931,8 +931,8 @@ function normalizeTourSnapshot(source, fallbackSource) {
 
 function formatPaymentProvider(provider) {
   var n = Number(provider);
-  if (n === 0) return 'VNPay';
-  if (n === 1) return 'MoMo';
+  if (n === 0) return 'MoMo';
+  if (n === 1) return 'VNPay';
   if (n === 2) return 'Tiền mặt';
   return provider === undefined || provider === null ? '—' : String(provider);
 }
