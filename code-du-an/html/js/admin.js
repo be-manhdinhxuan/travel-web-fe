@@ -582,7 +582,7 @@ function adminUpdateDashStats() {
 // ===== USERS TABLE =====
 // ===== USERS MANAGEMENT =====
 var ADMIN_USER_PAGE = 1;
-var ADMIN_USER_PER = 20;
+var ADMIN_USER_PER = 10;
 var ADMIN_USER_ALL_LIMIT = 1000;
 var ADMIN_USER_SEARCH = '';
 var ADMIN_USER_ROLE = '';
@@ -1838,7 +1838,8 @@ async function adminEditTourScheduleAdd() {
     '<td><input id="newScNote" type="text" class="admin-create-tour-line-input" placeholder="Ghi chú"></td>' +
     '<td><input id="newScTotalSlots" type="number" min="1" class="admin-create-tour-line-input" placeholder="10"></td>' +
     '<td style="color:#6b7280;font-size:0.78rem">Tự động</td>' +
-    '<td>' + adminEditScheduleStatusSelectHtml('newScStatus', 1, false) + '</td>' +
+    // Vô hiệu hóa dropdown trạng thái khi tạo mới
+    '<td>' + adminEditScheduleStatusSelectHtml('newScStatus', 1, true) + '</td>' +
     '<td><div class="act-btns"><button type="button" class="admin-act-btn" onclick="adminEditTourScheduleSaveNewRow()">✅ Lưu</button><button type="button" class="admin-act-btn admin-act-btn-red" onclick="adminEditTourScheduleCancelNewRow()">❌ Hủy</button></div></td>';
 
   body.appendChild(row);
@@ -1943,7 +1944,7 @@ async function adminEditTourSchedulePromptEdit(idx) {
     '<td><input id="editScNote" type="text" class="admin-create-tour-line-input" value="' + adminTourDetailEscapeHtml(String(sc.note || '')) + '"></td>' +
     '<td><input id="editScTotalSlots" type="number" min="1" class="admin-create-tour-line-input" value="' + adminTourDetailEscapeHtml(String(sc.total_slots || 0)) + '"></td>' +
     '<td><input id="editScAvailableSlots" type="number" min="0" class="admin-create-tour-line-input" value="' + adminTourDetailEscapeHtml(String(sc.available_slots || 0)) + '"></td>' +
-    '<td>' + adminEditScheduleStatusSelectHtml('editScStatus', sc.status, false) + '</td>' +
+    '<td>' + adminEditScheduleStatusSelectHtml('editScStatus', sc.status, true) + '</td>' +
     '<td><div class="act-btns"><button type="button" class="admin-act-btn" onclick="adminEditTourScheduleSaveEditRow()">✅ Lưu</button><button type="button" class="admin-act-btn admin-act-btn-red" onclick="adminEditTourScheduleCancelEditRow()">❌ Hủy</button></div></td>';
 
   body.appendChild(row);
